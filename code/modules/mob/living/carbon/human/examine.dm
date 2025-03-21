@@ -67,7 +67,6 @@
 			self_inspect = TRUE
 		var/used_title = get_role_title()
 		var/is_returning = FALSE
-		var/is_apprentice = mind?.apprentice
 		if(islatejoin)
 			is_returning = TRUE
 
@@ -537,7 +536,7 @@
 		if(skipface && user.has_flaw(/datum/charflaw/hunted))
 			user.add_stress(/datum/stressevent/hunted)
 
-	if(!obscure_name && (flavortext || headshot_link))
+	if(!obscure_name && (flavortext || (headshot_link && src.client?.patreon?.has_access(ACCESS_ASSISTANT_RANK)))) // only show flavor text if there is a flavor text and we show headshot
 		. += "<a href='?src=[REF(src)];task=view_flavor_text;'>Examine closer</a>"
 
 	var/list/lines = build_cool_description(get_mob_descriptors(obscure_name, user), src)
