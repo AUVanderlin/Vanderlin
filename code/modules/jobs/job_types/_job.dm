@@ -93,7 +93,6 @@
 	var/list/peopleiknow = list()
 	var/list/peopleknowme = list()
 
-	var/plevel_req = 0
 	var/min_pq = -999
 
 	var/give_bank_account = FALSE
@@ -135,7 +134,13 @@
 	var/apprentice_name
 	///do we magic?
 	var/magic_user = FALSE
+	///Do we get passive income every day from our noble estates?
+	var/noble_income = FALSE
 
+	var/static/list/actors_list_blacklist = list(
+		/datum/job/adventurer,
+		/datum/job/pilgrim,
+	)
 
 /datum/job/New()
 	. = ..()
@@ -144,6 +149,9 @@
 			peopleiknow += X
 			peopleknowme += X
 		for(var/X in GLOB.serf_positions)
+			peopleiknow += X
+			peopleknowme += X
+		for(var/X in GLOB.company_positions)
 			peopleiknow += X
 			peopleknowme += X
 		for(var/X in GLOB.church_positions)
@@ -214,13 +222,15 @@
 
 	if(spawned.islatejoin && (job_flags & JOB_ANNOUNCE_ARRIVAL)) //to be moved somewhere more appropriate
 		var/used_title = get_informed_title(spawned)
-		scom_announce("[spawned.real_name] the [used_title] arrives from Kingsfield.")
+		scom_announce("[spawned.real_name] the [used_title] arrives from [SSmapping.config.immigrant_origin].")
 
 	if(give_bank_account)
 		if(give_bank_account > 1)
 			SStreasury.create_bank_account(spawned, give_bank_account)
 		else
 			SStreasury.create_bank_account(spawned)
+		if(noble_income)
+			SStreasury.noble_incomes[spawned] = noble_income
 
 	if(job_flags & JOB_SHOW_IN_CREDITS)
 		SScrediticons.processing += spawned
@@ -228,6 +238,25 @@
 	if(cmode_music)
 		DIRECT_OUTPUT(spawned, load_resource(cmode_music, -1)) //preload their combat mode music
 		spawned.cmode_music = cmode_music
+
+	if(!(type in actors_list_blacklist)) //don't show these.
+		GLOB.actors_list[spawned.mobid] = "[spawned.real_name] as [spawned.mind.assigned_role.get_informed_title(spawned)]<BR>"
+
+	var/mob/living/carbon/human/humanguy = spawned
+
+	var/datum/job/target_job = humanguy?.mind?.assigned_role
+	if(target_job?.forced_flaw)
+		if(humanguy.charflaw)
+			QDEL_NULL(humanguy.charflaw)
+		humanguy.charflaw = new target_job.forced_flaw.type(humanguy)
+
+	if(humanguy.charflaw)
+		humanguy.charflaw.after_spawn(humanguy)
+
+	if(length(advclass_cat_rolls))
+		humanguy.advsetup = TRUE
+		humanguy.invisibility = INVISIBILITY_MAXIMUM
+		humanguy.become_blind("advsetup")
 
 /datum/job/proc/announce_job(mob/living/joining_mob)
 	if(head_announce)
@@ -316,7 +345,7 @@
 		else
 			H.set_patron(default_patron || pick(possiblegods))
 		if(old_patron != H.patron) // If the patron we selected first does not match the patron we end up with, display the message.
-			to_chat(H, "<span class='warning'>I've followed the word of [old_patron] in my younger years, but the path I tread todae has accustomed me to [H.patron].")
+			to_chat(H, "<span class='warning'>I've followed the word of [old_patron.display_name ? old_patron.display_name : old_patron] in my younger years, but the path I tread todae has accustomed me to [H.patron.display_name? H.patron.display_name : H.patron].")
 
 	if(H.mind)
 		if(H.dna)

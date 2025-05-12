@@ -1,6 +1,5 @@
 //clusterCheckFlags defines
 //All based on clusterMin and clusterMax as guides
-
 //Individual defines
 #define CLUSTER_CHECK_NONE				0  			//No checks are done, cluster as much as possible
 #define CLUSTER_CHECK_DIFFERENT_TURFS	(1<<1)  //Don't let turfs of DIFFERENT types cluster
@@ -32,7 +31,7 @@
 	if(buildmode_name == "Undocumented")
 		buildmode_name = copytext("[type]", 20)	// / d a t u m / m a p g e n e r a t o r / = 20 characters.
 
-#ifndef FASTLOAD
+#ifndef TESTING
 	initialiseModules()
 #endif
 //Defines the region the map represents, sets map

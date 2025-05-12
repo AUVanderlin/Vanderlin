@@ -138,7 +138,7 @@
 /obj/structure/fake_machine/drugmachine/attackby(obj/item/P, mob/user, params)
 	if(istype(P, /obj/item/key))
 		var/obj/item/key/K = P
-		if(K.lockid == "nightman")
+		if(K.lockid == ACCESS_APOTHECARY)
 			locked = !locked
 			playsound(loc, 'sound/misc/beep.ogg', 100, FALSE, -1)
 			update_icon()
@@ -150,7 +150,7 @@
 	if(istype(P, /obj/item/storage/keyring))
 		var/obj/item/storage/keyring/K = P
 		for(var/obj/item/key/KE in K.contents)
-			if(KE.lockid == "nightman")
+			if(KE.lockid == ACCESS_APOTHECARY)
 				locked = !locked
 				playsound(loc, 'sound/misc/beep.ogg', 100, FALSE, -1)
 				update_icon()
@@ -169,8 +169,8 @@
 		return
 	if(!usr.canUseTopic(src, BE_CLOSE) || locked)
 		return
+	var/mob/living/carbon/human/human_mob = usr
 	if(href_list["buy"])
-		var/mob/M = usr
 		var/path = text2path(href_list["buy"])
 		if(!ispath(path, /datum/supply_pack))
 			message_admins("APOTHECARY [usr.key] IS TRYING TO BUY A [path] WITH THE GOLDFACE. THIS IS AN EXPLOIT.")
@@ -185,12 +185,14 @@
 			budget -= cost
 			if(!(upgrade_flags & UPGRADE_NOTAX))
 				SStreasury.give_money_treasury(tax_amt, "goldface import tax")
+				record_featured_stat(FEATURED_STATS_TAX_PAYERS, human_mob, tax_amt)
+				GLOB.vanderlin_round_stats[STATS_TAXES_COLLECTED] += tax_amt
 		else
 			say("Not enough!")
 			return
 		var/pathi = pick(PA.contains)
 		var/obj/item/I = new pathi(get_turf(src))
-		M.put_in_hands(I)
+		human_mob.put_in_hands(I)
 		qdel(PA)
 	if(href_list["change"])
 		if(budget > 0)

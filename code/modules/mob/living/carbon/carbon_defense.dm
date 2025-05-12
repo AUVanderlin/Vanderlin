@@ -44,9 +44,7 @@
 		return
 	if(get_active_held_item())
 		return
-	if(!(mobility_flags & MOBILITY_MOVE))
-		return
-	if(restrained())
+	if(HAS_TRAIT(src, TRAIT_HANDS_BLOCKED))
 		return
 	return TRUE
 
@@ -330,8 +328,8 @@
 	//Stun
 	var/should_stun = (!(flags & SHOCK_TESLA) || siemens_coeff > 0.5) && !(flags & SHOCK_NOSTUN)
 	if(!HAS_TRAIT(src, TRAIT_NOPAIN))
-		if(should_stun && !HAS_TRAIT(src, TRAIT_NOPAINSTUN))
-			Paralyze(30)
+		if(should_stun && !HAS_TRAIT(src, TRAIT_NOPAINSTUN) && !has_status_effect(/datum/status_effect/shock_recovery))
+			Paralyze(3 SECONDS)
 		//Jitter and other fluff.
 		jitteriness += 1000
 		do_jitter_animation(jitteriness)
@@ -343,8 +341,16 @@
 ///Called slightly after electrocute act to reduce jittering and apply a secondary stun.
 /mob/living/carbon/proc/secondary_shock(should_stun)
 	jitteriness = max(jitteriness - 990, 10)
-	if(should_stun && !HAS_TRAIT(src, TRAIT_NOPAINSTUN))
-		Paralyze(60)
+	if(should_stun && !HAS_TRAIT(src, TRAIT_NOPAINSTUN) && !has_status_effect(/datum/status_effect/shock_recovery))
+		Paralyze(6 SECONDS)
+		apply_shock_paralyze_immunity(12 SECONDS)
+
+/mob/living/carbon/proc/apply_shock_paralyze_immunity(time)
+	apply_status_effect(/datum/status_effect/shock_recovery)
+	addtimer(CALLBACK(src, PROC_REF(remove_shock_paralyze_immunity), src), time)
+
+/mob/living/carbon/proc/remove_shock_paralyze_immunity()
+	remove_status_effect(/datum/status_effect/shock_recovery)
 
 /mob/living/carbon/proc/help_shake_act(mob/living/carbon/M)
 	if(on_fire)
@@ -479,3 +485,23 @@
 	var/obj/item/organ/ears/ears = getorganslot(ORGAN_SLOT_EARS)
 	if((istype(ears) && !ears.deaf) || (src.stat == DEAD)) // 2nd check so you can hear messages when beheaded
 		. = TRUE
+
+/mob/living/carbon/adjustOxyLoss(amount, updating_health = TRUE, forced = FALSE)
+	. = ..()
+	if(isnull(.))
+		return
+	if(. <= 75)
+		if(getOxyLoss() > 75)
+			ADD_TRAIT(src, TRAIT_KNOCKEDOUT, OXYLOSS_TRAIT)
+	else if(getOxyLoss() <= 75)
+		REMOVE_TRAIT(src, TRAIT_KNOCKEDOUT, OXYLOSS_TRAIT)
+
+/mob/living/carbon/setOxyLoss(amount, updating_health = TRUE, forced = FALSE)
+	. = ..()
+	if(isnull(.))
+		return
+	if(. <= 75)
+		if(getOxyLoss() > 75)
+			ADD_TRAIT(src, TRAIT_KNOCKEDOUT, OXYLOSS_TRAIT)
+	else if(getOxyLoss() <= 75)
+		REMOVE_TRAIT(src, TRAIT_KNOCKEDOUT, OXYLOSS_TRAIT)

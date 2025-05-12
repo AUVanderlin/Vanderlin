@@ -5,6 +5,11 @@ quirks have it's own panel so we don't need them here.
 */
 GLOBAL_LIST_INIT(traits_by_type, list(
 	/mob = list(
+		"TRAIT_KNOCKEDOUT" = TRAIT_KNOCKEDOUT,
+		"TRAIT_IMMOBILIZED" = TRAIT_IMMOBILIZED,
+		"TRAIT_FLOORED" = TRAIT_FLOORED,
+		"TRAIT_HANDS_BLOCKED" = TRAIT_HANDS_BLOCKED,
+		"TRAIT_RESTRAINED" = TRAIT_RESTRAINED,
 		"TRAIT_INCAPACITATED" = TRAIT_INCAPACITATED,
 		"TRAIT_BLIND" = TRAIT_BLIND,
 		"TRAIT_MUTE" = TRAIT_MUTE,
@@ -44,6 +49,7 @@ GLOBAL_LIST_INIT(traits_by_type, list(
 		"TRAIT_TOXINLOVER" = TRAIT_TOXINLOVER,
 		"TRAIT_NOBREATH" = TRAIT_NOBREATH,
 		"TRAIT_HOLY" = TRAIT_HOLY,
+		"TRAIT_NOAMBUSH" = TRAIT_NOAMBUSH,
 		"TRAIT_NOCRITDAMAGE" = TRAIT_NOCRITDAMAGE,
 		"TRAIT_NOSLIPWATER" = TRAIT_NOSLIPWATER,
 		"TRAIT_NOSLIPALL" = TRAIT_NOSLIPALL,
@@ -84,6 +90,11 @@ GLOBAL_LIST_INIT(traits_by_type, list(
 		"Webwalker" = TRAIT_WEBWALK,
 		"Dead Nose" = TRAIT_NOSTINK,
 		"High Jumping" = TRAIT_ZJUMP,
+		"Jesterophobia" = TRAIT_JESTERPHOBIA,
+		"Xenophobia" = TRAIT_XENOPHOBIC,
+		"Tolerant" = TRAIT_TOLERANT,
+		"Nude Sleeper" = TRAIT_NUDE_SLEEPER,
+		"Civilized Barbarian" = TRAIT_CIVILIZEDBARBARIAN,
 		"Intimidating" = TRAIT_NOSEGRAB,
 		"Nutcracker" = TRAIT_NUTCRACKER,
 		"Strong Bite" = TRAIT_STRONGBITE,
@@ -134,7 +145,11 @@ GLOBAL_LIST_INIT(traits_by_type, list(
 		"Tiny" = TRAIT_TINY,
 		"Foreigner" = TRAIT_FOREIGNER,
 		"Beautiful" = TRAIT_BEAUTIFUL,
+		"Bad Mood" = TRAIT_BAD_MOOD,
+		"Night Owl" = TRAIT_NIGHT_OWL,
 		"Ugly" = TRAIT_UGLY,
+		"Hollow Bones" = TRAIT_HOLLOWBONES,
+		"Light Load" = TRAIT_AMAZING_BACK,
 	),
 	/obj/item/bodypart = list(
 		"TRAIT_PARALYSIS" = TRAIT_PARALYSIS

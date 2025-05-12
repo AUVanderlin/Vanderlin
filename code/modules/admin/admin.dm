@@ -70,7 +70,10 @@
 	body +="</head>"
 	body += "<body><div id='container'>"
 	body += "<div id='left'>"
-	body += "<body>Options panel for <b>[M]</b>"
+	if(M.ckey)
+		body += "<body>\[<A href='byond://?_src_=holder;[HrefToken()];ppbyckey=[M.ckey];ppbyckeyorigmob=[REF(M)]'>Find Updated Panel</A>\] <br>"
+
+	body += "Options panel for <b>[M]</b>"
 	if(M.client)
 		body += " played by <b>[M.client]</b> "
 		body += "\[<A href='?_src_=holder;[HrefToken()];editrights=[(GLOB.admin_datums[M.client.ckey] || GLOB.deadmins[M.client.ckey]) ? "rank" : "add"];key=[M.key]'>[M.client.holder ? M.client.holder.rank : "Player"]</A>\]"
@@ -83,7 +86,9 @@
 		body += " \[<A href='?_src_=holder;[HrefToken()];revive=[REF(M)]'>Heal</A>\] "
 
 	if(M.client)
-		body += "<br>\[<b>First Seen:</b> [M.client.player_join_date]\]\[<b>Byond account registered on:</b> [M.client.account_join_date]\]"
+		body += "<br>\[<b>First Seen:</b> [M.client.player_join_date]\]"
+		body += "<br>\[<b>Byond account registered on:</b> [M.client.account_join_date]\]"
+		body += "<br>\[<b>IP:</b> [M.client.address]\]"
 		body += "<br><br><b>CentCom Ban DB: </b> "
 		if(CONFIG_GET(string/centcom_ban_db))
 			body += "<a href='byond://?_src_=holder;[HrefToken()];centcomlookup=[M.client.ckey]'>Search</a>"
@@ -103,26 +108,30 @@
 		body += "<br>"
 		body += "<a href='?_src_=holder;[HrefToken()];roleban=add;mob=[REF(M)]'>\[Role Ban Panel\]</a> "
 
-		var/patron = "NA"
+		var/patron = ""
 		if(isliving(M))
 			var/mob/living/living = M
 			patron = initial(living.patron.name)
-		body += "<br><br>Current Patron: [patron]"
-
+		var/flaw = ""
 		var/curse_string = ""
+		var/job = ""
 		if(ishuman(M))
-			var/mob/living/carbon/human/living = M
-			for(var/datum/curse/curse in living.curses)
-				curse_string += "<br> - [curse.name]"
-		body += "<br>Curses: [curse_string]"
+			var/mob/living/carbon/human/human_mob = M
+			flaw = human_mob.charflaw
+			curse_string = human_mob.curses.Join(", ")
+			job = human_mob?.mind.assigned_role.title
+
+		body += "<br><br>Current Patron: <a href='?_src_=holder;[HrefToken()];changepatron=add;mob=[REF(M)]'>\[[patron ? patron : "NA"]\]</a>"
+		body += "<br>Current Flaw: <a href='?_src_=holder;[HrefToken()];changeflaw=add;mob=[REF(M)]'>\[[flaw ? flaw : "NA"]\]</a>"
+		body += "<br>Current Curses: <a href='?_src_=holder;[HrefToken()];modifycurses=add;mob=[REF(M)]'>\[[curse_string ? curse_string : "NA"]\]</a>"
+		body += "<br>Current Job: <a href='?_src_=holder;[HrefToken()];setjob=add;mob=[REF(M)]'>\[[job ? job : "NA"]\]</a>"
 
 		var/full_version = "Unknown"
 		if(M.client.byond_version)
 			full_version = "[M.client.byond_version].[M.client.byond_build ? M.client.byond_build : "xxx"]"
-		body += "<br>\[<b>Byond version:</b> [full_version]\]<br>"
+		body += "<br>\[<b>Byond version:</b> [full_version]\]"
 
-
-	body += "<br><br>\[ "
+	body += "<br><br>\["
 	body += "<a href='?_src_=vars;[HrefToken()];Vars=[REF(M)]'>VV</a> - "
 	if(M.mind)
 		body += "<a href='?_src_=holder;[HrefToken()];traitor=[REF(M)]'>TP</a> - "
@@ -148,6 +157,7 @@
 	body += "<A href='?_src_=holder;[HrefToken()];showmessageckey=[M.ckey]'>Notes | Messages | Watchlist</A> | "
 	if(M.client)
 		body += "\ <A href='?_src_=holder;[HrefToken()];sendbacktolobby=[REF(M)]'>Send back to Lobby</A> | "
+		body += "<A href='?_src_=holder;[HrefToken()];cryomob=[REF(M)]'>CRYO</A>"
 		var/muted = M.client.prefs.muted
 		body += "<br><b>Mute: </b> "
 		body += "\[<A href='?_src_=holder;[HrefToken()];mute=[M.ckey];mute_type=[MUTE_IC]'><font color='[(muted & MUTE_IC)?"red":"blue"]'>IC</font></a> | "
@@ -155,7 +165,7 @@
 		body += "<A href='?_src_=holder;[HrefToken()];mute=[M.ckey];mute_type=[MUTE_PRAY]'><font color='[(muted & MUTE_PRAY)?"red":"blue"]'>PRAY</font></a> | "
 		body += "<A href='?_src_=holder;[HrefToken()];mute=[M.ckey];mute_type=[MUTE_ADMINHELP]'><font color='[(muted & MUTE_ADMINHELP)?"red":"blue"]'>ADMINHELP</font></a> | "
 		body += "<A href='?_src_=holder;[HrefToken()];mute=[M.ckey];mute_type=[MUTE_DEADCHAT]'><font color='[(muted & MUTE_DEADCHAT)?"red":"blue"]'>DEADCHAT</font></a> | "
-		body += "<A href='?_src_=holder;[HrefToken()];mute=[M.ckey];mute_type=[MUTE_LOOC]'><font color='[(muted & MUTE_LOOC)?"red":"blue"]'>LOOC</font></a>\]"
+		body += "<A href='?_src_=holder;[HrefToken()];mute=[M.ckey];mute_type=[MUTE_LOOC]'><font color='[(muted & MUTE_LOOC)?"red":"blue"]'>LOOC</font></a> | "
 		body += "<A href='?_src_=holder;[HrefToken()];mute=[M.ckey];mute_type=[MUTE_MEDITATE]'><font color='[(muted & MUTE_MEDITATE)?"red":"blue"]'>Meditate</font></a>\]"
 		body += "(<A href='?_src_=holder;[HrefToken()];mute=[M.ckey];mute_type=[MUTE_ALL]'><font color='[(muted & MUTE_ALL)?"red":"blue"]'>toggle all</font></a>)"
 
@@ -255,8 +265,7 @@
 
 	if(!check_rights())
 		return
-
-	M.fully_heal(admin_revive = TRUE)
+	M.revive(TRUE, TRUE)
 	message_admins("<span class='danger'>Admin [key_name_admin(usr)] healed / revived [key_name_admin(M)]!</span>")
 	log_admin("[key_name(usr)] healed / Revived [key_name(M)].")
 
@@ -444,44 +453,63 @@
 	usr << browse(dat, "window=admin2;size=240x280")
 	return
 
-/////////////////////////////////////////////////////////////////////////////////////////////////admins2.dm merge
-//i.e. buttons/verbs
-
-
+#define REGULAR_RESTART "Regular Restart"
+#define REGULAR_RESTART_DELAYED "Regular Restart (with delay)"
+#define HARD_RESTART "Hard Restart (No Delay/Feedback Reason)"
+#define HARDEST_RESTART "Hardest Restart (No actions, just reboot)"
+#define TGS_RESTART "Server Restart (Kill and restart DD)"
 /datum/admins/proc/restart()
 	set category = "Server"
 	set name = "Reboot World"
-	set desc="Restarts the world immediately"
-	if (!usr.client.holder)
+	set desc = "Restarts the world immediately"
+	if(!check_rights(R_SERVER))
 		return
 
-	var/list/options = list("Regular Restart", "Hard Restart (No Delay/Feeback Reason)", "Hardest Restart (No actions, just reboot)")
-	if(world.TgsAvailable())
-		options += "Server Restart (Kill and restart DD)";
-
-	var/rebootconfirm
 	if(SSticker.admin_delay_notice)
-		if(alert(usr, "Are you sure? An admin has already delayed the round end for the following reason: [SSticker.admin_delay_notice]", "Confirmation", "Yes", "No") == "Yes")
-			rebootconfirm = TRUE
-	else
-		rebootconfirm = TRUE
-	if(rebootconfirm)
-		var/result = input(usr, "Select reboot method", "World Reboot", options[1]) as null|anything in options
-		if(result)
-			SSblackbox.record_feedback("tally", "admin_verb", 1, "Reboot World") //If you are copy-pasting this, ensure the 2nd parameter is unique to the new proc!
-			var/init_by = "Initiated by Admin."
-			switch(result)
-				if("Regular Restart")
-					SSticker.Reboot(init_by, "admin reboot - by Admin", 10)
-				if("Hard Restart (No Delay, No Feeback Reason)")
-					to_chat(world, "World reboot - [init_by]")
-					world.Reboot()
-				if("Hardest Restart (No actions, just reboot)")
-					to_chat(world, "Hard world reboot - [init_by]")
-					world.Reboot(fast_track = TRUE)
-				if("Server Restart (Kill and restart DD)")
-					to_chat(world, "Server restart - [init_by]")
-					world.TgsEndProcess()
+		if(alert(usr, "Are you sure? An admin has already delayed the round end for the following reason: [SSticker.admin_delay_notice]", "Confirmation", "Yes", "No") != "Yes")
+			return FALSE
+
+	var/list/options = list(REGULAR_RESTART, REGULAR_RESTART_DELAYED, HARD_RESTART, HARDEST_RESTART)
+	if(world.TgsAvailable())
+		options += TGS_RESTART
+
+	var/result = input(usr, "Select reboot method", "World Reboot", options[1]) as null|anything in options
+	if(!result)
+		return
+
+	SSblackbox.record_feedback("tally", "admin_verb", 1, "Reboot World") //If you are copy-pasting this, ensure the 2nd parameter is unique to the new proc!
+	var/init_by = "Initiated by [get_display_ckey(usr.ckey)]."
+	switch(result)
+		if(REGULAR_RESTART, REGULAR_RESTART_DELAYED)
+			var/delay = 1
+			if(result == REGULAR_RESTART_DELAYED)
+				delay = input("What delay should the restart have (in seconds)?", "Restart Delay", 5) as num|null
+				if(!delay)
+					return FALSE
+			SSplexora.restart_type = PLEXORA_SHUTDOWN_NORMAL
+			SSplexora.restart_requester = usr
+			SSticker.Reboot(init_by, "admin reboot - by [usr.key][usr.client.holder.fakekey ? " (stealth)" : ""]", delay SECONDS)
+		if(HARD_RESTART)
+			SSplexora.restart_type = PLEXORA_SHUTDOWN_HARD
+			SSplexora.restart_requester = usr
+			to_chat(world, "World reboot - [init_by]")
+			world.Reboot()
+		if(HARDEST_RESTART)
+			SSplexora.restart_type = PLEXORA_SHUTDOWN_HARDEST
+			SSplexora.restart_requester = usr
+			to_chat(world, "Hard world reboot - [init_by]")
+			world.Reboot(fast_track = TRUE)
+		if(TGS_RESTART)
+			SSplexora.restart_type = PLEXORA_SHUTDOWN_KILLDD
+			SSplexora.restart_requester = usr
+			to_chat(world, "Server restart - [init_by]")
+			world.TgsEndProcess()
+
+#undef REGULAR_RESTART
+#undef REGULAR_RESTART_DELAYED
+#undef HARD_RESTART
+#undef HARDEST_RESTART
+#undef TGS_RESTART
 
 /datum/admins/proc/end_round()
 	set category = "Server"
@@ -675,7 +703,7 @@
 	if(preparsed.len > 1)
 		amount = CLAMP(text2num(preparsed[2]),1,ADMIN_SPAWN_CAP)
 
-	var/chosen = pick_closest_path(path)
+	var/atom/chosen = pick_closest_path(path)
 	if(!chosen)
 		return
 	var/turf/T = get_turf(usr)
@@ -689,6 +717,7 @@
 
 	log_admin("[key_name(usr)] spawned [amount] x [chosen] at [AREACOORD(usr)]")
 	SSblackbox.record_feedback("tally", "admin_verb", 1, "Spawn Atom") //If you are copy-pasting this, ensure the 2nd parameter is unique to the new proc!
+	return initial(chosen.name)
 
 /datum/admins/proc/podspawn_atom(object as text)
 	set category = "Debug"

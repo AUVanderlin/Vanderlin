@@ -18,13 +18,7 @@
 	cmode_music = 'sound/music/cmode/church/CombatAstrata.ogg'
 
 	allowed_sexes = list(MALE, FEMALE)
-	allowed_races = list(
-		"Humen",
-		"Elf",
-		"Half-Elf",
-		"Dwarf",
-		"Aasimar"
-	)
+	allowed_races = RACES_PLAYER_NONDISCRIMINATED
 
 	outfit = /datum/outfit/job/priest
 	spells = list(
@@ -96,6 +90,16 @@
 	total_positions = 0
 	spawn_positions = 0
 
+/datum/job/priest/vice //just used to change the priest title
+	title = "Vice Priest"
+	f_title = "Vice Priestess"
+	job_flags = (JOB_ANNOUNCE_ARRIVAL | JOB_EQUIP_RANK)
+	flag = PRIEST
+	department_flag = CHURCHMEN
+	faction = FACTION_STATION
+	total_positions = 0
+	spawn_positions = 0
+
 /mob/living/carbon/human/proc/coronate_lord()
 	set name = "Coronate"
 	set category = "Priest"
@@ -143,8 +147,8 @@
 	lord_job?.add_spells(coronated)
 	SSticker.rulermob = coronated
 	GLOB.badomens -= OMEN_NOLORD
-	say("By the authority of the Gods, I pronounce you Ruler of all Vanderlin!")
-	priority_announce("[real_name] the [mind.assigned_role.get_informed_title(src)] has named [coronated.real_name] the inheritor of Vanderlin!", \
+	say("By the authority of the Gods, I pronounce you Ruler of all [SSmapping.config.map_name]!")
+	priority_announce("[real_name] the [mind.assigned_role.get_informed_title(src)] has named [coronated.real_name] the inheritor of [SSmapping.config.map_name]!", \
 	title = "Long Live [lord_job.get_informed_title(coronated)] [coronated.real_name]!", sound = 'sound/misc/bell.ogg')
 
 /mob/living/carbon/human/proc/churchexcommunicate()
@@ -164,6 +168,9 @@
 				if(H.real_name == inputty)
 					H.cleric?.recommunicate()
 			return
+		if(length(GLOB.tennite_schisms))
+			to_chat(src, span_warning("I cannot excommunicate anyone during the schism!"))
+			return FALSE
 		var/found = FALSE
 		for(var/mob/living/carbon/human/H in GLOB.player_list)
 			if(H.real_name == inputty)
@@ -192,6 +199,9 @@
 				if(H.real_name == inputty)
 					H.remove_stress(/datum/stressevent/psycurse)
 			return
+		if(length(GLOB.tennite_schisms))
+			to_chat(src, span_warning("I cannot curse anyone during the schism!"))
+			return FALSE
 		var/found = FALSE
 		for(var/mob/living/carbon/H in GLOB.player_list)
 			if(H.real_name == inputty)

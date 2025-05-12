@@ -2,6 +2,9 @@
 #define TRAIT_WEBWALK 					"Webwalker"
 #define TRAIT_NOSTINK 					"Dead Nose"
 #define TRAIT_ZJUMP 					"High Jumping"
+#define TRAIT_JESTERPHOBIA 				"Jesterphobic"
+#define TRAIT_XENOPHOBIC 				"Xenophobic"
+#define TRAIT_TOLERANT 					"Tolerant"
 #define TRAIT_NOSEGRAB 				"Intimidating"
 #define TRAIT_NUTCRACKER 				"Nutcracker"
 #define TRAIT_STRONGBITE				"Strong Bite"
@@ -50,6 +53,9 @@
 #define TRAIT_POISONBITE				"Poison Bite"
 #define TRAIT_FORAGER					"Foraging Knowledge" //Can tell which berries are good to eat when examining
 #define TRAIT_TINY 						"Tiny"
+#define TRAIT_DREAM_WATCHER				"Noc Blessed" //Unique Trait of the Dream Watcher Town Elder Class, they have a chance to know about antags or gods influences.
+#define TRAIT_HOLLOWBONES				"Hollow Bones"
+#define TRAIT_AMAZING_BACK				"Light Load"
 
 // Divine patron trait bonuses:
 #define TRAIT_SOUL_EXAMINE				"Blessing of Necra"  //can check bodies to see if they have departed
@@ -71,6 +77,8 @@
 
 #define TRAIT_BASHDOORS "bashdoors"
 #define TRAIT_NOMOOD "no_mood"
+#define TRAIT_BAD_MOOD "Bad Mood"
+#define TRAIT_NIGHT_OWL "Night Owl"
 #define TRAIT_SIMPLE_WOUNDS "simple_wounds"
 #define TRAIT_SCHIZO_AMBIENCE "schizo_ambience" //replaces all ambience with creepy shit
 #define TRAIT_SCREENSHAKE "screenshake" //screen will always be shaking, you cannot stop it
@@ -87,6 +95,8 @@
 #define TRAIT_IWASUNZOMBIFIED "iwasunzombified" //prevents PQ gain from curing a zombie twice
 #define TRAIT_ZIZOID_HUNTED "zizoidhunted" // Used to signal character has been marked by death by the Zizoid cult
 #define TRAIT_LEPROSY "Leprosy"
+#define TRAIT_NUDE_SLEEPER "Nude Sleeper"
+#define TRAIT_CIVILIZEDBARBARIAN "Civilized Barbarian"
 #define TRAIT_BEAUTIFUL "Beautiful"
 #define TRAIT_UGLY "Ugly"
 #define TRAIT_SCHIZO_FLAW "Schizophrenic"
@@ -95,6 +105,8 @@
 
 #define TRAIT_MALUMFIRE "Professional Smith"
 #define TRAIT_CRATEMOVER "Crate Mover"
+#define TRAIT_BURDEN "Burdened" //Gaffer stuff
+#define TRAIT_OLDPARTY "Old_party"
 
 // PATRON CURSE TRAITS
 #define TRAIT_CURSE "Curse" //source
@@ -116,6 +128,9 @@ GLOBAL_LIST_INIT(roguetraits, list(
 	TRAIT_WEBWALK = "I can move freely between webs.",
 	TRAIT_NOSTINK = span_dead("My nose is numb to the smell of decay."),
 	TRAIT_ZJUMP = "Time to reach a new height.",
+	TRAIT_JESTERPHOBIA = span_warning("I have a severe irrational fear of Jesters"),
+	TRAIT_XENOPHOBIC = span_warning("Lesser races pollute our land"),
+	TRAIT_TOLERANT = span_info("I dream of an ideal future, one with peace between all races"),
 	TRAIT_NOSEGRAB = "I love to grab idiots by their noses!",
 	TRAIT_NUTCRACKER = "I love kicking idiots on the nuts!",
 	TRAIT_SEEPRICES = "I can tell the prices of things down to the zenny.",
@@ -143,6 +158,8 @@ GLOBAL_LIST_INIT(roguetraits, list(
 	TRAIT_ROT_EATER = span_necrosis("I can eat rotten food."),
 	TRAIT_ORGAN_EATER = span_bloody("I can eat organs and raw flesh."),
 	TRAIT_CRACKHEAD = span_love("I can use drugs as much as I want!"),
+	TRAIT_CIVILIZEDBARBARIAN = span_info("My rigorous training in the martial arts has turned me into a living weapon. No limb is out of reach for my fists and feet, and my unarmed strikes now have a higher chance to inflict critical damage."),
+	TRAIT_NUDE_SLEEPER = span_warning("I can't fall asleep unless I'm nude and in bed."),
 	TRAIT_SOUL_EXAMINE = span_deadsay("I know when someone's soul has departed after checking their heartbeat."),
 	TRAIT_CYCLOPS_LEFT = span_warning("My left eye has been poked out..."),
 	TRAIT_CYCLOPS_RIGHT = span_warning("My right eye has been poked out..."),
@@ -153,6 +170,8 @@ GLOBAL_LIST_INIT(roguetraits, list(
 	TRAIT_MISSING_NOSE = span_warning("I struggle to breathe."),
 	TRAIT_DISFIGURED = span_warning("No one can recognize me..."),
 	TRAIT_BEAUTIFUL = span_love("My face was shaped by the gods!"),
+	TRAIT_BAD_MOOD = span_warning("Everything just seems to piss me off"),
+	TRAIT_NIGHT_OWL = span_info("I enjoy spending my time in the night"),
 	TRAIT_UGLY = span_necrosis("Do not look in the mirror."),
 	TRAIT_SPELLBLOCK = span_warning("I cannot cast any spells."),
 	TRAIT_ANTIMAGIC = "I am immune to most forms of magic.",
@@ -180,7 +199,15 @@ GLOBAL_LIST_INIT(roguetraits, list(
 	TRAIT_SEE_LEYLINES = "I can see the lines that make up this world.",
 	TRAIT_TINY = "I am small, its hard to look people in the eyes.",
 	TRAIT_FOREIGNER = span_notice("I'm not from around here."),
+	TRAIT_BURDEN = "I carry the Burden of HEAD EATER's hunger...",
+	TRAIT_OLDPARTY = "In years long passed, me and a group of fellow adventurers saved this city!",
+	TRAIT_DREAM_WATCHER = span_notice("I'm blessed by Noc, my dreams tell more than the average person.."),
+	TRAIT_AMAZING_BACK = span_notice("I'm able to carry far more on my back!"),
+	TRAIT_HOLLOWBONES = span_danger("My bones are light as air, Its hard to wear armor."),
 	))
+
+#define SIGNAL_ADDTRAIT(trait_ref) ("addtrait " + trait_ref)
+#define SIGNAL_REMOVETRAIT(trait_ref) ("removetrait " + trait_ref)
 
 // trait accessor defines
 #define ADD_TRAIT(target, trait, source) \
@@ -190,6 +217,7 @@ GLOBAL_LIST_INIT(roguetraits, list(
 			target.status_traits = list(); \
 			_L = target.status_traits; \
 			_L[trait] = list(source); \
+			SEND_SIGNAL(target, SIGNAL_ADDTRAIT(trait)); \
 			SEND_GLOBAL_SIGNAL(COMSIG_ATOM_ADD_TRAIT, target, trait); \
 		} else { \
 			_L = target.status_traits; \
@@ -197,8 +225,9 @@ GLOBAL_LIST_INIT(roguetraits, list(
 				_L[trait] |= list(source); \
 			} else { \
 				_L[trait] = list(source); \
-			} \
-			SEND_GLOBAL_SIGNAL(COMSIG_ATOM_ADD_TRAIT, target, trait);\
+				SEND_SIGNAL(target, SIGNAL_ADDTRAIT(trait)); \
+				SEND_GLOBAL_SIGNAL(COMSIG_ATOM_ADD_TRAIT, target, trait); \
+			}; \
 		} \
 	} while (0)
 #define REMOVE_TRAIT(target, trait, sources) \
@@ -208,20 +237,21 @@ GLOBAL_LIST_INIT(roguetraits, list(
 		if (sources && !islist(sources)) { \
 			_S = list(sources); \
 		} else { \
-			_S = sources\
+			_S = sources; \
 		}; \
 		if (_L && _L[trait]) { \
 			for (var/_T in _L[trait]) { \
 				if ((!_S && (_T != ROUNDSTART_TRAIT)) || (_T in _S)) { \
-					_L[trait] -= _T \
-				} \
+					_L[trait] -= _T; \
+				}; \
 			};\
 			if (!length(_L[trait])) { \
 				_L -= trait; \
+				SEND_SIGNAL(target, SIGNAL_REMOVETRAIT(trait)); \
 				SEND_GLOBAL_SIGNAL(COMSIG_ATOM_REMOVE_TRAIT, target, trait); \
 			}; \
 			if (!length(_L)) { \
-				target.status_traits = null \
+				target.status_traits = null; \
 			}; \
 		} \
 	} while (0)
@@ -231,13 +261,16 @@ GLOBAL_LIST_INIT(roguetraits, list(
 		var/list/_S = sources; \
 		if (_L) { \
 			for (var/_T in _L) { \
-				_L[_T] &= _S;\
+				_L[_T] &= _S; \
 				if (!length(_L[_T])) { \
-					_L -= _T } \
-				};\
-				if (!length(_L)) { \
-					target.status_traits = null\
-				};\
+					_L -= _T; \
+					SEND_SIGNAL(target, SIGNAL_REMOVETRAIT(_T)); \
+					SEND_GLOBAL_SIGNAL(COMSIG_ATOM_REMOVE_TRAIT, target, trait); \
+				}; \
+			};\
+			if (!length(_L)) { \
+				target.status_traits = null\
+			};\
 		}\
 	} while (0)
 
@@ -251,6 +284,16 @@ Remember to update _globalvars/traits.dm if you're adding/removing/renaming trai
 
 //mob traits
 #define TRAIT_IMMOBILIZED		"immobilized" //! Prevents voluntary movement.
+#define TRAIT_KNOCKEDOUT		"knockedout" //! Forces the user to stay unconscious.
+#define TRAIT_FLOORED 			"floored" //! Prevents standing or staying up on its own.
+/// Prevents usage of manipulation appendages (picking, holding or using items, manipulating storage).
+#define TRAIT_HANDS_BLOCKED		"handsblocked"
+/// Inability to access UI hud elements. Turned into a trait from [MOBILITY_UI] to be able to track sources.
+#define TRAIT_UI_BLOCKED		"uiblocked"
+/// Inability to pull things. Turned into a trait from [MOBILITY_PULL] to be able to track sources.
+#define TRAIT_PULL_BLOCKED		"pullblocked"
+/// Abstract condition that prevents movement if being pulled and might be resisted against. Handcuffs and straight jackets, basically.
+#define TRAIT_RESTRAINED		"restrained"
 #define TRAIT_INCAPACITATED		"incapacitated"
 #define TRAIT_BLIND 			"blind"
 #define TRAIT_MUTE				"mute"
@@ -336,6 +379,8 @@ Remember to update _globalvars/traits.dm if you're adding/removing/renaming trai
 #define TRAIT_NO_BITE "no_bite" //prevents biting
 #define TRAIT_HARDDISMEMBER		"hard_dismember"
 #define TRAIT_FOREIGNER "foreigner" // is this guy a foreigner?
+#define TRAIT_NOAMBUSH "no_ambush" //! mob cannot be ambushed for any reason
+
 ///trait determines if this mob can breed given by /datum/component/breeding
 #define TRAIT_MOB_BREEDER "mob_breeder"
 #define TRAIT_IMPERCEPTIBLE "imperceptible" // can't be perceived in any way, likely due to invisibility
@@ -350,9 +395,12 @@ Remember to update _globalvars/traits.dm if you're adding/removing/renaming trai
 #define TRAIT_NOEMBED			"noembed"
 #define TRAIT_NO_TELEPORT		"no-teleport" //you just can't
 
+/// Buckling yourself to objects with this trait won't immobilize you
+#define TRAIT_NO_IMMOBILIZE "no_immobilize"
+
 // common trait sources
 #define TRAIT_GENERIC "generic"
-#define UNCONSCIOUS_BLIND "unconscious_blind"
+#define UNCONSCIOUS_TRAIT "unconscious"
 #define EYE_DAMAGE "eye_damage"
 #define GENETIC_MUTATION "genetic"
 #define OBESITY "obesity"
@@ -376,9 +424,22 @@ Remember to update _globalvars/traits.dm if you're adding/removing/renaming trai
 #define GLASSES_TRAIT "glasses"
 #define VEHICLE_TRAIT "vehicle" // inherited from riding vehicles
 #define INNATE_TRAIT "innate"
-#define BUCKLED_TRAIT "buckled" //trait associated to being buckled
-#define CHOKEHOLD_TRAIT "chokehold" //trait associated to being held in a chokehold
-#define RESTING_TRAIT "resting" //trait associated to resting
+#define CRIT_HEALTH_TRAIT "crit_health"
+#define OXYLOSS_TRAIT "oxyloss"
+#define BLOODLOSS_TRAIT "bloodloss"
+/// Trait associated to being buckled
+#define BUCKLED_TRAIT "buckled"
+/// Trait associated to being held in a chokehold
+#define CHOKEHOLD_TRAIT "chokehold"
+/// trait associated to resting
+#define RESTING_TRAIT "resting"
+/// Trait associated to wearing a suit
+#define SUIT_TRAIT "suit"
+/// Trait associated to lying down (having a [lying_angle] of a different value than zero).
+#define LYING_DOWN_TRAIT "lying-down"
+
+/// trait associated to a stat value or range of
+#define STAT_TRAIT "stat"
 
 // unique trait sources, still defines
 #define TRAIT_BESTIALSENSE "bestial-sense"
@@ -427,3 +488,11 @@ Remember to update _globalvars/traits.dm if you're adding/removing/renaming trai
 #define TRAIT_I_AM_INVISIBLE_ON_A_BOAT "invisible_on_tram"
 ///Trait given by /datum/element/relay_attacker
 #define TRAIT_RELAYING_ATTACKER "relaying_attacker"
+
+#define LACKING_LOCOMOTION_APPENDAGES_TRAIT "lacking-locomotion-appengades" //trait associated to not having locomotion appendages nor the ability to fly or float
+#define LACKING_MANIPULATION_APPENDAGES_TRAIT "lacking-manipulation-appengades" //trait associated to not having fine manipulation appendages such as hands
+#define HANDCUFFED_TRAIT "handcuffed"
+/// Trait applied by by [/datum/component/soulstoned]
+#define SOULSTONE_TRAIT "soulstone"
+/// Trait applied to brain mobs when they lack external aid for locomotion, such as being inside a mech.
+#define BRAIN_UNAIDED "brain-unaided"

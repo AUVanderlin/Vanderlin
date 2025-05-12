@@ -54,17 +54,18 @@ SUBSYSTEM_DEF(elastic)
 
 /datum/controller/subsystem/elastic/proc/get_round_data()
 	var/list/round_data = list()
+	/// For stats that need special formatting and must be send manually instead of as a part of the loop
+	var/list/special_stats = list(STATS_BLOOD_SPILT)
 
-	round_data["blood_lost"] = round(SSticker.blood_lost / 100, 1)
-	round_data["ankles_broken"] = SSticker.holefall
-	round_data["deaths"] = SSticker.deaths
-	round_data["moat_fallers"] = SSticker.moatfallers
-	round_data["smited"] = SSticker.pplsmited
-	round_data["gibbed"] = SSticker.gibbs
-	round_data["triumph_gained"] = SSticker.tri_gained
-	round_data["triumph_lost"] = SSticker.tri_lost
-	round_data["snorted_drugs"] = SSticker.snort
-	round_data["beards_shaved"] = SSticker.beardshavers
+	for(var/patron_name in GLOB.patron_follower_counts)
+		round_data["[patron_name]_followers"] = GLOB.patron_follower_counts[patron_name]
+
+	round_data[STATS_BLOOD_SPILT] = round(GLOB.vanderlin_round_stats[STATS_BLOOD_SPILT] / 100, 1)
+
+	for(var/stat in GLOB.vanderlin_round_stats)
+		if(stat in special_stats)
+			continue
+		round_data[stat] = GLOB.vanderlin_round_stats[stat]
 
 	return round_data
 

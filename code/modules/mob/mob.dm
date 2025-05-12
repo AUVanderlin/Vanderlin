@@ -139,11 +139,6 @@ GLOBAL_VAR_INIT(mobids, 1)
 				type = alt_type
 				if(type & MSG_VISUAL && eye_blind)
 					return
-	// voice muffling
-	if(stat == UNCONSCIOUS)
-		if(type & MSG_AUDIBLE) //audio
-			to_chat(src, "<I>... You can almost hear something ...</I>")
-		return
 	to_chat(src, msg)
 
 /**
@@ -182,6 +177,8 @@ GLOBAL_VAR_INIT(mobids, 1)
 			msg = blind_message
 		if(!msg)
 			continue
+		if(M != src && !M.eye_blind)
+			M.log_message("saw [key_name(src)] emote: [message]", LOG_EMOTE, log_globally = FALSE)
 		M.show_message(msg, MSG_VISUAL, blind_message, MSG_AUDIBLE)
 		if(runechat_message && M.can_hear())
 			M.create_chat_message(src, raw_message = runechat_message, spans = list("emote"))
@@ -207,6 +204,9 @@ GLOBAL_VAR_INIT(mobids, 1)
 	if(self_message)
 		hearers -= src
 	for(var/mob/M in hearers)
+		if(M != src && M.client)
+			if(M.can_hear())
+				M.log_message("heard [key_name(src)] emote: [message]", LOG_EMOTE, log_globally = FALSE)
 		M.show_message(message, MSG_AUDIBLE, deaf_message, MSG_VISUAL)
 		if(runechat_message && M.can_see_runechat(src) && M.can_hear())
 			M.create_chat_message(src, raw_message = runechat_message, spans = list("emote"))
@@ -230,10 +230,6 @@ GLOBAL_VAR_INIT(mobids, 1)
 ///Get the item on the mob in the storage slot identified by the id passed in
 /mob/proc/get_item_by_slot(slot_id)
 	return null
-
-///Is the mob restrained
-/mob/proc/restrained(ignore_grab = TRUE)
-	return
 
 ///Is the mob incapacitated
 /mob/proc/incapacitated(ignore_restraints = FALSE, ignore_grab = TRUE)
@@ -287,6 +283,8 @@ GLOBAL_VAR_INIT(mobids, 1)
 		return FALSE
 	equip_to_slot(W, slot, redraw_mob, initial) //This proc should not ever fail.
 	update_a_intents()
+	if(isliving(src))
+		src:update_reflection()
 	return TRUE
 
 /**
@@ -326,15 +324,15 @@ GLOBAL_VAR_INIT(mobids, 1)
 
 	if(!slot_priority)
 		slot_priority = list( \
-			SLOT_BACK, SLOT_RING, SLOT_WRISTS,\
+			SLOT_RING, SLOT_WRISTS,\
 			SLOT_PANTS, SLOT_ARMOR,\
 			SLOT_WEAR_MASK, SLOT_HEAD, SLOT_NECK,\
 			SLOT_SHOES, SLOT_GLOVES,\
-			SLOT_HEAD,\
-			SLOT_BELT, SLOT_S_STORE,\
+			SLOT_BELT,\
 			SLOT_MOUTH,SLOT_BACK_R,SLOT_BACK_L,SLOT_BELT_L,SLOT_BELT_R,SLOT_CLOAK,SLOT_SHIRT,\
 			SLOT_L_STORE, SLOT_R_STORE,\
-			SLOT_GENERC_DEXTROUS_STORAGE\
+			SLOT_GENERC_DEXTROUS_STORAGE,\
+			SLOT_HANDS\
 		)
 
 	for(var/slot in slot_priority)
@@ -526,7 +524,7 @@ GLOBAL_VAR_INIT(mobids, 1)
 	set hidden = 1
 	set src = usr
 
-	if(incapacitated())
+	if(incapacitated(ignore_grab = TRUE))
 		return
 
 	var/obj/item/I = get_active_held_item()
@@ -646,7 +644,6 @@ GLOBAL_VAR_INIT(mobids, 1)
 	if(href_list["refresh"])
 		if(machine && in_range(src, usr))
 			show_inv(machine)
-
 
 	if(href_list["item"] && usr.canUseTopic(src, BE_CLOSE, NO_DEXTERITY))
 		var/slot = text2num(href_list["item"])
@@ -770,7 +767,7 @@ GLOBAL_VAR_INIT(mobids, 1)
 		if(!TurfAdjacent(listed_turf))
 			listed_turf = null
 		else
-			var/obj/structure/mineral_door/secret/secret_door =  locate(/obj/structure/mineral_door/secret) in listed_turf
+			var/obj/structure/door/secret/secret_door =  locate(/obj/structure/door/secret) in listed_turf
 			if(!secret_door)
 				statpanel(listed_turf.name, null, listed_turf)
 			var/list/overrides = list()
@@ -813,7 +810,7 @@ GLOBAL_VAR_INIT(mobids, 1)
 		return FALSE
 	if(notransform)
 		return FALSE
-	if(restrained())
+	if(HAS_TRAIT(src, TRAIT_RESTRAINED))
 		return FALSE
 	if( buckled || stat != CONSCIOUS)
 		return FALSE
@@ -821,7 +818,7 @@ GLOBAL_VAR_INIT(mobids, 1)
 
 ///Checks mobility move as well as parent checks
 /mob/living/canface()
-	if(!(mobility_flags & MOBILITY_MOVE))
+	if(HAS_TRAIT(src, TRAIT_IMMOBILIZED))
 		return FALSE
 	if(world.time < last_dir_change + 5)
 		return
@@ -1025,13 +1022,14 @@ GLOBAL_VAR_INIT(mobids, 1)
  *
  * Calling this proc without an oldname will only update the mob and skip updating the pda, id and records ~Carn
  */
-/mob/proc/fully_replace_character_name(oldname,newname)
+/mob/proc/fully_replace_character_name(oldname, newname)
 	log_message("[src] name changed from [oldname] to [newname]", LOG_OWNERSHIP)
 	if(!newname)
-		return 0
+		return FALSE
 
 	log_played_names(ckey,newname)
 
+	GLOB.chosen_names += newname
 	real_name = newname
 	name = newname
 	if(mind)
@@ -1039,21 +1037,25 @@ GLOBAL_VAR_INIT(mobids, 1)
 		if(mind.key)
 			log_played_names(mind.key,newname) //Just in case the mind is unsynced at the moment.
 
+	GLOB.character_ckey_list[real_name] = ckey
+
 	if(oldname)
-		//update the datacore records! This is goig to be a bit costly.
+		GLOB.chosen_names -= oldname
+		//update the datacore records! This is going to be a bit costly.
 		replace_records_name(oldname,newname)
+		if(GLOB.character_ckey_list[oldname])
+			GLOB.character_ckey_list -= oldname
 
 		for(var/datum/mind/T in SSticker.minds)
 			for(var/datum/objective/obj in T.get_all_objectives())
 				// Only update if this player is a target
-				if(obj.target && obj.target.current && obj.target.current.real_name == name)
+				if(obj.target?.current?.real_name == name)
 					obj.update_explanation_text()
-	return 1
+	return TRUE
 
 ///Updates GLOB.data_core records with new name , see mob/living/carbon/human
 /mob/proc/replace_records_name(oldname,newname)
 	return
-
 
 /mob/proc/update_stat()
 	return
@@ -1094,13 +1096,15 @@ GLOBAL_VAR_INIT(mobids, 1)
 
 ///Can this mob read (is literate and not blind)
 /mob/proc/can_read(obj/O, silent = FALSE)
+	if(isobserver(src))
+		return TRUE
 	if(is_blind(src) || eye_blurry)
 		if(!silent)
-			to_chat(src, "<span class='warning'>I'm too blind to read.</span>")
+			to_chat(src, span_warning("I'm too blind to read."))
 		return
 	if(!is_literate())
 		if(!silent)
-			to_chat(src, "<span class='warning'>I can't make sense of these verba.</span>")
+			to_chat(src, span_warning("I can't make sense of these verbs."))
 		return
 	return TRUE
 
@@ -1230,23 +1234,9 @@ GLOBAL_VAR_INIT(mobids, 1)
 ///Set the movement type of the mob and update it's movespeed
 /mob/setMovetype(newval)
 	. = ..()
+	if(isnull(.))
+		return
 	update_movespeed(FALSE)
-
-/// Updates the grab state of the mob and updates movespeed
-/mob/setGrabState(newstate)
-	. = ..()
-	if(!pulling)
-		remove_movespeed_modifier(MOVESPEED_ID_MOB_GRAB_STATE, update=TRUE)
-	else
-		if(!newstate)
-			remove_movespeed_modifier(MOVESPEED_ID_MOB_GRAB_STATE, update=TRUE)
-		else
-			if(grab_state == GRAB_PASSIVE)
-				remove_movespeed_modifier(MOVESPEED_ID_MOB_GRAB_STATE, update=TRUE)
-			else
-				var/usedmove = grab_state*3
-				if(usedmove)
-					add_movespeed_modifier(MOVESPEED_ID_MOB_GRAB_STATE, update=TRUE, priority=100, override=TRUE, multiplicative_slowdown=usedmove, blacklisted_movetypes=FLOATING)
 
 /mob/proc/update_equipment_speed_mods()
 	var/speedies = equipped_speed_mods()
@@ -1262,6 +1252,12 @@ GLOBAL_VAR_INIT(mobids, 1)
 		if(I.item_flags & SLOWS_WHILE_IN_HAND)
 			. += I.slowdown
 
+/mob/proc/set_stat(new_stat)
+	if(new_stat == stat)
+		return
+	. = stat
+	stat = new_stat
+	SEND_SIGNAL(src, COMSIG_MOB_STATCHANGE, new_stat, .)
 
 /mob/say_mod(input, message_mode)
 	var/customsayverb = findtext(input, "*")
@@ -1275,3 +1271,19 @@ GLOBAL_VAR_INIT(mobids, 1)
 		input = capitalize(copytext(input, customsayverb+1))
 	return "[message_spans_start(spans)][input]</span>"
 
+/// Send a menu that allows for the selection of an item. Randomly selects one after time_limit. selection_list should be an associative list of string and typepath
+/mob/proc/select_equippable(list/selection_list, time_limit = 20 SECONDS, message = "", title = "")
+	if(QDELETED(src))
+		return
+	if(!client || !mind)
+		return
+	if(!LAZYLEN(selection_list))
+		return
+	var/choice = browser_input_list(src, message, title, selection_list, timeout = time_limit)
+	if(!choice)
+		choice = pick(selection_list)
+	var/spawn_item = LAZYACCESS(selection_list, choice)
+	if(!spawn_item)
+		return choice
+	equip_to_appropriate_slot(new spawn_item(get_turf(src)))
+	return choice

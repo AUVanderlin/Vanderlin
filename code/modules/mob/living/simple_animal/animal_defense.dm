@@ -40,7 +40,7 @@
 		if(INTENT_DISARM)
 			var/mob/living/carbon/human/user = M
 			var/mob/living/simple_animal/target = src
-			if(!(user.mobility_flags & MOBILITY_STAND) || user.IsKnockdown())
+			if(HAS_TRAIT(src, TRAIT_FLOORED))
 				return FALSE
 			if(user == target)
 				return FALSE
@@ -160,7 +160,7 @@
 	if(HAS_TRAIT(user, TRAIT_PACIFISM))
 		to_chat(user, "<span class='warning'>I don't want to harm [target]!</span>")
 		return FALSE
-	if(user.IsKnockdown())
+	if(HAS_TRAIT(src, TRAIT_FLOORED))
 		return FALSE
 	if(user == target)
 		return FALSE
@@ -240,7 +240,7 @@
 
 	take_overall_damage(brute_loss,burn_loss)
 
-/mob/living/simple_animal/do_attack_animation(atom/A, visual_effect_icon, used_item, no_effect)
+/mob/living/simple_animal/do_attack_animation(atom/A, visual_effect_icon, used_item, no_effect, item_animation_override = null, datum/intent/used_intent)
 	if(!no_effect && !visual_effect_icon && melee_damage_upper)
 		if(melee_damage_upper < 10)
 			visual_effect_icon = ATTACK_EFFECT_PUNCH

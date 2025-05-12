@@ -68,7 +68,7 @@
 		return 1
 	if(isliving(mover))
 		var/mob/living/M = mover
-		if(!(M.mobility_flags & MOBILITY_STAND))
+		if(M.body_position == LYING_DOWN)
 			if(passcrawl)
 				return TRUE
 	if(icon_state == "woodrailing" && (dir in CORNERDIRS))
@@ -119,7 +119,7 @@
 		return 1
 	if(isliving(O))
 		var/mob/living/M = O
-		if(!(M.mobility_flags & MOBILITY_STAND))
+		if(M.body_position == LYING_DOWN)
 			if(passcrawl)
 				return TRUE
 	if(icon_state == "woodrailing" && (dir in CORNERDIRS))
@@ -251,7 +251,7 @@
 		return 1
 	if(istype(mover) && (mover.pass_flags & PASSGRILLE))
 		return 1
-	if(mover.throwing && !ismob(mover))
+	if(mover.throwing && isitem(mover))
 		return prob(66)
 	return ..()
 
@@ -465,6 +465,10 @@
 	if(get_dir(O.loc, target) == dir)
 		return 0
 	return 1
+
+/obj/structure/fluff/clock/zizoclock
+	desc = "It tells the time... in morbid fashion!"
+	icon_state = "zizoclock"
 
 // Version thats dense. Should honestly be standard?
 /obj/structure/fluff/clock/dense
@@ -777,6 +781,22 @@
 	icon_state = "3"
 	pixel_x = -32
 
+
+/obj/structure/fluff/statue/zizo
+	name = "statue of Zizo"
+	desc = "The Dark Lady. Even in stone, you feel unsettled looking at it."
+	icon = 'icons/roguetown/misc/64x128.dmi'
+	icon_state = "zizo"
+	max_integrity = 100
+	deconstructible = FALSE
+	density = TRUE
+	blade_dulling = DULLING_BASH
+	bound_width = 64
+
+/obj/structure/fluff/statue/zizo/Initialize()
+	. = ..()
+	set_light(1, 1, 1, l_color = COLOR_PURPLE)
+
 /obj/structure/fluff/statue/musician/OnCrafted(dirin, mob/user)
 	. = ..()
 	if(prob(20))
@@ -789,6 +809,14 @@
 	icon_state = "telescope"
 	density = TRUE
 	anchored = FALSE
+
+/obj/structure/fluff/stonecoffin
+	name = "stone coffin"
+	desc = "A damaged stone coffin..."
+	icon = 'icons/roguetown/misc/structure.dmi'
+	icon_state = "stonecoffin"
+	density = TRUE
+	anchored = TRUE
 
 /obj/structure/fluff/telescope/attack_hand(mob/user)
 	if(!ishuman(user))
@@ -872,7 +900,7 @@
 							if(H.tiredness >= 50)
 								H.apply_status_effect(/datum/status_effect/debuff/trainsleep)
 						probby = 0
-					if(!(L.mobility_flags & MOBILITY_STAND))
+					if(L.body_position == LYING_DOWN)
 						probby = 0
 					if(L.STAINT < 3)
 						probby = 0
@@ -945,14 +973,20 @@
 	if(user.mind)
 		var/datum/antagonist/bandit/B = user.mind.has_antag_datum(/datum/antagonist/bandit)
 		if(B)
+			if(istype(W, /obj/item/reagent_containers/lux))
+				user.adjust_triumphs(1, reason = "Offered Lux")
+				qdel(W)
+				return
 			if(istype(W, /obj/item/coin) || istype(W, /obj/item/gem) || istype(W, /obj/item/reagent_containers/glass/cup/silver) || istype(W, /obj/item/reagent_containers/glass/cup/golden) || istype(W, /obj/item/reagent_containers/glass/carafe) || istype(W, /obj/item/clothing/ring) || istype(W, /obj/item/clothing/head/crown/circlet) || istype(W, /obj/item/statue))
 				if(B.tri_amt >= 10)
 					to_chat(user, "<span class='warning'>The mouth doesn't open.</span>")
 					return
 				if(!istype(W, /obj/item/coin))
 					B.contrib += (W.get_real_price() / 2) //sell jewerly and other fineries, though at a lesser price compared to fencing them first
+					GLOB.vanderlin_round_stats[STATS_SHRINE_VALUE] += (W.get_real_price() / 2)
 				else
 					B.contrib += W.get_real_price()
+					GLOB.vanderlin_round_stats[STATS_SHRINE_VALUE] += W.get_real_price()
 				if(B.contrib >= 100)
 					B.tri_amt++
 					user.mind.adjust_triumphs(1)
@@ -1011,6 +1045,7 @@
 	buckle_requires_restraints = 1
 	buckle_prevents_pull = 1
 	var/shrine = FALSE	// used for some checks
+	var/divine = TRUE
 
 /obj/structure/fluff/psycross/Initialize()
 	. = ..()
@@ -1049,6 +1084,13 @@
 	break_sound = null
 	attacked_sound = list("sound/combat/hits/onmetal/metalimpact (1).ogg", "sound/combat/hits/onmetal/metalimpact (2).ogg")
 	chance2hear = 66
+
+/obj/structure/fluff/psycross/zizocross
+	name = "inverted cross"
+	desc = "An unholy symbol. Blasphemy for most, reverence for few."
+	icon_state = "zizoinvertedcross"
+	attacked_sound = list("sound/combat/hits/onmetal/metalimpact (1).ogg", "sound/combat/hits/onmetal/metalimpact (2).ogg")
+	divine = FALSE
 
 /obj/structure/fluff/psycross/crafted
 	name = "wooden pantheon cross"
@@ -1171,6 +1213,9 @@
 						thebride.adjust_triumphs(1)
 						//Bite the apple first if you want to be the groom.
 						priority_announce("[thegroom.real_name] has married [bridefirst]!", title = "Holy Union!", sound = 'sound/misc/bell.ogg')
+						thegroom.remove_stress(/datum/stressevent/eora_matchmaking)
+						thebride.remove_stress(/datum/stressevent/eora_matchmaking)
+						GLOB.vanderlin_round_stats[STATS_MARRIAGES]++
 						marriage = TRUE
 						qdel(A)
 
@@ -1222,6 +1267,74 @@
 	plane = GAME_PLANE_UPPER
 	blade_dulling = DULLING_BASH
 	max_integrity = 300
+
+//..................................................................................................................................
+/*------------------------------------------------------------------------------------------------------------------------------------\
+|  Gaffer shit, yes I'm making my own place here just for that and maaan its cozy, in this gated community for myself and no one else |
+\------------------------------------------------------------------------------------------------------------------------------------*/
+
+/obj/structure/fluff/statue/gaffer
+	name = "Subdued Statue"
+	icon_state = "subduedstatue"
+	anchored = TRUE
+	density = FALSE
+	opacity = 0
+	blade_dulling = DULLING_BASHCHOP
+	max_integrity = 999999
+	deconstructible = FALSE
+	var/ring_destroyed = FALSE
+
+/obj/structure/fluff/statue/gaffer/Initialize()
+	. = ..()
+	RegisterSignal(SSdcs, COMSIG_GAFFER_RING_DESTROYED, PROC_REF(ringdied))
+
+/obj/structure/fluff/statue/gaffer/proc/ringdied(datum/source)
+	SIGNAL_HANDLER
+	if(ring_destroyed == FALSE)
+		ring_destroyed = TRUE
+		update_icon()
+
+/obj/structure/fluff/statue/gaffer/update_icon()
+	if(ring_destroyed == TRUE)
+		icon_state = "subduedstatue_hasring"
+	if(ring_destroyed == FALSE)
+		icon_state = "subduedstatue"
+
+/obj/structure/fluff/statue/gaffer/examine(mob/user)
+	. = ..()
+	if(HAS_TRAIT(user, TRAIT_BURDEN))
+		. += "slumped and tortured, broken body pertrified and in pain, its chest rose and fell in synch with mine banishing any doubt left, it is me! my own visage glares back at me!"
+		user.add_stress(/datum/stressevent/ring_madness)
+		return
+	if(ring_destroyed == TRUE)
+		. += "a statue depicting a decapitated man writhing in chains on the ground, it holds its hands out, pleading, in its palms is a glowing ring..."
+		return
+	. += "a statue depicting a decapitated man writhing in chains on the ground, it holds its hands out, pleading"
+
+/obj/structure/fluff/statue/gaffer/attack_hand(mob/living/user)
+	. = ..()
+	if(!user.mind)
+		return
+	if(!ring_destroyed)
+		return
+	if(is_gaffer_assistant_job(user.mind?.assigned_role))
+		to_chat(user, span_danger("It is not mine to have..."))
+		return
+	to_chat(user, span_danger("As you extend your hand over to the glowing ring, you feel a shiver go up your spine, as if unseen eyes turned to glare at you..."))
+	var/gaffed = alert(user, "Will you bear the burden? (Be the next Gaffer)", "YOUR DESTINY", "Yes", "No")
+
+	if(gaffed == "No" && ring_destroyed == TRUE)
+		to_chat(user, span_danger("yes...best to leave it alone."))
+		return
+
+	if((gaffed == "Yes") && Adjacent(user) && ring_destroyed == TRUE)
+		var/obj/item/ring = new /obj/item/clothing/ring/gold/burden(loc)
+		ADD_TRAIT(user, TRAIT_BURDEN, type)
+		user.put_in_hands(ring)
+		user.equip_to_slot_if_possible(ring, SLOT_RING, FALSE, FALSE, TRUE, TRUE)
+		to_chat(user, span_danger("Once your hand is close enough to the ring, it jumps upwards and burrows itself onto your palm"))
+		ring_destroyed = FALSE
+		update_icon()
 
 /obj/structure/fluff/statue/knight/interior/gen/update_icon_state()
 	. = ..()

@@ -1,5 +1,5 @@
 /mob/living/gib(no_brain, no_organs, no_bodyparts)
-	var/prev_lying = lying
+	var/prev_lying = lying_angle
 	if(stat != DEAD)
 		death(TRUE)
 	if(client)
@@ -60,11 +60,13 @@
 
 /mob/living/death(gibbed)
 	var/was_dead_before = stat == DEAD
-	stat = DEAD
-	SEND_SIGNAL(src, COMSIG_MOB_STATCHANGE, DEAD)
+	set_stat(DEAD)
+	// SEND_SIGNAL(src, COMSIG_MOB_STATCHANGE, DEAD)
 	unset_machine()
 	timeofdeath = world.time
 	tod = station_time_timestamp()
+
+	new /obj/structure/soul(get_turf(src))
 //	var/turf/T = get_turf(src)
 	for(var/obj/item/I in contents)
 		I.on_mob_death(src, gibbed)
@@ -87,13 +89,13 @@
 
 	set_drugginess(0)
 	set_disgust(0)
-	SetSleeping(0, 0)
+	SetSleeping(0)
 	reset_perspective(null)
 	reload_fullscreen()
 	update_action_buttons_icon()
 	update_damage_hud()
 	update_health_hud()
-	update_mobility()
+	// update_mobility()
 	stop_pulling()
 
 	to_chat(src, span_green("A bleak afterlife awaits... but the Gods may let you walk again in another shape! Spirit, you must descend in a Journey to the Underworld and wait there for judgment..."))
@@ -157,9 +159,9 @@
 		if ("coast", "coastforest", "river")
 			locale = "somewhere betwixt Abyssor's realm and Dendor's bounty"
 		if ("indoors", "shop", "physician", "outdoors", "roofs", "manor", "wizard's tower", "garrison","village garrison", "dungeon cell", "baths", "tavern", "basement")
-			locale = "the city of Vanderlin and all its bustling souls"
+			locale = "the city of [SSmapping.config.map_name] and all its bustling souls"
 		if ("sewers")
-			locale = "somwhere under the city of vanderlin and all its bustling souls"
+			locale = "somwhere under the city of [SSmapping.config.map_name] and all its bustling souls"
 		if ("church")
 			locale = "a hallowed place, sworn to the Ten" // special bit for the church since it's sacred ground
 

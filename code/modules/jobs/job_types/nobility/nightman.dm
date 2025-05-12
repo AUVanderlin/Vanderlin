@@ -15,20 +15,13 @@
 	bypass_lastclass = TRUE
 
 	allowed_sexes = list(MALE, FEMALE)
-	allowed_races = list(
-		"Humen",
-		"Dwarf",
-		"Elf",
-		"Half-Elf",
-		"Tiefling",
-		"Dark Elf",
-		"Aasimar",
-		"Half-Orc"
-	)
-
+	allowed_races = RACES_PLAYER_NONEXOTIC
 	outfit = /datum/outfit/job/apothecary
 	give_bank_account = 100
 	cmode_music = 'sound/music/cmode/towner/CombatBeggar.ogg'
+
+/datum/outfit/job/apothecary
+	job_bitflag = BITFLAG_ROYALTY | BITFLAG_CONSTRUCTOR
 
 /datum/outfit/job/apothecary/pre_equip(mob/living/carbon/human/H)
 	..()
@@ -38,9 +31,8 @@
 	pants = /obj/item/clothing/pants/trou/apothecary
 	gloves = /obj/item/clothing/gloves/leather/apothecary
 	belt = /obj/item/storage/belt/leather
-	beltr = /obj/item/storage/keyring/niteman
+	beltr = /obj/item/storage/keyring/apothecary
 	beltl = /obj/item/storage/belt/pouch/coins/mid
-	ADD_TRAIT(H, TRAIT_NOBLE, TRAIT_GENERIC)
 	ADD_TRAIT(H, TRAIT_LEGENDARY_ALCHEMIST, TRAIT_GENERIC)
 	ADD_TRAIT(H, TRAIT_FORAGER, TRAIT_GENERIC)
 	if(H.mind)

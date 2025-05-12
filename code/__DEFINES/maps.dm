@@ -20,6 +20,9 @@ Multi-Z stations are supported and multi-Z mining and away missions would
 require only minor tweaks.
 */
 
+/// A map key that corresponds to being one exclusively for Space.
+#define SPACE_KEY "space"
+
 #define SPACERUIN_MAP_EDGE_PAD 15
 
 // traits
@@ -45,6 +48,7 @@ require only minor tweaks.
 #define ZTRAIT_DOWN "Down"
 #define ZTRAIT_IGNORE_WEATHER_TRAIT "NoDayorWeather"
 
+#define ZTRAIT_CELLAR_LIKE "Cellar"
 #define ZTRAIT_LEYLINES "Leylines"
 // enum - how space transitions should affect this level
 #define ZTRAIT_LINKAGE "Linkage"

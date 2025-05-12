@@ -1,3 +1,7 @@
+/// Standard follower modifier for storytellers, ie. how many points they get for each follower
+#define STANDARD_FOLLOWER_MODIFIER 20
+/// Special follower modifier for Astrata, who is a default patron
+#define ASTRATA_FOLLOWER_MODIFIER STANDARD_FOLLOWER_MODIFIER - 3
 
 ///The storyteller datum. He operates with the SSgamemode data to run events
 /datum/storyteller
@@ -62,6 +66,16 @@
 	var/always_votable = FALSE
 	///weight this has of being picked for random storyteller/showing up in the vote if not always_votable
 	var/weight = 0
+	/// Influence factors, which are used to calculate storyteller influence. List of lists, which looks like RELEVANT_STATS = list(point gain, max capacity)
+	var/influence_factors = list()
+	/// How many influence points storyteller gets for each follower
+	var/follower_modifier = STANDARD_FOLLOWER_MODIFIER
+	/// Thematic color of the storyteller, used in statistics menu
+	var/color_theme
+	/// How many times has this storyteller been chosen to lead the round
+	var/times_chosen = 0
+	/// Bonus points to the storyteller total influence
+	var/bonus_points = 0
 
 /datum/storyteller/process()
 	if(!round_started || disable_distribution) // we are differing roundstarted ones until base roundstart so we can get cooler stuff
@@ -217,9 +231,3 @@
 			weight_total -= event.reoccurence_penalty_multiplier * weight_total * (1 - (event_repetition_multiplier ** occurences))
 		/// Write it
 		event.calculated_weight = weight_total
-
-/datum/storyteller/astrata
-	name = "Astrata"
-	desc = "Astrata will provide a balanced and varied experience. Consider this the default experience."
-	weight = 6
-	always_votable = TRUE

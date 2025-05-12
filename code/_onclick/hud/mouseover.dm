@@ -41,7 +41,7 @@
 		p.client.screen |= p.client.mouseovertext
 	return TRUE
 
-/obj/item/soul/handle_mouseover(location, control, params)
+/obj/structure/soul/handle_mouseover(location, control, params)
 	return TRUE
 
 /obj/structure/handle_mouseover(location, control, params)
@@ -124,9 +124,6 @@
 		p.client.mouseovertext.movethis(PM)
 		p.client.screen |= p.client.mouseovertext
 	return TRUE
-
-/turf/open
-	nomouseover = TRUE
 
 /turf/open/handle_mouseover(location, control, params)
 	var/mob/p = usr

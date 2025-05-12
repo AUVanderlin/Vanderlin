@@ -5,7 +5,6 @@
 	gender = PLURAL
 	icon_state = "heavyleggies" // Finally a sprite
 	item_state = "heavyleggies"
-	// adjustable = CAN_CADJUST
 	sewrepair = FALSE
 	blocksound = PLATEHIT
 	equip_delay_self = 30
@@ -25,8 +24,9 @@
 	armor_class = AC_HEAVY
 	armor = ARMOR_PLATE
 	max_integrity = INTEGRITY_STRONGEST
-	prevent_crits = ALL_EXCEPT_STAB
+	prevent_crits = ALL_EXCEPT_BLUNT
 	do_sound_plate = TRUE
+	item_weight = 9 * STEEL_MULTIPLIER
 
 /obj/item/clothing/pants/platelegs/captain
 	name = "captain's chausses"
@@ -48,3 +48,12 @@
 	sellprice = VALUE_IRON_ARMOR/2
 	armor = ARMOR_PLATE_BAD
 	max_integrity = INTEGRITY_STANDARD
+
+/obj/item/clothing/pants/platelegs/vampire
+	name = "ancient plate greaves"
+	desc = "Steel chausses from antiquity, though outdated they offer superior protection."
+	icon_state = "vpants"
+	item_state = "vpants"
+	armor = ARMOR_PLATE_GOOD
+	prevent_crits = ALL_CRITICAL_HITS_VAMP // Vampire armors don't protect against lashing, Castlevania reference
+	item_weight = 5.5 * STEEL_MULTIPLIER

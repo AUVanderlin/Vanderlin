@@ -111,8 +111,8 @@
 /obj/item/bodypart/head/goblin/skeletonize()
 	. = ..()
 	icon_state = "goblin_skel_head"
-	if(sellprice)
-		sellprice = 2
+	if(headprice)
+		headprice = 2
 
 /obj/item/bodypart/head/goblin/drop_organs(mob/user, violent_removal)
 	. = ..()
@@ -121,7 +121,7 @@
 /datum/species/goblin
 	name = "goblin"
 	id = "goblin"
-	species_traits = list(NO_UNDERWEAR,NOEYESPRITES)
+	species_traits = list(NO_UNDERWEAR)
 	inherent_traits = list(TRAIT_RESISTCOLD,TRAIT_RESISTHIGHPRESSURE,TRAIT_RESISTLOWPRESSURE,TRAIT_RADIMMUNE, TRAIT_EASYDISMEMBER, TRAIT_CRITICAL_WEAKNESS, TRAIT_NASTY_EATER, TRAIT_LEECHIMMUNE, TRAIT_INHUMENCAMP)
 	no_equip = list(SLOT_SHIRT, SLOT_WEAR_MASK, SLOT_GLOVES, SLOT_SHOES, SLOT_PANTS, SLOT_S_STORE)
 	nojumpsuit = 1
@@ -214,11 +214,11 @@
 	if(src.dna && src.dna.species)
 		src.dna.species.soundpack_m = new /datum/voicepack/goblin()
 		src.dna.species.soundpack_f = new /datum/voicepack/goblin()
-		var/obj/item/headdy = get_bodypart("head")
+		var/obj/item/bodypart/head/headdy = get_bodypart("head")
 		if(headdy)
 			headdy.icon = 'icons/roguetown/mob/monster/goblins.dmi'
 			headdy.icon_state = "[src.dna.species.id]_head"
-			headdy.sellprice = rand(7,20)
+			headdy.headprice = rand(7,20)
 	var/obj/item/organ/eyes/eyes = src.getorganslot(ORGAN_SLOT_EYES)
 	if(eyes)
 		eyes.Remove(src,1)
@@ -248,10 +248,14 @@
 
 /datum/component/rot/corpse/goblin/process()
 	var/amt2add = 10 //1 second
+	var/time_elapsed = last_process ? (world.time - last_process)/10 : 1
 	if(last_process)
 		amt2add = ((world.time - last_process)/10) * amt2add
 	last_process = world.time
 	amount += amt2add
+	if(has_world_trait(/datum/world_trait/pestra_mercy))
+		amount -= 5 * time_elapsed
+
 	var/mob/living/carbon/C = parent
 	if(!C)
 		qdel(src)
@@ -270,10 +274,10 @@
 			if(!B.rotted)
 				B.rotted = TRUE
 				should_update = TRUE
-			if(B.rotted && amount < 16 MINUTES)
+			if(B.rotted && amount < 16 MINUTES && !(FACTION_MATTHIOS in C.faction))
 				var/turf/open/T = C.loc
 				if(istype(T))
-					T.pollute_turf(/datum/pollutant/rot, 10)
+					T.pollute_turf(/datum/pollutant/rot, 4)
 	if(should_update)
 		if(amount > 20 MINUTES)
 			C.update_body()
@@ -291,12 +295,12 @@
 
 /datum/outfit/job/npc/goblin/pre_equip(mob/living/carbon/human/H)
 	..()
-	H.TOTALSTR = rand(6, 10)
-	H.TOTALPER = rand(5, 10)
-	H.TOTALINT = rand(1, 4)
-	H.TOTALCON = rand(4, 8)
-	H.TOTALEND = rand(8, 12)
-	H.TOTALSPD = rand(8, 14)
+	H.base_strength = rand(6, 10)
+	H.base_perception = rand(5, 10)
+	H.base_intelligence = rand(1, 4)
+	H.base_constitution = rand(4, 8)
+	H.base_endurance = rand(8, 12)
+	H.base_speed = rand(8, 14)
 	if(is_species(H, /datum/species/goblin/hell))
 		H.STASTR += 6
 		H.STACON += 6

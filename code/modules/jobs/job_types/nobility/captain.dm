@@ -14,18 +14,13 @@
 	bypass_lastclass = TRUE
 
 	allowed_sexes = list(MALE, FEMALE)
-	allowed_races = list(
-		"Humen",
-		"Elf",
-		"Half-Elf",
-		"Aasimar",
-		"Dwarf"
-	)
+	allowed_races = RACES_PLAYER_NONDISCRIMINATED
 
 	outfit = /datum/outfit/job/captain
 	spells = list(/obj/effect/proc_holder/spell/self/convertrole/guard)
 	give_bank_account = 120
 	cmode_music = 'sound/music/cmode/antag/CombatSausageMaker.ogg'
+	noble_income = 11
 
 /datum/job/captain/after_spawn(mob/living/spawned, client/player_client)
 	..()
@@ -50,40 +45,48 @@
 	neck = /obj/item/clothing/neck/gorget
 	shirt = /obj/item/clothing/shirt/undershirt/guard
 	shoes = /obj/item/clothing/shoes/boots
-	backr = /obj/item/storage/backpack/satchel
-	backl = /obj/item/weapon/shield/tower/metal
+	backl = /obj/item/storage/backpack/satchel
+	backr = /obj/item/weapon/shield/tower/metal
 	belt = /obj/item/storage/belt/leather/plaquesilver
-	beltl = /obj/item/weapon/sword/sabre
+	beltl = /obj/item/weapon/sword/sabre/dec
 	beltr = /obj/item/weapon/mace/cudgel
 	cloak = /obj/item/clothing/cloak/captain
 	backpack_contents = list(/obj/item/storage/keyring/captain = 1, /obj/item/signal_horn = 1)
 	if(H.mind)
-		H.mind?.adjust_skillrank(/datum/skill/combat/axesmaces, 4, TRUE)
-		H.mind?.adjust_skillrank(/datum/skill/combat/bows, 3, TRUE)
-		H.mind?.adjust_skillrank(/datum/skill/combat/crossbows, 3, TRUE)
-		H.mind?.adjust_skillrank(/datum/skill/combat/wrestling, 5, TRUE)
-		H.mind?.adjust_skillrank(/datum/skill/combat/unarmed, 4, TRUE)
-		H.mind?.adjust_skillrank(/datum/skill/combat/swords, 5, TRUE)
-		H.mind?.adjust_skillrank(/datum/skill/combat/polearms, 2, TRUE)
-		H.mind?.adjust_skillrank(/datum/skill/combat/whipsflails, 2, TRUE)
-		H.mind?.adjust_skillrank(/datum/skill/combat/knives, 3, TRUE)
-		H.mind?.adjust_skillrank(/datum/skill/combat/shields, 4, TRUE)
-		H.mind?.adjust_skillrank(/datum/skill/misc/swimming, 3, TRUE)
-		H.mind?.adjust_skillrank(/datum/skill/misc/climbing, 3, TRUE)
-		H.mind?.adjust_skillrank(/datum/skill/misc/athletics, 4, TRUE)
-		H.mind?.adjust_skillrank(/datum/skill/misc/reading, 2, TRUE)
-		H.mind?.adjust_skillrank(/datum/skill/misc/riding, 3, TRUE)
-		H.mind?.adjust_skillrank(/datum/skill/labor/mathematics, 3, TRUE)
-		H.change_stat(STATKEY_STR, 3)
+		H.mind.adjust_skillrank(/datum/skill/combat/swords, 5, TRUE)
+		H.mind.adjust_skillrank(/datum/skill/combat/wrestling, 4, TRUE)
+		H.mind.adjust_skillrank(/datum/skill/combat/axesmaces, 4, TRUE)
+		H.mind.adjust_skillrank(/datum/skill/combat/shields, 3, TRUE)
+		H.mind.adjust_skillrank(/datum/skill/combat/unarmed, 3, TRUE)
+		H.mind.adjust_skillrank(/datum/skill/combat/knives, 3, TRUE)
+		H.mind.adjust_skillrank(/datum/skill/combat/polearms, 2, TRUE)
+		H.mind.adjust_skillrank(/datum/skill/combat/whipsflails, 2, TRUE)
+
+		H.mind.adjust_skillrank(/datum/skill/combat/crossbows, 3, TRUE)
+		H.mind.adjust_skillrank(/datum/skill/combat/bows, 2, TRUE)
+
+		H.mind.adjust_skillrank(/datum/skill/misc/athletics, 4, TRUE)
+
+		H.mind.adjust_skillrank(/datum/skill/misc/swimming, 3, TRUE)
+		H.mind.adjust_skillrank(/datum/skill/misc/climbing, 3, TRUE)
+		H.mind.adjust_skillrank(/datum/skill/misc/riding, 3, TRUE)
+		H.mind.adjust_skillrank(/datum/skill/misc/reading, 2, TRUE)
+
+		H.mind.adjust_skillrank(/datum/skill/labor/mathematics, 3, TRUE)
+
+		H.change_stat(STATKEY_STR, 2)
 		H.change_stat(STATKEY_PER, 2)
 		H.change_stat(STATKEY_INT, 1)
 		H.change_stat(STATKEY_CON, 1)
 		H.change_stat(STATKEY_END, 2)
-		H.change_stat(STATKEY_SPD, 1)
+
 	ADD_TRAIT(H, TRAIT_NOBLE, TRAIT_GENERIC)
 	ADD_TRAIT(H, TRAIT_HEAVYARMOR, TRAIT_GENERIC)
 	ADD_TRAIT(H, TRAIT_KNOWBANDITS, TRAIT_GENERIC)
 	H.verbs |= /mob/proc/haltyell
+
+	if(H.dna?.species?.id == "human")
+		H.dna.species.soundpack_m = new /datum/voicepack/male/knight()
 
 /obj/effect/proc_holder/spell/self/convertrole
 	name = "Recruit Beggar"
@@ -183,3 +186,4 @@
 	recruitment_message = "Join the Forest Garrison, %RECRUIT!"
 	accept_message = "I swear to protect the forest!"
 	refuse_message = "I refuse."
+

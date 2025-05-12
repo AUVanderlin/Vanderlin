@@ -48,14 +48,35 @@
 				icon_state = "[base_state]0"
 			return
 
+/obj/machinery/light/fueled/firebowl/firebowlb
+	icon_state = "stonefireb1"
+	base_state = "stonefireb"
+	bulb_colour = "#6cfdff"
+
 /obj/machinery/light/fueled/firebowl/stump
 	icon_state = "stumpfire1"
 	base_state = "stumpfire"
+
+/obj/machinery/light/fueled/firebowl/stumpb
+	icon_state = "stumpfireb1"
+	base_state = "stumpfireb"
+	bulb_colour = "#6cfdff"
+
+/obj/machinery/light/fueled/firebowl/blackfire
+	desc = "A fire, black as death."
+	icon_state = "blackfire1"
+	base_state = "blackfire"
+	bulb_colour = "#8468ff"
 
 /obj/machinery/light/fueled/firebowl/church
 	icon_state = "churchfire1"
 	base_state = "churchfire"
 
+/obj/machinery/light/fueled/firebowl/church/unholyfire
+	desc = "This fire burns yet it is cold..."
+	icon_state = "unholyfire1"
+	base_state = "unholyfire"
+	bulb_colour = "#8468ff"
 
 /obj/machinery/light/fueled/firebowl/standing
 	name = "standing fire"
@@ -105,6 +126,7 @@
 	fueluse = 0
 	crossfire = FALSE
 	cookonme = TRUE
+	temperature_change = 35
 
 /obj/machinery/light/fueled/wallfire/candle
 	name = "candles"
@@ -115,6 +137,7 @@
 	cookonme = FALSE
 	pixel_y = 32
 	soundloop = null
+	temperature_change = 0
 
 /obj/machinery/light/fueled/wallfire/candle/OnCrafted(dirin, mob/user)
 	pixel_x = 0
@@ -162,6 +185,25 @@
 	pixel_y = 0
 	pixel_x = -32
 
+/obj/machinery/light/fueled/wallfire/candle/skull
+	bulb_colour = "#8d73ff"
+	icon_state = "skullwallcandle1"
+	base_state = "skullwallcandle"
+
+/obj/machinery/light/fueled/wallfire/candle/skull/extinguish()
+	return FALSE
+
+/obj/machinery/light/fueled/wallfire/candle/skull/burn_out()
+	return FALSE
+
+/obj/machinery/light/fueled/wallfire/candle/skull/r
+	pixel_y = 0
+	pixel_x = 32
+
+/obj/machinery/light/fueled/wallfire/candle/skull/l
+	pixel_y = 0
+	pixel_x = -32
+
 /obj/machinery/light/fueled/wallfire/candle/weak
 	light_power = 0.9
 	light_outer_range =  6
@@ -187,12 +229,14 @@
 	base_state = "torchwall"
 	brightness = 5
 	density = FALSE
-	var/obj/item/flashlight/flare/torch/torchy
+	var/obj/item/flashlight/flare/torch/torchy = /obj/item/flashlight/flare/torch
 	fueluse = FALSE //we use the torch's fuel
 	soundloop = null
 	crossfire = FALSE
 	plane = GAME_PLANE_UPPER
 	cookonme = FALSE
+	temperature_change = 0
+	fog_parter_effect = null
 
 /obj/machinery/light/fueled/torchholder/c
 	pixel_y = 32
@@ -202,6 +246,12 @@
 
 /obj/machinery/light/fueled/torchholder/l
 	dir = EAST
+
+/obj/machinery/light/fueled/torchholder/seton(s)
+	. = ..()
+	if(!torchy || torchy.fuel <= 0)
+		on = FALSE
+		set_light_on(on)
 
 /obj/machinery/light/fueled/torchholder/fire_act(added, maxstacks)
 	if(torchy)
@@ -217,8 +267,9 @@
 				return TRUE
 
 /obj/machinery/light/fueled/torchholder/Initialize()
-	torchy = new /obj/item/flashlight/flare/torch(src)
-	torchy.spark_act()
+	if(torchy)
+		torchy = new torchy(src)
+		torchy.spark_act()
 	. = ..()
 
 /obj/machinery/light/fueled/torchholder/OnCrafted(dirin, user)
@@ -247,7 +298,7 @@
 			torchy.forceMove(loc)
 		torchy = null
 		on = FALSE
-		set_light(0)
+		update()
 		update_icon()
 		playsound(src.loc, 'sound/foley/torchfixturetake.ogg', 70)
 
@@ -303,6 +354,19 @@
 		return
 	. = ..()
 
+
+/obj/machinery/light/fueled/torchholder/metal_torch
+	torchy = /obj/item/flashlight/flare/torch/metal
+
+/obj/machinery/light/fueled/torchholder/metal_torch/west
+	dir = WEST
+
+/obj/machinery/light/fueled/torchholder/metal_torch/east
+	dir = EAST
+
+/obj/machinery/light/fueled/torchholder/metal_torch/north
+	dir = NORTH
+
 /obj/machinery/light/fueled/chand
 	name = "chandelier"
 	icon_state = "chand1"
@@ -317,6 +381,7 @@
 	soundloop = null
 	crossfire = FALSE
 	obj_flags = CAN_BE_HIT | BLOCK_Z_OUT_DOWN | BLOCK_Z_IN_UP
+	temperature_change = 5
 
 /obj/machinery/light/fueled/chand/attack_hand(mob/user)
 	if(isliving(user) && on)
@@ -339,6 +404,7 @@
 	on = FALSE
 	cookonme = TRUE
 	soundloop = /datum/looping_sound/fireloop
+	temperature_change = 45
 	var/heat_time = 100
 	var/obj/item/attachment = null
 	var/obj/item/reagent_containers/food/snacks/food = null
@@ -353,41 +419,50 @@
 	if(!attachment)
 		if(istype(W, /obj/item/cooking/pan) || istype(W, /obj/item/reagent_containers/glass/bucket/pot))
 			playsound(get_turf(user), 'sound/foley/dropsound/shovel_drop.ogg', 40, TRUE, -1)
-			attachment = W
-			W.forceMove(src)
-			update_icon()
+
+			if(user.transferItemToLoc(W, src, silent = TRUE))
+				attachment = W
+				update_icon()
 			return
+
 	else
 		if(istype(W, /obj/item/reagent_containers/glass/bowl))
 			to_chat(user, "<span class='notice'>Remove the pot from the hearth first.</span>")
 			return
+
 		if(istype(attachment, /obj/item/cooking/pan))
 			if(W.type in subtypesof(/obj/item/reagent_containers/food/snacks))
 				var/obj/item/reagent_containers/food/snacks/S = W
-				if(istype(W, /obj/item/reagent_containers/food/snacks/egg)) // added
+
+				if(istype(W, /obj/item/reagent_containers/food/snacks/egg))
 					if(W.icon_state != "rawegg")
 						playsound(get_turf(user), 'sound/foley/eggbreak.ogg', 100, TRUE, -1)
 						if(!do_after(user, 25))
 							return
-						W.icon_state = "rawegg" // added
+						W.icon_state = "rawegg"
 					rawegg = TRUE
+
 				if(!food)
-					S.forceMove(src)
-					food = S
-					update_icon()
-					if(on)
-						playsound(src.loc, 'sound/misc/frying.ogg', 80, FALSE, extrarange = 5)
+					if(user.transferItemToLoc(S, src, silent = TRUE))
+						food = S
+						update_icon()
+						if(on)
+							playsound(src.loc, 'sound/misc/frying.ogg', 80, FALSE, extrarange = 5)
 					return
-// New concept = boil at least 33 water, add item, it turns into food reagent volume 33 of the appropriate type
+
 		else if(istype(attachment, /obj/item/reagent_containers/glass/bucket/pot))
 			var/obj/item/reagent_containers/glass/bucket/pot/pot = attachment
+
 			if(!pot.reagents.has_reagent(/datum/reagent/water, 33))
 				to_chat(user, "<span class='notice'>Not enough water.</span>")
 				return TRUE
+
 			if(pot.reagents.chem_temp < 374)
 				to_chat(user, "<span class='warning'>[pot] isn't boiling!</span>")
 				return
+
 			pot.attempt_pot_recipes(W, user)
+
 	. = ..()
 
 //////////////////////////////////
@@ -506,6 +581,8 @@
 	cookonme = TRUE
 	max_integrity = 30
 	soundloop = /datum/looping_sound/fireloop
+
+	temperature_change = 35
 
 /obj/machinery/light/fueled/campfire/process()
 	..()

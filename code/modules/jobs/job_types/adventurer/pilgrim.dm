@@ -1,9 +1,9 @@
 /datum/job/pilgrim
 	title = "Pilgrim"
-	tutorial = "Pilgrims begin far outside of the town and must reach it in order to ply their various trades. \
-	Sometimes, they build their own settlements and enjoy the terrible nature."
+	tutorial = "As a Pilgrim, you begin far outside the safety of the city and must reach it in order to ply your trade. \
+	Alternatively, you can build your own settlement and enjoy the terrible dangers nature has to offer."
 	flag = ADVENTURER
-	department_flag = PEASANTS
+	department_flag = OUTSIDERS
 	job_flags = (JOB_ANNOUNCE_ARRIVAL | JOB_SHOW_IN_CREDITS | JOB_EQUIP_RANK | JOB_NEW_PLAYER_JOINABLE)
 	display_order = JDO_PILGRIM
 	faction = FACTION_STATION
@@ -13,7 +13,7 @@
 	banned_leprosy = FALSE
 	bypass_lastclass = TRUE
 
-	allowed_races = ALL_PLAYER_RACES_BY_NAME
+	allowed_races = RACES_PLAYER_ALL
 
 	outfit = null
 	outfit_female = null
@@ -21,6 +21,7 @@
 
 	same_job_respawn_delay = 0
 	can_have_apprentices = FALSE
+	selection_color = "#a33096"
 
 /datum/job/pilgrim/after_spawn(mob/living/spawned, client/player_client)
 	..()

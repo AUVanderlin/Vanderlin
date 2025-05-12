@@ -10,6 +10,7 @@
 	climb_time = 0
 	climb_offset = 10
 	on = TRUE
+	temperature_change = 86
 	var/list/ore = list()
 	var/maxore = 1
 	var/cooking = 0
@@ -198,6 +199,7 @@
 
 					if(steelalloy == 7)
 						testing("STEEL ALLOYED")
+						maxore = 3
 						alloy = /obj/item/ingot/steel
 					else if(bronzealloy == 7)
 						testing("BRONZE ALLOYED")
@@ -205,6 +207,7 @@
 					else if(blacksteelalloy == 7)
 						testing("BLACKSTEEL ALLOYED")
 						alloy = /obj/item/ingot/blacksteel
+						GLOB.vanderlin_round_stats[STATS_BLACKSTEEL_SMELTED]++
 					else
 						alloy = null
 					if(alloy)
@@ -227,6 +230,7 @@
 								ore -= I
 								ore += R
 								qdel(I)
+					maxore = initial(maxore)
 					playsound(src,'sound/misc/smelter_fin.ogg', 100, FALSE)
 					visible_message("<span class='notice'>\The [src] finished smelting.</span>")
 					cooking = 31

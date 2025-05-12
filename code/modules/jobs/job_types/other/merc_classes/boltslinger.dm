@@ -2,18 +2,7 @@
 	name = "Boltslinger"
 	tutorial = "A cutthroat and a soldier of fortune, your mastery of the crossbow has brought you to many battlefields, all in pursuit of mammon."
 	allowed_sexes = list(MALE, FEMALE)
-	allowed_races = list(
-		"Humen",
-		"Rakshari",
-		"Elf",
-		"Half-Elf",
-		"Dwarf",
-		"Tiefling",
-		"Dark Elf",
-		"Aasimar",
-		"Half-Orc",
-		"Kobold",
-	)
+	allowed_races = RACES_PLAYER_NONEXOTIC
 	outfit = /datum/outfit/job/mercenary/boltslinger
 	category_tags = list(CTAG_MERCENARY)
 	maximum_possible_slots = 5
@@ -40,7 +29,7 @@
 		H.mind?.adjust_skillrank(/datum/skill/combat/swords, 3, TRUE)
 		H.mind?.adjust_skillrank(/datum/skill/combat/polearms, 1, TRUE)
 		H.mind?.adjust_skillrank(/datum/skill/combat/shields, pick(0,0,1), TRUE)
-		H.mind?.adjust_skillrank(/datum/skill/combat/crossbows, 3, TRUE)
+		H.mind?.adjust_skillrank(/datum/skill/combat/crossbows, 4, TRUE)
 		H.mind?.adjust_skillrank(/datum/skill/craft/tanning, 1, TRUE)
 		H.mind?.adjust_skillrank(/datum/skill/combat/unarmed, 1, TRUE)
 		H.mind?.adjust_skillrank(/datum/skill/craft/crafting, 1, TRUE)
@@ -55,7 +44,7 @@
 
 		H.merctype = 6
 
-		H.change_stat(STATKEY_PER, 3)
+		H.change_stat(STATKEY_PER, 2)
 		H.change_stat(STATKEY_END, 1)
 		H.change_stat(STATKEY_STR, 1)
 	ADD_TRAIT(H, TRAIT_MEDIUMARMOR, TRAIT_GENERIC)

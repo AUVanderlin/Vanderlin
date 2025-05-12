@@ -3,17 +3,7 @@
 	var/outfit
 	var/tutorial = "Choose me!"
 	var/list/allowed_sexes
-	var/list/allowed_races = list(
-	"Humen",
-	"Rakshari",
-	"Elf",
-	"Half-Elf",
-	"Dwarf",
-	"Tiefling",
-	"Dark Elf",
-	"Aasimar",
-	"Half-Orc"
-	)
+	var/list/allowed_races = RACES_PLAYER_ALL
 	var/list/allowed_patrons
 	var/list/allowed_ages
 	var/pickprob = 100
@@ -65,6 +55,8 @@
 	for(var/datum/status_effect/incapacitating/stun/S in H.status_effects)
 		H.remove_status_effect(S)
 	post_equip(H)
+
+	apply_character_post_equipment(H)
 
 /datum/advclass/proc/post_equip(mob/living/carbon/human/H)
 	addtimer(CALLBACK(SScrediticons, TYPE_PROC_REF(/datum/controller/subsystem/crediticons, add_credit), H), 2 SECONDS)
