@@ -80,7 +80,15 @@
 
 /obj/item/coin/proc/set_quantity(new_quantity)
 	quantity = new_quantity
-	update_icon()
+	if(quantity > 1)
+		drop_sound = 'sound/foley/coins1.ogg'
+	else
+		drop_sound = 'sound/foley/coinphy (1).ogg'
+	if(quantity == 1 || quantity == 2)
+		dropshrink = 0.2
+	else
+		dropshrink = 1
+	update_appearance(UPDATE_ICON_STATE | UPDATE_DESC | UPDATE_NAME)
 	update_transform()
 
 /obj/item/coin/get_displayed_price(mob/user)
@@ -168,7 +176,7 @@
 	var/intelligence = user.mind?.current.STAINT
 	var/perception = user.mind?.current.STAPER
 	var/speed = user.mind?.current.STASPD
-	var/mathematics_skill = user.mind?.get_skill_level(/datum/skill/labor/mathematics) || 0
+	var/mathematics_skill = user.get_skill_level(/datum/skill/labor/mathematics) || 0
 	var/list/skill_data = list("delay" = 1.2 SECONDS,"error" = 0)
 
 	var/base_tier	// Base intelligence tiers
@@ -273,36 +281,31 @@
 	flip_cd = world.time
 	playsound(user, 'sound/foley/coinphy (1).ogg', 100, FALSE)
 	var/flip_outcome = rigged_outcome ? rigged_outcome : prob(50)
+	if(rigged_outcome)
+		record_featured_stat(FEATURED_STATS_CRIMINALS, user)
+		GLOB.vanderlin_round_stats[STATS_GAMES_RIGGED]++
+	var/outcome_text
 	switch(flip_outcome)
 		if(1)
-			user.visible_message("<span class='info'>[user] flips the coin. Heads!</span>")
+			user.visible_message(span_info("[user] flips the coin. Heads!"))
 			heads_tails = TRUE
+			outcome_text = "heads"
 		if(0,2)
-			user.visible_message("<span class='info'>[user] flips the coin. Tails!</span>")
+			user.visible_message(span_info("[user] flips the coin. Tails!"))
 			heads_tails = FALSE
+			outcome_text = "tails"
+
+	SEND_SIGNAL(user, COMSIG_COIN_FLIPPED, user, src, outcome_text)
+
 	rigged_outcome = 0
-	update_icon()
+	update_appearance(UPDATE_ICON_STATE)
 
-/obj/item/coin/update_icon()
-	..()
-	if(quantity > 1)
-		drop_sound = 'sound/foley/coins1.ogg'
-	else
-		drop_sound = 'sound/foley/coinphy (1).ogg'
-
-	if(quantity == 1)
-		name = initial(name)
-		desc = initial(desc)
-		icon_state = "[base_type][heads_tails]"
-		dropshrink = 0.2
-		return
-
-	name = plural_name
-	desc = ""
-	dropshrink = 1
+/obj/item/coin/update_icon_state()
+	. = ..()
 	switch(quantity)
+		if(1)
+			icon_state = "[base_type][heads_tails]"
 		if(2)
-			dropshrink = 0.2 // this is just like the single coin, gotta shrink it
 			icon_state = "[base_type]m"
 			if(heads_tails == last_merged_heads_tails)
 				icon_state = "[base_type][heads_tails]1"
@@ -317,6 +320,19 @@
 		if(16 to INFINITY)
 			icon_state = "[base_type]15"
 
+/obj/item/coin/update_name()
+	. = ..()
+	if(quantity == 1)
+		name = initial(name)
+	else
+		name = plural_name
+
+/obj/item/coin/update_desc()
+	. = ..()
+	if(quantity == 1)
+		desc = initial(desc)
+	else
+		desc = ""
 
 /obj/item/coin/attackby(obj/item/I, mob/user)
 	if(istype(I, /obj/item/coin))
@@ -370,6 +386,13 @@
 	. = ..()
 	if(!coin_amount)
 		set_quantity(rand(4,14))
+
+/obj/item/coin/silver/pile/xylix
+	name = MAP_SWITCH("ziliqua", "INFINTE COIN PILE")
+
+/obj/item/coin/silver/pile/xylix/Initialize()
+	. = ..()
+	set_quantity(rand(6,9))
 
 #undef CTYPE_GOLD
 #undef CTYPE_SILV

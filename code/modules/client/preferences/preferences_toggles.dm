@@ -302,9 +302,6 @@ GLOBAL_LIST_INIT(ghost_forms, sortList(list("ghost","ghostking","ghostian2","ske
 	if(new_form)
 		prefs.ghost_form = new_form
 		prefs.save_preferences()
-		if(isobserver(mob))
-			var/mob/dead/observer/O = mob
-			O.update_icon(new_form)
 
 GLOBAL_LIST_INIT(ghost_orbits, list(GHOST_ORBIT_CIRCLE,GHOST_ORBIT_TRIANGLE,GHOST_ORBIT_SQUARE,GHOST_ORBIT_HEXAGON,GHOST_ORBIT_PENTAGON))
 
@@ -333,7 +330,7 @@ GLOBAL_LIST_INIT(ghost_orbits, list(GHOST_ORBIT_CIRCLE,GHOST_ORBIT_TRIANGLE,GHOS
 		prefs.save_preferences()
 		if(isobserver(mob))
 			var/mob/dead/observer/O = mob
-			O.update_icon()
+			O.update_appearance()
 
 /client/verb/pick_ghost_customization()
 	set name = "Ghost Customization"
@@ -526,6 +523,21 @@ GLOBAL_LIST_INIT(ghost_orbits, list(GHOST_ORBIT_CIRCLE,GHOST_ORBIT_TRIANGLE,GHOS
 		mob.icon_state = new_icon
 	message_admins("[key] has set their ghost icon to [new_icon]!")
 
+// maybe add more ui themes l8r idk
+/client/proc/set_ui_theme()
+	set name = "Toggle UI theme"
+	set desc = "Toggle UI theme"
+	set category = "Prefs - Admin"
+	if(!holder)
+		return
+
+	if(prefs.ui_theme == UI_PREFERENCE_LIGHT_MODE)
+		prefs.ui_theme = UI_PREFERENCE_DARK_MODE
+	else
+		prefs.ui_theme = UI_PREFERENCE_LIGHT_MODE
+
+	to_chat(src, span_notice("UI theme switched to [prefs.ui_theme]"))
+
 /client/proc/set_personal_admin_ooc_color()
 	set name = "Set Personal Admin OOC Color"
 	set category = "Prefs - Admin"
@@ -548,3 +560,5 @@ GLOBAL_LIST_INIT(ghost_orbits, list(GHOST_ORBIT_CIRCLE,GHOST_ORBIT_TRIANGLE,GHOS
 		return
 	prefs.ooccolor = null
 	prefs.save_preferences()
+
+#undef TOGGLE_CHECKBOX

@@ -160,6 +160,11 @@
 	desc = span_blue("Relaxing.")
 	timer = 15 SECONDS
 
+/datum/stressevent/bathwater/on_apply(mob/living/user)
+	. = ..()
+	if(user.client)
+		SEND_SIGNAL(user, COMSIG_BATH_TAKEN)
+
 /datum/stressevent/ozium
 	stressadd = -99
 	desc = span_blue("I've taken a hit and entered a painless world.")
@@ -207,3 +212,8 @@
 	stressadd = -1
 	desc = span_green("I have prevailed over my rival! Graggar favours me now!")
 	timer = INFINITY
+
+/datum/stressevent/night_owl_night
+	stressadd = -1
+	desc = span_green("I love the night!")
+	timer = 20 MINUTES

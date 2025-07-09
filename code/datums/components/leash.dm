@@ -70,14 +70,20 @@
 	RegisterSignal(owner, COMSIG_PARENT_QDELETING, PROC_REF(on_owner_qdel))
 
 	var/static/list/container_connections = list(
-		COMSIG_MOVABLE_MOVED = PROC_REF(on_owner_moved),
+		COMSIG_MOVABLE_MOVED = PROC_REF(on_moved),
 	)
 
 	AddComponent(/datum/component/connect_containers, owner, container_connections)
-	RegisterSignal(owner, COMSIG_MOVABLE_MOVED, PROC_REF(on_owner_moved))
+	RegisterSignal(owner, COMSIG_MOVABLE_MOVED, PROC_REF(on_moved))
+	RegisterSignal(parent, COMSIG_MOVABLE_MOVED, PROC_REF(on_moved))
 	RegisterSignal(parent, COMSIG_MOVABLE_PRE_MOVE, PROC_REF(on_parent_pre_move))
 
 	check_distance()
+
+/datum/component/leash/UnregisterFromParent()
+	. = ..()
+	UnregisterSignal(parent, COMSIG_MOVABLE_MOVED, COMSIG_MOVABLE_PRE_MOVE)
+	UnregisterSignal(owner, COMSIG_MOVABLE_MOVED)
 
 /datum/component/leash/Destroy()
 	owner = null
@@ -97,7 +103,7 @@
 
 	qdel(src)
 
-/datum/component/leash/proc/on_owner_moved(atom/movable/source)
+/datum/component/leash/proc/on_moved(atom/movable/source)
 	SIGNAL_HANDLER
 	PRIVATE_PROC(TRUE)
 
@@ -121,7 +127,7 @@
 	PRIVATE_PROC(TRUE)
 
 	if(beam_icon && beam_icon_state)
-		var/list/true_path= get_path_to(parent, get_turf(owner), /turf/proc/Distance3D, 33, 250, 1)
+		var/list/true_path= get_path_to(parent, get_turf(owner), TYPE_PROC_REF(/turf, Heuristic_cardinal_3d), 33, 250, 1)
 		true_path |= list(get_turf(owner))
 		redraw_beams(true_path)
 
@@ -133,7 +139,7 @@
 	current_path_tick += 1
 	var/our_path_tick = current_path_tick
 
-	var/list/path = get_path_to(parent, get_turf(owner), /turf/proc/Distance3D, mintargetdist = distance)
+	var/list/path = get_path_to(parent, get_turf(owner), TYPE_PROC_REF(/turf, Heuristic_cardinal_3d), mintargetdist = distance)
 
 	if (last_completed_path_tick > our_path_tick)
 		return

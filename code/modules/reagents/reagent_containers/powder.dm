@@ -11,6 +11,23 @@
 	grid_height = 32
 	grid_width = 32
 
+/obj/item/reagent_containers/powder/canconsume(mob/eater, mob/user, silent)
+	. = ..()
+	if(!.)
+		return
+	if(user.zone_selected != BODY_ZONE_PRECISE_NOSE)
+		to_chat(user, span_notice("\The [src] must be snorted."))
+		return FALSE
+	// Checked in parent for carbon
+	var/mob/living/L = eater
+	if(!L.can_smell())
+		if(L == user)
+			to_chat(user, span_warning("I can't use my nose!"))
+		else
+			to_chat(user, span_warning("[L.p_they(TRUE)] can't use [L.p_their()] nose!"))
+		return FALSE
+	return TRUE
+
 /obj/item/reagent_containers/powder/throw_impact(atom/hit_atom, datum/thrownthing/thrownthing)
 	. = ..()
 	if(thrownthing?.target_zone != BODY_ZONE_PRECISE_NOSE)
@@ -25,8 +42,6 @@
 
 /obj/item/reagent_containers/powder/attack(mob/M, mob/user, def_zone)
 	if(!canconsume(M, user))
-		return FALSE
-	if(user.zone_selected != BODY_ZONE_PRECISE_NOSE)
 		return FALSE
 	if(M == user)
 		M.visible_message(span_notice("[user] sniffs [src]."))
@@ -50,6 +65,7 @@
 
 	if(reagents.total_volume)
 		reagents.trans_to(M, reagents.total_volume, transfered_by = user, method = "swallow")
+		SEND_SIGNAL(M, COMSIG_DRUG_SNIFFED, user)
 		record_featured_stat(FEATURED_STATS_CRIMINALS, user)
 		GLOB.vanderlin_round_stats[STATS_DRUGS_SNORTED]++
 	qdel(src)

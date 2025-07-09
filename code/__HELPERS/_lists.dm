@@ -203,6 +203,8 @@ if (length(L) < I) { \
 	. = list()
 	for(var/thing in atoms)
 		var/atom/A = thing
+		if(isnull(A))
+			continue
 		if (typecache[A.type])
 			. += A
 
@@ -454,22 +456,21 @@ if (length(L) < I) { \
 
 //for sorting clients or mobs by ckey
 /proc/sortKey(list/L, order=1)
-	return sortTim(L, order >= 0 ? /proc/cmp_ckey_asc : /proc/cmp_ckey_dsc)
+	return sortTim(L, order >= 0 ? GLOBAL_PROC_REF(cmp_ckey_asc) : GLOBAL_PROC_REF(cmp_ckey_dsc))
 
 //Specifically for record datums in a list.
 /proc/sortRecord(list/L, field = "name", order = 1)
 	GLOB.cmp_field = field
-	return sortTim(L, order >= 0 ? /proc/cmp_records_asc : /proc/cmp_records_dsc)
+	return sortTim(L, order >= 0 ? GLOBAL_PROC_REF(cmp_records_asc) : GLOBAL_PROC_REF(cmp_records_dsc))
 
 //any value in a list
-/proc/sortList(list/L, cmp=/proc/cmp_text_asc) as /list
+/proc/sortList(list/L, cmp = GLOBAL_PROC_REF(cmp_text_asc)) as /list
 	RETURN_TYPE(/list)
 	return sortTim(L.Copy(), cmp)
 
 //uses sortList() but uses the var's name specifically. This should probably be using mergeAtom() instead
 /proc/sortNames(list/L, order=1)
-	return sortTim(L, order >= 0 ? /proc/cmp_name_asc : /proc/cmp_name_dsc)
-
+	return sortTim(L, order >= 0 ? GLOBAL_PROC_REF(cmp_name_asc) : GLOBAL_PROC_REF(cmp_name_dsc))
 
 //Converts a bitfield to a list of numbers (or words if a wordlist is provided)
 /proc/bitfield2list(bitfield = 0, list/wordlist)
@@ -701,6 +702,16 @@ if (length(L) < I) { \
 
 	return TRUE
 
+#define LAZY_LISTS_OR(left_list, right_list)\
+	( length(left_list)\
+		? length(right_list)\
+			? (left_list | right_list)\
+			: left_list.Copy()\
+		: length(right_list)\
+			? right_list.Copy()\
+			: null\
+	)
+
 //Scales a range (i.e 1,100) and picks an item from the list based on your passed value
 //i.e in a list with length 4, a 25 in the 1-100 range will give you the 2nd item
 //This assumes your ranges start with 1, I am not good at math and can't do linear scaling
@@ -728,7 +739,7 @@ GLOBAL_LIST_EMPTY(string_lists)
 	return GLOB.string_lists[string_id] = values
 
 /// Runtimes if the passed in list is not sorted
-/proc/assert_sorted(list/list, name, cmp = /proc/cmp_numeric_asc)
+/proc/assert_sorted(list/list, name, cmp = GLOBAL_PROC_REF(cmp_numeric_asc))
 	var/last_value = list[1]
 
 	for (var/index in 2 to list.len)

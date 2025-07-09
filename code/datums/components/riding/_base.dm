@@ -37,6 +37,7 @@
 
 /datum/component/riding/proc/vehicle_mob_unbuckle(datum/source, mob/living/M, force = FALSE)
 	var/atom/movable/AM = parent
+	AM.ai_controller?.set_blackboard_key(BB_IS_BEING_RIDDEN, FALSE)
 	restore_position(M)
 	unequip_buckle_inhands(M)
 	M.updating_glide_size = TRUE
@@ -45,8 +46,10 @@
 
 /datum/component/riding/proc/vehicle_mob_buckle(datum/source, mob/living/M, force = FALSE)
 	var/atom/movable/AM = parent
+	AM.ai_controller?.set_blackboard_key(BB_IS_BEING_RIDDEN, TRUE)
 	M.set_glide_size(AM.glide_size)
 	M.updating_glide_size = FALSE
+
 	handle_vehicle_offsets()
 
 /datum/component/riding/proc/handle_vehicle_layer()
@@ -108,7 +111,7 @@
 							buckled_mob.layer = diroffsets[3]
 						buckled_mob.set_mob_offsets("riding", _x = x2off, _y = y2off)
 						break dir_loop
-	var/list/static/default_vehicle_pixel_offsets = list(TEXT_NORTH = list(0, 0), TEXT_SOUTH = list(0, 0), TEXT_EAST = list(0, 0), TEXT_WEST = list(0, 0))
+	var/static/list/default_vehicle_pixel_offsets = list(TEXT_NORTH = list(0, 0), TEXT_SOUTH = list(0, 0), TEXT_EAST = list(0, 0), TEXT_WEST = list(0, 0))
 /*	var/px = default_vehicle_pixel_offsets[AM_dir]
 	var/py = default_vehicle_pixel_offsets[AM_dir]
 	if(directional_vehicle_offsets[AM_dir])

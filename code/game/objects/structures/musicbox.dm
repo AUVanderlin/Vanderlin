@@ -56,10 +56,10 @@
 
 /datum/looping_sound/musloop
 	mid_sounds = list()
-	mid_length = 2400 // Whoever wrote this is giving me an aneurism
+	mid_length = 4 MINUTES
 	volume = 70
 	extra_range = 8
-	falloff = 0
+	falloff_exponent = 0
 	persistent_loop = TRUE
 	var/stress2give = /datum/stressevent/music
 	channel = CHANNEL_JUKEBOX
@@ -79,14 +79,15 @@
 	density = TRUE
 	anchored = TRUE
 	max_integrity = 0
+	rattle_sound = 'sound/misc/machineno.ogg'
+	unlock_sound = 'sound/misc/beep.ogg'
+	lock_sound = 'sound/misc/beep.ogg'
 	var/datum/looping_sound/musloop/soundloop
 	var/list/init_curfile = list('sound/music/jukeboxes/_misc/_generic.ogg') // A list of songs that curfile is set to on init. MUST BE IN ONE OF THE MUSIC_TAVCAT_'s. MAPPERS MAY TOUCH THIS.
 	var/curfile // The current track that is playing right now
 	var/playing = FALSE // If music is playing or not. playmusic() deals with this don't mess with it.
 	var/curvol = 50 // The current volume at which audio is played. MAPPERS MAY TOUCH THIS.
 	var/playuponspawn = FALSE // Does the music box start playing music when it first spawns in? MAPPERS MAY TOUCH THIS.
-	var/locked = FALSE
-	var/lockid = null
 
 /obj/structure/fake_machine/musicbox/Initialize()
 	. = ..()
@@ -99,17 +100,16 @@
 	. = ..()
 	qdel(soundloop)
 
-/obj/structure/fake_machine/musicbox/update_icon()
+/obj/structure/fake_machine/musicbox/update_icon_state()
+	. = ..()
 	icon_state = "music[playing]"
 
 /obj/structure/fake_machine/musicbox/examine(mob/user)
 	. = ..()
 	. += "Volume: [curvol]/100"
-	if(lockid)
-		if(locked)
-			. += span_info("It's locked- under a [lockid] key!")
-		else
-			. += span_info("It's unlocked- under a [lockid] key!")
+	if(lock_check(TRUE))
+		. += span_info("It's [locked() ? "locked" : "unlocked"].")
+		. += span_info("It's keyhole has [access2string()] etched next to it.")
 
 /obj/structure/fake_machine/musicbox/proc/toggle_music()
 	if(!playing)
@@ -123,13 +123,12 @@
 	soundloop.cursound = null
 	soundloop.volume = curvol
 	soundloop.start()
-	testing("Music: V[soundloop.volume] C[soundloop.cursound] T[soundloop.thingshearing]")
-	update_icon()
+	update_appearance(UPDATE_ICON_STATE)
 
 /obj/structure/fake_machine/musicbox/proc/stop_playing()
 	playing = FALSE
 	soundloop.stop()
-	update_icon()
+	update_appearance(UPDATE_ICON_STATE)
 
 /obj/structure/fake_machine/musicbox/attack_hand(mob/user)
 	. = ..()
@@ -139,7 +138,7 @@
 
 	user.changeNext_move(CLICK_CD_MELEE)
 
-	if(locked)
+	if(locked())
 		to_chat(user, span_info("\The [src] is locked..."))
 		return
 
@@ -203,37 +202,11 @@
 		stop_playing()
 		start_playing()
 
-/obj/structure/fake_machine/musicbox/attackby(obj/item/useitem, mob/living/user, params)
-	. = ..()
-	user.changeNext_move(CLICK_CD_MELEE)
-	if(lockid)
-		if(istype(useitem, /obj/item/key))
-			var/obj/item/key/K = useitem
-			if(K.lockid == lockid || K.lockid == "lord") // All locks obey THE King's master key.
-				locked = !locked
-				playsound(loc, 'sound/misc/beep.ogg', 100, FALSE, -1)
-				if(locked==TRUE)
-					user.visible_message(span_info("[user] locks \the [src]."),span_info("I lock \the [src]."))
-				else
-					user.visible_message(span_info("[user] unlocks \the [src]."),span_info("I unlock \the [src]."))
-				return
-			else
-				playsound(src, 'sound/misc/machineno.ogg', 100, FALSE, -1)
-				to_chat(user, "<span class='warning'>Wrong key.</span>")
-				return
-		if(istype(useitem, /obj/item/storage/keyring))
-			var/obj/item/storage/keyring/K = useitem
-			for(var/obj/item/key/KE in K.contents)
-				if(KE.lockid == lockid)
-					locked = !locked
-					playsound(loc, 'sound/misc/beep.ogg', 100, FALSE, -1)
-					return
-
 /obj/structure/fake_machine/musicbox/mannor
-	lockid = "mannor"
+	lock = /datum/lock/key/manor
 
 /obj/structure/fake_machine/musicbox/tavern
-	lockid = "tavern"
+	lock = /datum/lock/key/inn
 	curvol = 30
 	playuponspawn = TRUE
 	init_curfile = list(\
@@ -247,4 +220,11 @@
 /obj/structure/fake_machine/musicbox/tavern/Initialize()
 	. = ..()
 	soundloop.extra_range = 12
-	soundloop.falloff = 6
+	soundloop.falloff_exponent = 6
+
+#undef MUSIC_TAVCAT_CHILL
+#undef MUSIC_TAVCAT_FUCK
+#undef MUSIC_TAVCAT_PARTY
+#undef MUSIC_TAVCAT_SCUM
+#undef MUSIC_TAVCAT_DAMN
+#undef MUSIC_TAVCAT_MISC

@@ -49,7 +49,7 @@
 /obj/item/reagent_containers/food/snacks/rotten/Initialize()
 	var/mutable_appearance/rotflies = mutable_appearance('icons/roguetown/mob/rotten.dmi', "rotten")
 	add_overlay(rotflies)
-	rot_away_timer = QDEL_IN(src, 10 MINUTES)
+	rot_away_timer = QDEL_IN_STOPPABLE(src, 10 MINUTES)
 	. = ..()
 
 /obj/item/reagent_containers/food/snacks/rotten/meat
@@ -185,9 +185,10 @@
 	lefthand_file = 'icons/roguetown/onmob/lefthand.dmi'
 	righthand_file = 'icons/roguetown/onmob/righthand.dmi'
 	icon_state = "bowl"
+	fill_icon_thresholds = list(0, 30, 50, 100)
+	reagent_flags = TRANSFERABLE | AMOUNT_VISIBLE
 	force = 5
 	throwforce = 5
-	reagent_flags = OPENCONTAINER
 	amount_per_transfer_from_this = 6
 	possible_transfer_amounts = list(6)
 	dropshrink = 0.8
@@ -197,7 +198,7 @@
 	sellprice = 1
 	drinksounds = list('sound/items/drink_cup (1).ogg','sound/items/drink_cup (2).ogg','sound/items/drink_cup (3).ogg','sound/items/drink_cup (4).ogg','sound/items/drink_cup (5).ogg')
 	fillsounds = list('sound/items/fillcup.ogg')
-	metalizer_result = /obj/item/coin/copper
+	metalizer_result = /obj/item/reagent_containers/glass/bowl/iron
 
 /obj/item/reagent_containers/glass/bowl/iron
 	icon_state = "bowl_iron"
@@ -222,51 +223,30 @@
 	..()
 	qdel(src)
 
-/obj/item/reagent_containers/glass/bowl/update_icon()
-	cut_overlays()
-	var/mutable_appearance/steam = mutable_appearance(icon, "steam")
-	if(reagents)
-		if(reagents.total_volume > 0)
-			if(reagents.total_volume < 1)
-				icon_state = "bowl"
-				underlays.Cut()
-			if(reagents.total_volume <= 10)
-				var/mutable_appearance/filling = mutable_appearance(icon, "bowl_low")
-				filling.color = mix_color_from_reagents(reagents.reagent_list)
-				add_overlay(filling)
-		if(reagents.total_volume > 10)
-			if(reagents.total_volume <= 20)
-				var/mutable_appearance/filling = mutable_appearance(icon, "bowl_half")
-				filling.color = mix_color_from_reagents(reagents.reagent_list)
-				add_overlay(filling)
-		if(reagents.total_volume > 20)
-			if(reagents.has_reagent(/datum/reagent/consumable/soup/oatmeal, 10))
-				var/mutable_appearance/filling = mutable_appearance(icon, "bowl_oatmeal")
-				filling.color = mix_color_from_reagents(reagents.reagent_list)
-				add_overlay(filling)
-			if(reagents.has_reagent(/datum/reagent/consumable/soup/veggie/cabbage, 17) || reagents.has_reagent(/datum/reagent/consumable/soup/veggie/onion, 17) || reagents.has_reagent(/datum/reagent/consumable/soup/veggie/onion, 17))
-				var/mutable_appearance/filling = mutable_appearance(icon, "bowl_full")
-				filling.color = mix_color_from_reagents(reagents.reagent_list)
-				underlays += steam
-				add_overlay(filling)
-			if(reagents.has_reagent(/datum/reagent/consumable/soup/stew/chicken, 17) || reagents.has_reagent(/datum/reagent/consumable/soup/stew/meat, 17) || reagents.has_reagent(/datum/reagent/consumable/soup/stew/fish, 17))
-				var/mutable_appearance/filling = mutable_appearance(icon, "bowl_stew")
-				filling.color = mix_color_from_reagents(reagents.reagent_list)
-				underlays += steam
-				add_overlay(filling)
-			else
-				var/mutable_appearance/filling = mutable_appearance(icon, "bowl_full")
-				filling.color = mix_color_from_reagents(reagents.reagent_list)
-				add_overlay(filling)
-		else
-			underlays.Cut()
-	else
-		icon_state = "bowl"
-		underlays.Cut()
-
-/obj/item/reagent_containers/glass/bowl/on_reagent_change(changetype)
-	..()
-	update_icon()
+/obj/item/reagent_containers/glass/bowl/update_overlays()
+	. = ..()
+	if(!reagents?.total_volume)
+		return
+	// ONE MILLION YEARS DUNGEON FOR NPC1314
+	var/mutable_appearance/filling
+	var/percent = round((reagents.total_volume / volume) * 100)
+	if(percent >= 80)
+		var/datum/reagent/master = reagents.get_master_reagent()
+		var/static/list/stew = list(
+			/datum/reagent/consumable/soup/stew/chicken,
+			/datum/reagent/consumable/soup/stew/meat,
+			/datum/reagent/consumable/soup/stew/fish,
+		)
+		if(istype(master,/datum/reagent/consumable/soup/oatmeal))
+			filling = mutable_appearance(icon, "bowl_oatmeal")
+		else if(is_type_in_list(master, stew))
+			filling = mutable_appearance(icon, "bowl_stew")
+		if(!filling)
+			return
+		filling.color = mix_color_from_reagents(reagents.reagent_list)
+		filling.alpha = mix_alpha_from_reagents(reagents.reagent_list)
+		. += filling
+		. += mutable_appearance(icon, "steam")
 
 /obj/item/reagent_containers/glass/bowl/attackby(obj/item/I, mob/user, params) // lets you eat with a spoon from a bowl
 	if(!istype(I, /obj/item/kitchen/spoon))
@@ -294,17 +274,13 @@
 	layer = CLOSED_BLASTDOOR_LAYER // obj layer + a little, small obj layering above convenient
 	drop_sound = 'sound/foley/dropsound/gen_drop.ogg'
 	list_reagents = list(/datum/reagent/consumable/blackpepper = 5)
-	reagent_flags = TRANSPARENT
-
-
-
-
 
 /*-------------\
 | Pot reagents |
 \-------------*/	// These are for the pot, if more vegetables are added and need to be integrated into the pot brewing you need to add them here
 
 /datum/reagent/consumable/soup // so you get hydrated without the flavor system messing it up. Works like water with less hydration
+	name = "soup"
 	var/hydration = 5
 
 /datum/reagent/consumable/soup/on_mob_life(mob/living/carbon/M)
@@ -352,6 +328,7 @@
 	taste_description = "boiled turnip"
 
 /datum/reagent/consumable/soup/egg
+	name = "egg soup"
 	color = "#dedbaf"
 	taste_description = "egg soup"
 	nutriment_factor = 12
@@ -484,20 +461,10 @@
 	qdel(src)
 
 /obj/item/reagent_containers/powder/flour/attackby(obj/item/I, mob/living/user, params)
-	..()
+	. = ..()
 	var/found_table = locate(/obj/structure/table) in (loc)
 	var/obj/item/reagent_containers/glass/R = I
-	if(user.mind)
-		short_cooktime = (50 - ((user.mind.get_skill_level(/datum/skill/craft/cooking))*7))
 	if(isturf(loc)&& (found_table))
-		if(istype(I, /obj/item/reagent_containers/food/snacks/dough_base))
-			playsound(get_turf(user), 'sound/foley/kneading.ogg', 100, TRUE, -1)
-			to_chat(user, span_notice("Kneading in more flour..."))
-			if(do_after(user, short_cooktime, src))
-				new /obj/item/reagent_containers/food/snacks/dough(loc)
-				qdel(I)
-				qdel(src)
-				user.mind.add_sleep_experience(/datum/skill/craft/cooking, (user.STAINT*0.5))
 		if(!istype(R) || (water_added))
 			return ..()
 		if(!R.reagents.has_reagent(/datum/reagent/water, 10))
@@ -505,7 +472,7 @@
 			return TRUE
 		to_chat(user, span_notice("Adding water, now its time to knead it..."))
 		playsound(get_turf(user), 'sound/foley/splishy.ogg', 100, TRUE, -1)
-		if(do_after(user,15, src))
+		if(do_after(user, 1.5 SECONDS, src))
 			name = "wet flour"
 			desc = "Destined for greatness, at your hands."
 			R.reagents.remove_reagent(/datum/reagent/water, 10)
@@ -516,7 +483,7 @@
 
 /obj/item/reagent_containers/powder/flour/attack_hand(mob/living/user)
 	if(water_added)
-		short_cooktime = (40 - ((user.mind.get_skill_level(/datum/skill/craft/cooking))*5))
+		short_cooktime = (40 - ((user.get_skill_level(/datum/skill/craft/cooking))*5))
 		playsound(get_turf(user), 'sound/foley/kneading_alt.ogg', 90, TRUE, -1)
 		if(do_after(user, short_cooktime, src))
 			new /obj/item/reagent_containers/food/snacks/dough_base(get_turf(src))

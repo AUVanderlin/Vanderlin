@@ -27,9 +27,6 @@
 	force = DAMAGE_DAGGER
 	dropshrink = 0.8
 	possible_item_intents = list(/datum/intent/dagger/thrust, /datum/intent/food)
-	fried_type = /obj/item/reagent_containers/food/snacks/fryfish/swordfish
-	cooked_type = /obj/item/reagent_containers/food/snacks/fryfish/swordfish
-	cooked_smell = /datum/pollutant/food/baked_swordfish
 
 //esssentially a magic throwing knife
 /obj/projectile/magic/swordfish
@@ -196,7 +193,7 @@
 	range = 7
 	warnie = "sydwarning"
 	req_items = list(/obj/item/clothing/neck/psycross/silver/abyssor)
-	sound = 'sound/foley/jumpland/waterland.wav'
+	sound = 'sound/foley/jumpland/waterland.ogg'
 	invocation = "Embrace the waters of Abyssor's domain."
 	invocation_type = "shout"
 	associated_skill = /datum/skill/magic/holy
@@ -230,7 +227,7 @@
 			return ..()
 
 		target.visible_message(span_info("A wave of replenishing water passes through [target]!"), span_notice("I'm engulfed in a wave of replenishing water!"))
-		wash_atom(target, CLEAN_STRONG)
+		target.wash(CLEAN_WASH)
 		var/situational_bonus = 1
 		var/list/water = typesof(/turf/open/water) - typesof(/turf/open/water/acid)
 		// the more water around us, the more we heal, up to times two

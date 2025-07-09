@@ -4,7 +4,6 @@
 	icon_state = "hole1"
 	icon = 'icons/turf/floors.dmi'
 	var/stage = 1
-	var/mutable_appearance/abovemob
 	var/turf/open/floor/dirt/mastert
 	var/faildirt = 0
 	mob_storage_capacity = 3
@@ -16,6 +15,35 @@
 	max_integrity = 0
 	buckle_lying = 90
 	layer = 2.8
+	lock = null
+	can_add_lock = FALSE
+	alternative_icon_handling = TRUE
+
+/obj/structure/closet/dirthole/Initialize()
+	var/turf/open/floor/dirt/T = loc
+	if(istype(T))
+		mastert = T
+		T.holie = src
+		if(T.muddy)
+			if(!(locate(/obj/item/natural/worms) in T))
+				if(prob(40))
+					if(prob(10))
+						new /obj/item/natural/worms/grub_silk(T)
+					else
+						new /obj/item/natural/worms/leech(T)
+				else
+					new /obj/item/natural/worms(T)
+		else
+			if(!(locate(/obj/item/natural/stone) in T))
+				if(prob(23))
+					new /obj/item/natural/stone(T)
+	return ..()
+
+/obj/structure/closet/dirthole/Destroy()
+	if(istype(mastert))
+		if(mastert && mastert?.holie == src)
+			mastert.holie = null
+	return ..()
 
 /obj/structure/closet/dirthole/grave
 	stage = 3
@@ -28,7 +56,6 @@
 	climb_offset = 10
 	icon_state = "gravecovered"
 	opened = FALSE
-	locked = TRUE
 
 /obj/structure/closet/dirthole/closed/loot/Initialize()
 	. = ..()
@@ -68,32 +95,26 @@
 	return
 
 /obj/structure/closet/dirthole/proc/attemptwatermake(mob/living/user, obj/item/reagent_containers/bucket)
-	testing("attempting to make water proc called")
 	if(user.used_intent.type == /datum/intent/splash)
-		testing("intent check complete")
 		if(bucket.reagents)
-			testing("reagent check complete")
 			var/datum/reagent/master_reagent = bucket.reagents.get_master_reagent()
 			var/reagent_volume = master_reagent.volume
 			if(do_after(user, 10 SECONDS, src))
 				if(bucket.reagents.remove_reagent(master_reagent.type, clamp(master_reagent.volume, 1, 100)))
-					testing("remove reagent proc complete")
 					var/turf/structure_turf = get_turf(src)
 					var/turf/open/water/W = structure_turf.PlaceOnTop(/turf/open/water/river/creatable)
 					if(!W) // how did this happen
 						return
 					W.water_reagent = master_reagent.type
 					W.water_volume = clamp(reagent_volume, 1, 100)
-					W.update_icon()
+					W.handle_water()
 					playsound(W, 'sound/foley/waterenter.ogg', 100, FALSE)
-					QDEL_NULL(src) // Somehow this actually makes it disappear. Hilarious.
-	testing("proc ended")
+					QDEL_NULL(src)
 
 /obj/structure/closet/dirthole/attackby(obj/item/attacking_item, mob/user, params)
 	if(!istype(attacking_item, /obj/item/weapon/shovel))
 		if(istype(attacking_item, /obj/item/reagent_containers/glass/bucket/wooden))
 			var/obj/item/reagent_containers/glass/bucket/wooden/bucket = attacking_item
-			testing("attempt water make proc should be called now")
 			attemptwatermake(user, bucket)
 			return
 		return ..()
@@ -108,7 +129,6 @@
 				return
 			stage = 4
 			climb_offset = 10
-			locked = TRUE
 			close()
 			var/founds
 			for(var/atom/A in contents)
@@ -117,17 +137,16 @@
 			if(!founds)
 				stage = 2
 				climb_offset = 0
-				locked = FALSE
 				open()
-			update_icon()
+			stage_update()
 		else if(stage < 4)
 			stage--
 			climb_offset = 0
-			update_icon()
+			stage_update()
 			if(stage == 0)
 				qdel(src)
 		QDEL_NULL(attacking_shovel.heldclod)
-		attacking_shovel.update_icon()
+		attacking_shovel.update_appearance(UPDATE_ICON_STATE)
 		return
 	else
 		playsound(loc,'sound/items/dig_shovel.ogg', 100, TRUE)
@@ -138,19 +157,10 @@
 				if(!do_after(user, 10 SECONDS * attacking_shovel.time_multiplier, src))
 					return TRUE
 				attacking_shovel.heldclod = new(attacking_shovel)
-				attacking_shovel.update_icon()
+				attacking_shovel.update_appearance(UPDATE_ICON_STATE)
 				playsound(mastert,'sound/items/dig_shovel.ogg', 100, TRUE)
 				mastert.ChangeTurf(/turf/open/transparent/openspace)
 				return
-//					for(var/D in GLOB.cardinals)
-//						var/turf/T = get_step(mastert, D)
-//						if(T)
-//							if(istype(T, /turf/open/water))
-//								attacking_shovel.heldclod = new(attacking_shovel)
-//								attacking_shovel.update_icon()
-//								playsound(mastert,'sound/items/dig_shovel.ogg', 100, TRUE)
-//								mastert.ChangeTurf(T.type, flags = CHANGETURF_INHERIT_AIR)
-//								return
 			to_chat(user, "<span class='warning'>I think that's deep enough.</span>")
 			return
 		var/used_str = 10
@@ -172,7 +182,6 @@
 				return
 			stage = 3
 			climb_offset = 0
-			locked = FALSE
 			open()
 			for(var/obj/structure/gravemarker/G in loc)
 				record_featured_stat(FEATURED_STATS_CRIMINALS, user)
@@ -185,10 +194,10 @@
 					else
 						to_chat(user, "<span class='warning'>Necra shuns my blasphemous deeds, I am cursed!</span>")
 						L.apply_status_effect(/datum/status_effect/debuff/cursed)
-		update_icon()
+				SEND_SIGNAL(user, COMSIG_GRAVE_ROBBED, user)
+		stage_update()
 		attacking_shovel.heldclod = new(attacking_shovel)
-		attacking_shovel.update_icon()
-		return
+		attacking_shovel.update_appearance(UPDATE_ICON_STATE)
 
 /datum/status_effect/debuff/cursed
 	id = "cursed"
@@ -258,7 +267,6 @@
 		for(var/mob/living/carbon/human/D in C.contents)
 			D.buried = TRUE
 	opened = FALSE
-//	update_icon()
 	return TRUE
 
 /obj/structure/closet/dirthole/dump_contents()
@@ -276,81 +284,60 @@
 		climb_offset = 0
 	opened = TRUE
 	dump_contents()
-	update_icon()
+	stage_update()
 	return 1
 
-
-/obj/structure/closet/dirthole/update_icon()
+/obj/structure/closet/dirthole/proc/stage_update()
 	switch(stage)
-		if(1)
-			name = "hole"
-			icon_state = "hole1"
-			can_buckle = FALSE
-		if(2)
-			name = "hole"
-			icon_state = "hole2"
+		if(1, 2, 4)
 			can_buckle = FALSE
 		if(3)
-			name = "pit"
-			icon_state = "grave"
 			can_buckle = TRUE
+	update_appearance(UPDATE_ICON | UPDATE_NAME)
+
+/obj/structure/closet/dirthole/update_icon_state()
+	. = ..()
+	switch(stage)
+		if(1)
+			icon_state = "hole1"
+		if(2)
+			icon_state = "hole2"
+		if(3)
+			icon_state = "grave"
+		if(4)
+			icon_state = "gravecovered"
+
+/obj/structure/closet/dirthole/update_overlays()
+	. = ..()
+	if(!has_buckled_mobs() || stage != 3)
+		return
+	var/mutable_appearance/abovemob = mutable_appearance('icons/turf/floors.dmi', "grave_above", ABOVE_MOB_LAYER)
+	. += abovemob
+
+/obj/structure/closet/dirthole/update_name(updates)
+	. = ..()
+	switch(stage)
+		if(1, 2)
+			name = "hole"
+		if(3)
+			name = "pit"
 		if(4)
 			name = "grave"
-			icon_state = "gravecovered"
-			can_buckle = FALSE
-	update_abovemob()
-
-/obj/structure/closet/dirthole/Initialize()
-	abovemob = mutable_appearance('icons/turf/floors.dmi', "grave_above")
-	abovemob.layer = ABOVE_MOB_LAYER
-	update_icon()
-	var/turf/open/floor/dirt/T = loc
-	if(istype(T))
-		mastert = T
-		T.holie = src
-		if(T.muddy)
-			if(!(locate(/obj/item/natural/worms) in T))
-				if(prob(40))
-					if(prob(10))
-						new /obj/item/natural/worms/grub_silk(T)
-					else
-						new /obj/item/natural/worms/leech(T)
-				else
-					new /obj/item/natural/worms(T)
-		else
-			if(!(locate(/obj/item/natural/stone) in T))
-				if(prob(23))
-					new /obj/item/natural/stone(T)
-	return ..()
-
-/obj/structure/closet/dirthole/Destroy()
-	QDEL_NULL(abovemob)
-	if(istype(mastert))
-		if(mastert && mastert?.holie == src)
-			mastert.holie = null
-	return ..()
 
 /obj/structure/closet/dirthole/post_buckle_mob(mob/living/M)
 	. = ..()
-	update_abovemob()
-
-/obj/structure/closet/dirthole/proc/update_abovemob()
-	if(has_buckled_mobs() && stage == 3)
-		add_overlay(abovemob)
-	else
-		cut_overlay(abovemob)
+	update_appearance(UPDATE_OVERLAYS)
 
 /obj/structure/closet/dirthole/post_unbuckle_mob()
 	. = ..()
-	update_abovemob()
+	update_appearance(UPDATE_OVERLAYS)
 
 /obj/structure/closet/dirthole/relaymove(mob/user)
 	if(user.stat || !isturf(loc) || !isliving(user))
 		return
-	if(locked && !user.mind?.has_antag_datum(/datum/antagonist/zombie))
+	if(!user.mind?.has_antag_datum(/datum/antagonist/zombie))
 		if(message_cooldown <= world.time)
 			message_cooldown = world.time + 50
 			to_chat(user, "<span class='warning'>I'm trapped!</span>")
 		return
-	locked = FALSE
 	container_resist(user)

@@ -6,24 +6,29 @@
 	var/datum/plant_def/plant_type
 	var/spread_chance = 75
 
-
-/obj/structure/wild_plant/New(loc, datum/plant_def/incoming_type, spread_chance = 75)
+/obj/structure/wild_plant/Initialize(mapload, ...)
 	. = ..()
-	src.plant_type = new incoming_type
-
+	if(!plant_type || !istype(plant_type))
+		return
+	plant_type = new plant_type
 	if(prob(spread_chance))
 		try_spread()
 
-	name = name + src.plant_type.name
-	desc = desc + src.plant_type.name
+	name = name + plant_type.name
+	desc = desc + plant_type.name
 
 	pixel_x = rand(-12, 12)
 	pixel_y = rand(-12, 12)
 
-	icon_state = "[src.plant_type.icon_state]2"
+	icon_state = "[plant_type.icon_state]2"
+
+/obj/structure/wild_plant/Destroy()
+	if(istype(plant_type))
+		QDEL_NULL(plant_type)
+	return ..()
 
 /obj/structure/wild_plant/Crossed(mob/living/carbon/human/H)
-	playsound(src.loc, "plantcross", 80, FALSE, -1)
+	playsound(loc, "plantcross", 80, FALSE, -1)
 
 /obj/structure/wild_plant/proc/try_spread()
 	var/list/dirs = GLOB.cardinals.Copy()
@@ -54,7 +59,7 @@
 	apply_farming_fatigue(user, 4)
 	add_sleep_experience(user, /datum/skill/labor/farming, user.STAINT * 2)
 
-	var/farming_skill = user.mind.get_skill_level(/datum/skill/labor/farming)
+	var/farming_skill = user.get_skill_level(/datum/skill/labor/farming)
 	var/feedback = "I harvest the produce."
 	var/modifier = 0
 	var/chance_to_ruin_single = 75 - (farming_skill * 25)
@@ -71,6 +76,7 @@
 		modifier += 3
 
 	record_featured_stat(FEATURED_STATS_FARMERS, user)
+	record_featured_object_stat(FEATURED_STATS_CROPS, plant_type.name)
 	GLOB.vanderlin_round_stats[STATS_PLANTS_HARVESTED]++
 	to_chat(user, span_notice(feedback))
 	yield_produce(modifier)
@@ -82,31 +88,25 @@
 		new plant_type.produce_type(loc)
 	qdel(src)
 
-
-/obj/structure/wild_plant/random/New(loc, datum/plant_def/incoming_type, spread_chance)
-	incoming_type = pick(subtypesof(/datum/plant_def))
+/obj/structure/wild_plant/random/Initialize()
+	plant_type = pick(subtypesof(/datum/plant_def))
 	spread_chance = rand(25, 100)
-	. = ..()
+	return ..()
 
-/obj/structure/wild_plant/manabloom/New(loc, datum/plant_def/incoming_type, spread_chance)
-	incoming_type = /datum/plant_def/manabloom
+/obj/structure/wild_plant/manabloom
+	plant_type = /datum/plant_def/manabloom
+
+/obj/structure/wild_plant/manabloom/Initialize()
 	spread_chance = rand(25, 50)
-	. = ..()
+	return ..()
 
-/obj/structure/wild_plant/nospread/New(loc, datum/plant_def/incoming_type, spread_chance)
+/obj/structure/wild_plant/nospread
 	spread_chance = 0
-	. = ..()
 
 /obj/structure/wild_plant/nospread/manabloom
 	icon_state = "manabloom2"
-
-/obj/structure/wild_plant/nospread/manabloom/New(loc, datum/plant_def/incoming_type, spread_chance)
-	incoming_type = /datum/plant_def/manabloom
-	. = ..()
+	plant_type = /datum/plant_def/manabloom
 
 /obj/structure/wild_plant/nospread/poppy
 	icon_state = "poppy2"
-
-/obj/structure/wild_plant/nospread/poppy/New(loc, datum/plant_def/incoming_type, spread_chance)
-	incoming_type = /datum/plant_def/poppy
-	. = ..()
+	plant_type = /datum/plant_def/poppy

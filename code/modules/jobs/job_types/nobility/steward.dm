@@ -8,7 +8,7 @@
 	department_flag = NOBLEMEN
 	job_flags = (JOB_ANNOUNCE_ARRIVAL | JOB_SHOW_IN_CREDITS | JOB_EQUIP_RANK | JOB_NEW_PLAYER_JOINABLE)
 	display_order = JDO_STEWARD
-	faction = FACTION_STATION
+	faction = FACTION_TOWN
 	total_positions = 1
 	spawn_positions = 1
 	min_pq = 2
@@ -45,15 +45,14 @@
 	backr = /obj/item/storage/backpack/satchel
 	backpack_contents = list(/obj/item/storage/belt/pouch/coins/rich = 1, /obj/item/lockpickring/mundane = 1)
 
-	if(H.mind)
-		H.mind?.adjust_skillrank(/datum/skill/combat/knives, 2, TRUE)
-		H.mind?.adjust_skillrank(/datum/skill/misc/reading, 6, TRUE)
-		H.mind?.adjust_skillrank(/datum/skill/misc/riding, 2, TRUE)
-		H.mind?.adjust_skillrank(/datum/skill/misc/stealing, 2, TRUE)
-		H.mind?.adjust_skillrank(/datum/skill/misc/sneaking, 2, TRUE)
-		H.mind?.adjust_skillrank(/datum/skill/misc/lockpicking, 6, TRUE)
-		H.mind?.adjust_skillrank(/datum/skill/labor/mathematics, 5, TRUE)
-		H.change_stat(STATKEY_STR, -2)
-		H.change_stat(STATKEY_INT, 5)
-		H.change_stat(STATKEY_CON, -2)
+	H.adjust_skillrank(/datum/skill/combat/knives, 2, TRUE)
+	H.adjust_skillrank(/datum/skill/misc/reading, 6, TRUE)
+	H.adjust_skillrank(/datum/skill/misc/riding, 2, TRUE)
+	H.adjust_skillrank(/datum/skill/misc/stealing, 2, TRUE)
+	H.adjust_skillrank(/datum/skill/misc/sneaking, 2, TRUE)
+	H.adjust_skillrank(/datum/skill/misc/lockpicking, 6, TRUE)
+	H.adjust_skillrank(/datum/skill/labor/mathematics, 5, TRUE)
+	H.change_stat(STATKEY_STR, -2)
+	H.change_stat(STATKEY_INT, 5)
+	H.change_stat(STATKEY_CON, -2)
 	ADD_TRAIT(H, TRAIT_NOBLE, TRAIT_GENERIC)

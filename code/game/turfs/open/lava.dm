@@ -104,6 +104,9 @@
 /// Burns the target and makes the turf process (depending on the return value of do_burn()).
 #define LAVA_BE_BURNING 2
 
+/turf/open/lava/can_traverse_safely(atom/movable/traveler)
+	return ..() && !can_burn_stuff(traveler) // can traverse safely if you won't burn in it
+
 ///Proc that sets on fire something or everything on the turf that's not immune to lava. Returns TRUE to make the turf start processing.
 /turf/open/lava/proc/burn_stuff(atom/movable/to_burn, seconds_per_tick = 1)
 	if(is_safe())
@@ -156,8 +159,8 @@
 
 	if(iscarbon(burn_living))
 		var/mob/living/carbon/burn_carbon = burn_living
-		var/obj/item/clothing/burn_suit = burn_carbon.get_item_by_slot(SLOT_ARMOR)
-		var/obj/item/clothing/burn_helmet = burn_carbon.get_item_by_slot(SLOT_HEAD)
+		var/obj/item/clothing/burn_suit = burn_carbon.get_item_by_slot(ITEM_SLOT_ARMOR)
+		var/obj/item/clothing/burn_helmet = burn_carbon.get_item_by_slot(ITEM_SLOT_HEAD)
 		if(burn_suit?.clothing_flags & LAVAPROTECT && burn_helmet?.clothing_flags & LAVAPROTECT)
 			return LAVA_BE_PROCESSING
 

@@ -4,6 +4,8 @@ GLOBAL_LIST_EMPTY(vampire_objects)
 #define VITAE_LEVEL_HUNGRY 100
 #define VITAE_LEVEL_FED 200
 
+// Originally a a curse of hubris from Psydon Himself, vampires are
+// twisted by hellish influence from Kain's time in Subterra into bloodthirsty monsters who can create spread their curse.
 /datum/antagonist/vampire
 	name = "Vampire"
 	roundend_category = "Vampires"
@@ -36,10 +38,12 @@ GLOBAL_LIST_EMPTY(vampire_objects)
 		TRAIT_VAMP_DREAMS,
 		TRAIT_NOAMBUSH,
 		TRAIT_DARKVISION,
+		TRAIT_LIMBATTACHMENT,
 	)
 
 	var/vitae = 1000
 	var/vmax = 3000
+	var/list/ability_cooldowns = list()
 
 	COOLDOWN_DECLARE(last_transform)
 	var/disguised = FALSE //! spawn
@@ -68,16 +72,26 @@ GLOBAL_LIST_EMPTY(vampire_objects)
 		var/mob/living/carbon/human/vampdude = owner.current
 		vampdude.adv_hugboxing_cancel()
 
-
-
 	owner.current.cmode_music = 'sound/music/cmode/antag/CombatThrall.ogg'
+	owner.current.adjust_skillrank(/datum/skill/magic/blood, 2, TRUE)
 	owner.current.AddSpell(new /obj/effect/proc_holder/spell/targeted/transfix)
+
 	vamp_look()
 	. = ..()
 	equip()
 	after_gain()
 
+/datum/antagonist/vampire/lord/on_gain()
+	. = ..()
+	owner.special_role = span_redtext("[name]")
+	owner.current.mana_pool.ethereal_recharge_rate += 0.2
+
+/datum/antagonist/vampire/lord/on_removal()
+	owner.current.mana_pool.ethereal_recharge_rate -= 0.2
+	return ..()
+
 /datum/antagonist/vampire/proc/after_gain()
+	owner.current.verbs |= /mob/living/carbon/human/proc/vamp_regenerate
 	owner.current.verbs |= /mob/living/carbon/human/proc/disguise_button
 
 /datum/antagonist/vampire/on_removal()
@@ -194,6 +208,22 @@ GLOBAL_LIST_EMPTY(vampire_objects)
 		stack_trace("two vampire teams were created, and the wrong one tried to be assigned")
 
 	team = new_team
+
+///proc used for non spells vampire action
+/datum/antagonist/vampire/proc/check_vampire_cooldown(mob/user, ability_name, cooldown_time)
+
+	if(!ability_name || !user)
+		return FALSE
+
+	/// Check if on cooldown
+	if(src.ability_cooldowns[ability_name] > world.time)
+		var/time_left = src.ability_cooldowns[ability_name] - world.time
+		to_chat(user, span_warning("[ability_name] on cooldown! Wait [DisplayTimeText(time_left)]."))
+		return FALSE
+
+	// Set new cooldown
+	src.ability_cooldowns[ability_name] = world.time + cooldown_time
+	return TRUE
 
 /datum/antagonist/vampire/get_team()
 	return team

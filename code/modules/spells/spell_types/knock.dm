@@ -9,7 +9,7 @@
 	invocation = "AULIE OXIN FIERA"
 	invocation_type = "whisper"
 	range = 3
-	cooldown_min = 300 //20 deciseconds reduction per rank
+	cooldown_min = 0.5 MINUTES //20 deciseconds reduction per rank
 	attunements = list(
 		/datum/attunement/aeromancy = 0.2,
 	)
@@ -22,15 +22,17 @@
 			INVOKE_ASYNC(src, PROC_REF(open_door), door)
 		for(var/obj/structure/closet/C in T.contents)
 			INVOKE_ASYNC(src, PROC_REF(open_closet), C)
+	return ..()
 
 /obj/effect/proc_holder/spell/aoe_turf/knock/proc/open_door(obj/structure/door/door)
 	if(istype(door))
 		door.force_open()
-		door.locked = FALSE
+		door.unlock()
 
 /* Assuming force_open is a correct method for both wooden and other doors.
 Check your door implementation to ensure this method exists and is appropriate.*/
 
 /obj/effect/proc_holder/spell/aoe_turf/knock/proc/open_closet(obj/structure/closet/C)
-	C.locked = FALSE
-	C.open()
+	if(istype(C))
+		C.unlock()
+		C.open()

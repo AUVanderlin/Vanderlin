@@ -36,12 +36,13 @@
 	var/turf/T = get_turf(src)
 	if(T)
 		new /obj/item/grown/log/tree/stick(T)
-	..()
+	return ..()
 
 /obj/structure/gravemarker/OnCrafted(dir, mob/user)
 	icon_state = "gravemarker[rand(1,3)]"
 	for(var/obj/structure/closet/dirthole/hole in loc)
 		if(pacify_coffin(hole, user))
 			user.visible_message(span_rose("[user] consecrates [hole]."), span_rose("I consecrate [hole]."))
+			SEND_SIGNAL(user, COMSIG_GRAVE_CONSECRATED, hole)
 			GLOB.vanderlin_round_stats[STATS_GRAVES_CONSECRATED]++
 	return ..()

@@ -87,10 +87,10 @@
 	attunements_to_generate = null
 	negative_attunements = null
 
-	QDEL_NULL(transfer_rates)
-	QDEL_NULL(transfer_caps)
-	QDEL_NULL(transferring_to)
-	QDEL_NULL(transferring_from) // we already have a signal registered, so if we qdel we stop transfers
+	transfer_rates = null
+	transfer_caps = null
+	transferring_to = null
+	transferring_from = null
 
 	STOP_PROCESSING(SSmagic, src)
 
@@ -193,7 +193,7 @@
 
 	donation_budget_this_tick = (max_donation_rate_per_second)
 
-	if (ethereal_recharge_rate != 0)
+	if (ethereal_recharge_rate != 0 && (amount < get_softcap()))
 		adjust_mana(ethereal_recharge_rate, attunements_to_generate)
 	if((intrinsic_recharge_sources & MANA_ALL_LEYLINES) && amount < get_softcap())
 		var/list/leylines = list()
@@ -455,11 +455,10 @@
 
 /datum/mana_pool/proc/set_max_mana(new_max, change_amount = FALSE, change_softcap = TRUE)
 	var/percent = get_percent_to_max() //originally this was a duplicate redefinition- see change_amount
-	var/softcap_percent = get_percent_of_softcap_to_max()
+	var/softcap_increase = new_max - maximum_mana_capacity
 
 	if (change_softcap)
-		softcap_percent = get_percent_of_softcap_to_max() // originally softcap_percent was defined here
-		softcap = new_max * (softcap_percent / 100)
+		softcap += softcap_increase
 
 	if (change_amount)
 		percent = get_percent_to_max() // this used to be var/percent. why?
@@ -483,7 +482,7 @@
 	if(!istype(L) || !L.mind)
 		return softcap
 
-	var/skill_level = max(1, L.mind.get_skill_level(/datum/skill/magic/arcane))
+	var/skill_level = max(1, L.get_skill_level(/datum/skill/magic/arcane))
 	return softcap + (skill_level * 100)
 
 ///this is how a mana pool responds to backlash for most pools this is just taking damage

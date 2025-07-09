@@ -9,7 +9,7 @@
 	department_flag = PEASANTS
 	display_order = JDO_VAGRANT
 	job_flags = (JOB_ANNOUNCE_ARRIVAL | JOB_EQUIP_RANK | JOB_NEW_PLAYER_JOINABLE)
-	faction = FACTION_STATION
+	faction = FACTION_TOWN
 	total_positions = 15
 	spawn_positions = 15
 	min_pq = -100
@@ -50,14 +50,13 @@
 		shirt = /obj/item/clothing/shirt/undershirt/vagrant
 		if(prob(50))
 			shirt = /obj/item/clothing/shirt/undershirt/vagrant/l
-	if(H.mind)
-		H.mind?.adjust_skillrank(/datum/skill/misc/sneaking, pick(1,2,3,4,5), TRUE)
-		H.mind?.adjust_skillrank(/datum/skill/misc/stealing, pick(1,2,3,4,5), TRUE)
-		H.mind?.adjust_skillrank(/datum/skill/misc/lockpicking, pick (1,2,3,4,5), TRUE) // thug lyfe
-		H.mind?.adjust_skillrank(/datum/skill/misc/climbing, pick(2,3,4,5), TRUE)
-		H.mind?.adjust_skillrank(/datum/skill/combat/wrestling, pick(1,2,3), TRUE) // Street-fu
-		H.mind?.adjust_skillrank(/datum/skill/combat/unarmed, pick(1,2,3), TRUE)
-		H.base_fortune = rand(1, 20)
+	H.adjust_skillrank(/datum/skill/misc/sneaking, pick(1,2,3,4,5), TRUE)
+	H.adjust_skillrank(/datum/skill/misc/stealing, pick(1,2,3,4,5), TRUE)
+	H.adjust_skillrank(/datum/skill/misc/lockpicking, pick (1,2,3,4,5), TRUE) // thug lyfe
+	H.adjust_skillrank(/datum/skill/misc/climbing, pick(2,3,4,5), TRUE)
+	H.adjust_skillrank(/datum/skill/combat/wrestling, pick(1,2,3), TRUE) // Street-fu
+	H.adjust_skillrank(/datum/skill/combat/unarmed, pick(1,2,3), TRUE)
+	H.base_fortune = rand(1, 20)
 	if(prob(5))
 		r_hand = /obj/item/weapon/mace/woodclub
 	H.change_stat(STATKEY_INT, -3)

@@ -16,12 +16,14 @@
 	attunements = list(
 		/datum/attunement/electric = 0.9
 	)
+	overlay_state = "sundering"
 
 /obj/effect/proc_holder/spell/invoked/sundering_lightning/cast(list/targets, mob/user = usr)
 	var/turf/T = get_turf(targets[1])
 //	var/list/affected_turfs = list()
 	playsound(T,'sound/weather/rain/thunder_1.ogg', 80, TRUE)
 	T.visible_message(span_boldwarning("The air feels crackling and charged!"))
+	. = ..()
 	sleep(30)
 	create_lightning(T)
 
@@ -54,8 +56,7 @@
 
 /obj/effect/temp_visual/lightning/Initialize(mapload)
 	. = ..()
-	var/mutable_appearance/MA = mutable_appearance(icon, icon_state, plane = EMISSIVE_PLANE)
-	overlays += MA
+	add_overlay(emissive_appearance(icon, icon_state, alpha = src.alpha))
 
 /obj/effect/temp_visual/targetlightning
 	icon = 'icons/effects/effects.dmi'

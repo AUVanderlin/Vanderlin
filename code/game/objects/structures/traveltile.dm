@@ -49,6 +49,7 @@
 
 /obj/structure/fluff/traveltile/Initialize()
 	GLOB.traveltiles += src
+	hide_if_needed()
 	. = ..()
 
 /obj/structure/fluff/traveltile/Destroy()
@@ -59,7 +60,7 @@
 	if(invis_without_trait && required_trait)
 		invisibility = INVISIBILITY_OBSERVER
 		var/image/I = image(icon = 'icons/turf/floors.dmi', icon_state = "travel", layer = ABOVE_OPEN_TURF_LAYER, loc = src)
-		add_alt_appearance(/datum/atom_hud/alternate_appearance/basic, required_trait, I)
+		add_alt_appearance(/datum/atom_hud/alternate_appearance/basic/traveltile, required_trait, I)
 
 /obj/structure/fluff/traveltile/proc/get_other_end_turf(return_travel = FALSE)
 	if(!aportalgoesto)
@@ -160,7 +161,7 @@
 		show_travel_tile(user)
 		the_tile.show_travel_tile(user)
 	user.log_message("[user.mind?.key ? user.mind?.key : user.real_name] has travelled to [loc_name(the_tile)] from", LOG_GAME, color = "#0000ff")
-	mob_move_travel_z_level(user, get_turf(the_tile))
+	movable_travel_z_level(user, get_turf(the_tile))
 
 /obj/structure/fluff/traveltile/proc/reveal_travel_trait_to_others(mob/living/user)
 	if(!required_trait)
@@ -191,52 +192,3 @@
 			AA.remove_from_hud(user)
 			revealed_to -= user
 			break
-
-/obj/structure/fluff/traveltile/bandit
-	required_trait = TRAIT_BANDITCAMP
-	can_gain_with_sight = TRUE
-	can_gain_by_walking = TRUE
-	check_other_side = TRUE
-	invis_without_trait = TRUE
-
-/obj/structure/fluff/traveltile/vampire
-	required_trait = TRAIT_VAMPMANSION
-	can_gain_with_sight = TRUE
-	can_gain_by_walking = TRUE
-	check_other_side = TRUE
-	invis_without_trait = TRUE
-
-/obj/structure/fluff/traveltile/inhumen
-	required_trait = TRAIT_INHUMENCAMP
-	can_gain_with_sight = FALSE
-	can_gain_by_walking = FALSE
-	check_other_side = TRUE
-	invis_without_trait = TRUE
-
-
-/*	..................   Traveltiles   ................... */ // these are the ones on centcom, where the actual lair is, to reduce varedits onmap
-/obj/structure/fluff/traveltile/exit_bandit		// mus NOT be a traveltile/bandit child, because that one has a check for banditcamp trait. People should always be able to leave the camp.
-	aportalid = "banditin"
-	aportalgoesto = "banditexit"
-
-/obj/structure/fluff/traveltile/bandit
-	aportalid = "banditexit"
-	aportalgoesto = "banditin"
-
-/obj/structure/fluff/traveltile/exit_vampire	// mus NOT be a traveltile/vampire child, because that one has a check for banditcamp trait. People should always be able to leave the camp.
-	aportalid = "vampin"
-	aportalgoesto = "vampexit"
-
-/obj/structure/fluff/traveltile/vampire
-	aportalid = "vampexit"
-	aportalgoesto = "vampin"
-
-/obj/structure/fluff/traveltile/exit_inhumen
-	aportalid = "inhumenin"
-	aportalgoesto = "inhumenexit"
-
-
-/obj/structure/fluff/traveltile/to_inhumen_tribe
-	name = "to the Deep Bog"
-	aportalid = "inhumenexit"
-	aportalgoesto = "inhumenin"

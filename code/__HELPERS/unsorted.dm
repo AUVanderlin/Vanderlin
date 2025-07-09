@@ -286,8 +286,8 @@ Turf and target are separate in case you want to teleport some distance from a t
 /proc/get_mob_by_ckey(key)
 	if(!key)
 		return
-	var/list/mobs = sortmobs()
-	for(var/mob/M in mobs)
+	var/list/mobs = GLOB.mob_list
+	for(var/mob/M as anything in mobs)
 		if(M.ckey == key)
 			return M
 
@@ -459,7 +459,7 @@ Turf and target are separate in case you want to teleport some distance from a t
 /// Returns a sorted version of GLOB.areas, by name
 /proc/get_sorted_areas()
 	if(!GLOB.sortedAreas)
-		GLOB.sortedAreas = sortTim(GLOB.areas.Copy(), /proc/cmp_name_asc)
+		GLOB.sortedAreas = sortList(GLOB.areas, GLOBAL_PROC_REF(cmp_name_asc))
 	return GLOB.sortedAreas
 
 //Takes: Area type as a text string from a variable.
@@ -595,91 +595,6 @@ will handle it, but:
 	if(!weapon.embedding?.embed_chance)
 		return FALSE
 	return TRUE
-
-/proc/wash_atom(atom/A, clean = CLEAN_WEAK)
-	SEND_SIGNAL(A, COMSIG_COMPONENT_CLEAN_ACT, clean)
-	if(isobj(A))
-		wash_obj(A,clean)
-		var/obj/O = A
-		O.wash_act(clean)
-	else if(isturf(A))
-		wash_turf(A,clean)
-	else if(isliving(A))
-		wash_mob(A,clean)
-
-/obj/proc/wash_act(clean = CLEAN_WEAK)
-	return
-
-/proc/wash_obj(obj/O, clean = CLEAN_WEAK)
-	. = SEND_SIGNAL(O, COMSIG_COMPONENT_CLEAN_ACT, clean)
-
-/proc/wash_turf(turf/tile, clean = CLEAN_WEAK)
-	SEND_SIGNAL(tile, COMSIG_COMPONENT_CLEAN_ACT, clean)
-	for(var/obj/effect/E in tile)
-		if(is_cleanable(E))
-			var/obj/effect/decal/cleanable/cleanable = E
-			if(clean >= cleanable.minimum_clean_strength)
-				qdel(E)
-
-/proc/wash_mob(mob/living/L, clean = CLEAN_WEAK)
-	SEND_SIGNAL(L, COMSIG_COMPONENT_CLEAN_ACT, clean)
-	if(iscarbon(L))
-		var/mob/living/carbon/M = L
-		. = TRUE
-
-		for(var/obj/item/I in M.held_items)
-			wash_obj(I)
-
-		if(M.back && wash_obj(M.back))
-			M.update_inv_back(0)
-
-		var/list/obscured = M.check_obscured_slots()
-
-		if(M.head && wash_obj(M.head,clean))
-			M.update_inv_head()
-
-		if(M.wear_mask && !(SLOT_WEAR_MASK in obscured) && wash_obj(M.wear_mask,clean))
-			M.update_inv_wear_mask()
-
-		if(M.ears && !(HIDEEARS in obscured) && wash_obj(M.ears,clean))
-			M.update_inv_ears()
-
-		if(M.wear_neck && !(SLOT_NECK in obscured) && wash_obj(M.wear_neck,clean))
-			M.update_inv_neck()
-
-		if(M.shoes && !(HIDESHOES in obscured) && wash_obj(M.shoes,clean))
-			M.update_inv_shoes()
-
-		var/washgloves = FALSE
-		if(M.gloves && !(HIDEGLOVES in obscured))
-			washgloves = TRUE
-
-		if(ishuman(M))
-			var/mob/living/carbon/human/H = M
-
-			if(H.wear_armor && wash_obj(H.wear_armor,clean))
-				H.update_inv_armor()
-			else if(H.wear_shirt && wash_obj(H.wear_shirt,clean))
-				H.update_inv_shirt()
-			else if(H.wear_pants && wash_obj(H.wear_pants,clean))
-				H.update_inv_pants()
-
-			if(washgloves)
-				SEND_SIGNAL(H, COMSIG_COMPONENT_CLEAN_ACT, CLEAN_STRENGTH_BLOOD)
-
-			if(!H.is_mouth_covered())
-				H.lip_style = null
-				H.update_body()
-
-			if(H.belt && wash_obj(H.belt,clean))
-				H.update_inv_belt()
-
-			if(H.cloak && wash_obj(H.cloak,clean))
-				H.update_inv_cloak()
-		else
-			SEND_SIGNAL(M, COMSIG_COMPONENT_CLEAN_ACT, CLEAN_STRENGTH_BLOOD)
-	else
-		SEND_SIGNAL(L, COMSIG_COMPONENT_CLEAN_ACT, CLEAN_STRENGTH_BLOOD)
 
 /*
 Checks if that loc and dir has an item on the wall
@@ -1020,7 +935,7 @@ GLOBAL_DATUM_INIT(dview_mob, /mob/dview, new)
 
 // \ref behaviour got changed in 512 so this is necesary to replicate old behaviour.
 // If it ever becomes necesary to get a more performant REF(), this lies here in wait
-// #define REF(thing) (thing && istype(thing, /datum) && (thing:datum_flags & DF_USE_TAG) && thing:tag ? "[thing:tag]" : "\ref[thing]")
+// #define REF(thing) (thing && istype(thing, /datum) && (thing:datum_flags & DF_USE_TAG) && thing:tag ? "[thing:tag]" : text_ref(thing))
 /proc/REF(input)
 	if(istype(input, /datum))
 		var/datum/thing = input
@@ -1030,7 +945,7 @@ GLOBAL_DATUM_INIT(dview_mob, /mob/dview, new)
 				thing.datum_flags &= ~DF_USE_TAG
 			else
 				return "\[[url_encode(thing.tag)]\]"
-	return "\ref[input]"
+	return text_ref(input)
 
 // Makes a call in the context of a different usr
 // Use sparingly
@@ -1234,7 +1149,7 @@ GLOBAL_LIST_INIT(duplicate_forbidden_vars,list(
 			var/obj/item/I = O
 			I.damtype = STAMINA // thou shalt not
 
-		N.update_icon()
+		N.update_appearance()
 
 	if(holoitem)
 		O.flags_1 |= HOLOGRAM_1

@@ -239,7 +239,7 @@
 	user.emote("rage", forced = TRUE)
 	playsound(get_turf(user), 'sound/magic/barbroar.ogg', 50, TRUE)
 	user.apply_status_effect(/datum/status_effect/buff/barbrage)
-	return TRUE
+	return ..()
 
 // XYLIX
 
@@ -268,6 +268,7 @@
 		user.say(message, forced = "spell")
 		var/mob/living/victim = targets[1]
 		if(victim.can_hear())
+			SEND_SIGNAL(user, COMSIG_VICIOUSLY_MOCKED, victim)
 			victim.apply_status_effect(/datum/status_effect/debuff/viciousmockery)
 			GLOB.vanderlin_round_stats[STATS_PEOPLE_MOCKED]++
-		return TRUE
+		return ..()

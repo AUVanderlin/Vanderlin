@@ -14,6 +14,10 @@
 	pass_flags = PASSCLOSEDTURF | PASSMOB | PASSTABLE
 	next_move_modifier = 0
 
+	var/list/learned_routes = list() // AI learns efficient paths
+	var/list/worker_relationships = list() // Track worker interactions
+	var/list/recent_events = list() // Event history affects behavior
+
 	var/list/worker_mobs = list()
 	var/list/dead_workers = list()
 
@@ -33,7 +37,7 @@
 
 	var/datum/building_datum/held_build
 
-	var/worker_type = /mob/living/simple_animal/hostile/retaliate/leylinelycan
+	var/worker_type = /mob/living/simple_animal/hostile/retaliate/fae/sprite
 
 /mob/camera/strategy_controller/Initialize()
 	. = ..()
@@ -70,6 +74,44 @@
 	var/datum/building_datum/build = new building(src)
 	build.setup_building_ghost()
 
+/mob/camera/strategy_controller/proc/process_dynamic_events()
+	if(prob(2)) // 2% chance per process
+		trigger_random_event()
+
+
+/mob/camera/strategy_controller/proc/trigger_random_event()
+	if(!length(worker_mobs))
+		return
+
+	var/list/possible_events = list(
+		"resource_discovery",
+		"weather_change",
+		"trader_arrival",
+		"pest_infestation",
+		"tool_breakdown",
+		"inspiration_boost"
+	)
+
+	var/chosen_event = pick(possible_events)
+	recent_events += "[world.time]: [chosen_event]"
+
+	switch(chosen_event)
+		if("resource_discovery")
+			// Spawn resources near workers
+			for(var/mob/living/worker in worker_mobs)
+				if(prob(30))
+					worker.visible_message("Something glints in the ground near [worker]!")
+
+		if("inspiration_boost")
+			// Random worker gets temporary mood/speed boost
+			var/mob/living/lucky_worker = pick(worker_mobs)
+			lucky_worker.controller_mind.adjust_mood(20, "sudden inspiration")
+			lucky_worker.controller_mind.work_speed *= 1.5
+			addtimer(CALLBACK(src, PROC_REF(remove_inspiration), lucky_worker), 5 MINUTES)
+
+/mob/camera/strategy_controller/proc/remove_inspiration(mob/living/worker)
+	if(worker && worker.controller_mind)
+		worker.controller_mind.work_speed /= 1.5
 
 /mob/camera/strategy_controller/proc/queue_building_build(datum/building_datum/building, turf/source_turf)
 	new building(src, source_turf)
@@ -129,6 +171,8 @@
 /mob/camera/strategy_controller/process()
 	building_icon?.update(src)
 
+	process_dynamic_events()
+
 	if(length(building_requests))
 		for(var/mob/living/mob in worker_mobs)
 			if(mob.stat >= DEAD)
@@ -187,7 +231,7 @@
 
 			for(var/datum/queued_workorder/workorder in in_progress_workorders)
 				if(workorder.arg_1)
-					if(!length(get_path_to(mob, workorder.arg_1, /turf/proc/Distance3D, 32 + 1, 250,1)))
+					if(!length(get_path_to(mob, workorder.arg_1, TYPE_PROC_REF(/turf, Heuristic_cardinal_3d), 32 + 1, 250,1)))
 						continue
 				mob.controller_mind.set_current_task(workorder.work_path, workorder.arg_1, workorder.arg_2, workorder.arg_3, workorder.arg_4)
 				in_progress_workorders -= workorder

@@ -41,12 +41,12 @@
 
 	var/transfer_prints = FALSE
 
-/obj/item/clothing/gloves/ComponentInitialize()
+/obj/item/clothing/gloves/Initialize(mapload, ...)
 	. = ..()
 	RegisterSignal(src, COMSIG_COMPONENT_CLEAN_ACT, PROC_REF(clean_blood))
 
 /obj/item/clothing/gloves/proc/clean_blood(datum/source, strength)
-	if(strength < CLEAN_STRENGTH_BLOOD)
+	if(strength & CLEAN_TYPE_BLOOD)
 		return
 	transfer_blood = 0
 

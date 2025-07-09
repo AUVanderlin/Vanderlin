@@ -20,7 +20,7 @@ GLOBAL_LIST_INIT(IconStates_cache, list())
 	var/extra_index = get_extra_onmob_index()
 	if(extra_index) //WIP, unimplemented
 		used_index += extra_index
-	if(HAS_BLOOD_DNA(src))
+	if(GET_ATOM_BLOOD_DNA_LENGTH(src))
 		used_index += "_b"
 	var/static/list/onmob_sprites = list()
 	var/icon/onmob = onmob_sprites["[tag][behind][mirrored][used_index]"]
@@ -90,11 +90,10 @@ GLOBAL_LIST_INIT(IconStates_cache, list())
 	if(!blended)
 		return
 	if(!skipoverlays)
-		for(var/V in overlays)
-			var/image/IM = V
-			var/icon/image_overlay = new(IM.icon,IM.icon_state)
-			if(IM.color)
-				image_overlay.Blend(IM.color,ICON_MULTIPLY)
+		for(var/image/IM in overlays)
+			var/icon/image_overlay = new(IM.icon, IM.icon_state)
+			if(image_overlay && IM.color)
+				image_overlay.Blend(IM.color, ICON_MULTIPLY)
 			blended.Blend(image_overlay,ICON_OVERLAY)
 
 	var/icon/holder
@@ -792,18 +791,4 @@ GLOBAL_LIST_INIT(IconStates_cache, list())
 			var/list/screens = list(C.hud_used.plane_masters["[FLOOR_PLANE]"], C.hud_used.plane_masters["[GAME_PLANE]"], C.hud_used.plane_masters["[LIGHTING_PLANE]"])
 			for(var/whole_screen in screens)
 				animate(whole_screen, transform = matrix(), time = 5, easing = QUAD_EASING)
-#endif
-
-#ifdef TESTING
-/client/verb/door_test_button()
-	set category = "DEBUGTEST"
-	set name = "door_test_button"
-	if(mob)
-		var/mob/M = mob
-		if(isturf(M.loc))
-			var/turf/T = M.loc
-			for(var/obj/structure/door/D in T)
-				to_chat(M, "DOOR - [D]")
-				to_chat(M, "LOCKID: [D.lockid]")
-				to_chat(M, "LOCKSTATUS: [D.locked]")
 #endif

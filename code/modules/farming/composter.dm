@@ -1,5 +1,6 @@
 #define MAXIMUM_TOTAL_COMPOST 2000
 #define COMPOST_PER_PRODUCED_ITEM 100
+#define COMPOST_PROCESS_RATE 300 / (1 MINUTES)
 
 /obj/structure/composter
 	name = "composter"
@@ -29,20 +30,14 @@
 	if(show_dry && unflipped_compost >= COMPOST_PER_PRODUCED_ITEM)
 		. += span_warning("The compost requires flipping!")
 
-/obj/structure/composter/update_icon()
-	. = ..()
-	update_overlays()
-
 /obj/structure/composter/Initialize()
 	START_PROCESSING(SSprocessing, src)
-	update_icon()
+	update_appearance(UPDATE_OVERLAYS)
 	. = ..()
 
 /obj/structure/composter/Destroy()
 	STOP_PROCESSING(SSprocessing, src)
 	. = ..()
-
-#define COMPOST_PROCESS_RATE 300 / (1 MINUTES)
 
 /obj/structure/composter/process()
 	var/dt = 10
@@ -78,7 +73,7 @@
 	var/flip_amount = unflipped_compost
 	unflipped_compost -= flip_amount
 	flipped_compost += flip_amount
-	update_icon()
+	update_appearance(UPDATE_OVERLAYS)
 
 /obj/structure/composter/proc/try_handle_adding_compost(obj/item/attacking_item, mob/user, batch_process)
 	var/compost_value = 0
@@ -101,7 +96,7 @@
 		if(!batch_process)
 			to_chat(user, span_notice("I add \the [attacking_item] to \the [src]"))
 		qdel(attacking_item)
-		update_icon()
+		update_appearance(UPDATE_OVERLAYS)
 		return TRUE
 	return FALSE
 
@@ -121,7 +116,7 @@
 		return
 	ready_compost -= COMPOST_PER_PRODUCED_ITEM
 	. = new /obj/item/compost(get_turf(src))
-	update_icon()
+	update_appearance(UPDATE_OVERLAYS)
 
 /obj/structure/composter/attackby(obj/item/attacking_item, mob/user, params)
 	user.changeNext_move(CLICK_CD_FAST)
@@ -137,7 +132,7 @@
 					break
 		if(success)
 			to_chat(user, span_info("I dump all the compostables inside [attacking_item] into [src]."))
-			attacking_item.update_icon()
+			attacking_item.update_appearance()
 		else
 			to_chat(user, span_warning("There's nothing in [attacking_item] that can be composted."))
 		return TRUE
@@ -175,9 +170,12 @@
 		. += "pre_compost_low"
 
 	if(show_dry && unprocesed_dry_overlay_name)
-		var/mutable_appearance/dry_ma = mutable_appearance(icon, unprocesed_dry_overlay_name)
-		dry_ma.color = "#ffbb6d"
-		dry_ma.alpha = 40
+		var/mutable_appearance/dry_ma = mutable_appearance(\
+			icon,\
+			unprocesed_dry_overlay_name,\
+			color = "#ffbb6d",\
+			alpha = 40,\
+		)
 		. += dry_ma
 
 	if(total_processed >= MAXIMUM_TOTAL_COMPOST * 0.60)
@@ -195,3 +193,7 @@
 	w_class = WEIGHT_CLASS_SMALL
 	grid_width = 32
 	grid_height = 32
+
+#undef MAXIMUM_TOTAL_COMPOST
+#undef COMPOST_PER_PRODUCED_ITEM
+#undef COMPOST_PROCESS_RATE

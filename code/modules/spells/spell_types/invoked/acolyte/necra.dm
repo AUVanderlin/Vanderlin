@@ -24,11 +24,13 @@
 	for(var/obj/structure/closet/crate/coffin/coffin in target_turf)
 		if(pacify_coffin(coffin, user))
 			user.visible_message(span_rose("[user] consecrates [coffin]."), span_rose("My funeral rites have been performed on [coffin]."))
+			SEND_SIGNAL(user, COMSIG_GRAVE_CONSECRATED, coffin)
 			GLOB.vanderlin_round_stats[STATS_GRAVES_CONSECRATED]++
 			return
 	for(var/obj/structure/closet/dirthole/hole in target_turf)
 		if(pacify_coffin(hole, user))
 			user.visible_message(span_rose("[user] consecrates [hole]."), span_rose("My funeral rites have been performed on [hole]."))
+			SEND_SIGNAL(user, COMSIG_GRAVE_CONSECRATED, hole)
 			GLOB.vanderlin_round_stats[STATS_GRAVES_CONSECRATED]++
 			return
 	to_chat(user, span_warning("I failed to perform the rites."))
@@ -114,11 +116,10 @@
 	to_chat(soul, span_blue("You feel yourself being transported back to the Underworld."))
 	soul.orbiting?.end_orbit()
 	soul.drop_all_held_items()
-	for(var/obj/effect/landmark/underworld/A in shuffle(GLOB.landmarks_list))
-		soul.forceMove(A)
-		for(var/I in itemstore)
-			soul.put_in_hands(new I())
-		break
+	var/turf/soul_turf = pick(GLOB.underworldspiritspawns)
+	soul.forceMove(soul_turf)
+	for(var/I in itemstore)
+		soul.put_in_hands(new I())
 	soul.beingmoved = FALSE
 	soul.fully_heal(FALSE)
 	soul.invisibility = initial(soul.invisibility)
@@ -147,7 +148,7 @@
 	var/prob2explode = 100
 	if(user && user.mind)
 		prob2explode = 0
-		for(var/i in 1 to user.mind.get_skill_level(/datum/skill/magic/holy))
+		for(var/i in 1 to user.get_skill_level(/datum/skill/magic/holy))
 			prob2explode += 80
 	for(var/mob/living/L in targets)
 		var/isvampire = FALSE
@@ -174,6 +175,8 @@
 				L.visible_message("<span class='warning'>[L] HAS BEEN CHURNED BY NECRA'S GRIP!</span>", "<span class='danger'>I'VE BEEN CHURNED BY NECRA'S GRIP!</span>")
 				explosion(get_turf(L), light_impact_range = 1, flame_range = 1, smoke = FALSE)
 				L.Stun(50)
+				if(istype(L, /mob/living/simple_animal/hostile/retaliate/poltergeist))
+					L.gib()
 			else
 				L.visible_message("<span class='warning'>[L] resists being churned!</span>", "<span class='userdanger'>I resist being churned!</span>")
 	return ..()

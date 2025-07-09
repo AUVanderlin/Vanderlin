@@ -9,7 +9,7 @@
 	department_flag = CHURCHMEN
 	job_flags = (JOB_ANNOUNCE_ARRIVAL | JOB_SHOW_IN_CREDITS | JOB_EQUIP_RANK | JOB_NEW_PLAYER_JOINABLE)
 	display_order = JDO_PRIEST
-	faction = FACTION_STATION
+	faction = FACTION_TOWN
 	total_positions = 1
 	spawn_positions = 1
 	min_pq = 20
@@ -48,32 +48,30 @@
 	var/obj/item/weapon/polearm/woodstaff/aries/P = new()
 	H.put_in_hands(P, forced = TRUE)
 
+	if(H.patron != /datum/patron/divine/astrata) // For some stupid reason this was checking for Dendor before.
+		H.set_patron(/datum/patron/divine/astrata)
 
-	if(H.mind)
-		if(H.patron != /datum/patron/divine/astrata) // For some stupid reason this was checking for Dendor before.
-			H.set_patron(/datum/patron/divine/astrata)
-
-		H.mind?.adjust_skillrank(/datum/skill/misc/reading, 5, TRUE)
-		H.mind?.adjust_skillrank(/datum/skill/magic/holy, 4, TRUE)
-		H.mind?.adjust_skillrank(/datum/skill/combat/unarmed, 3, TRUE)
-		H.mind?.adjust_skillrank(/datum/skill/combat/wrestling, 3, TRUE)
-		H.mind?.adjust_skillrank(/datum/skill/combat/polearms, 3, TRUE) // Privilege of being the SECOND biggest target in the game, and arguably the worse of the two targets to lose
-		H.mind?.adjust_skillrank(/datum/skill/combat/axesmaces, 2, TRUE)
-		H.mind?.adjust_skillrank(/datum/skill/misc/athletics, 3, TRUE)
-		H.mind?.adjust_skillrank(/datum/skill/misc/sewing, 3, TRUE)
-		H.mind?.adjust_skillrank(/datum/skill/misc/medicine, 3, TRUE)
-		H.mind?.adjust_skillrank(/datum/skill/craft/cooking, 1, TRUE)
-		H.mind?.adjust_skillrank(/datum/skill/labor/mathematics, 3, TRUE)
-		if(H.age == AGE_OLD)
-			H.mind?.adjust_skillrank(/datum/skill/combat/polearms, 1, TRUE)
-			H.mind?.adjust_skillrank(/datum/skill/magic/holy, 1, TRUE)
-		H.change_stat(STATKEY_STR, 1) // One slot and a VERY important role, it deserves a half-decent statline
-		H.change_stat(STATKEY_INT, 2)
-		H.change_stat(STATKEY_END, 2)
-		H.change_stat(STATKEY_SPD, 1)
-		if(!H.has_language(/datum/language/celestial)) // For discussing church matters with the other Clergy
-			H.grant_language(/datum/language/celestial)
-			to_chat(H, "<span class='info'>I can speak Celestial with ,c before my speech.</span>")
+	H.adjust_skillrank(/datum/skill/misc/reading, 5, TRUE)
+	H.adjust_skillrank(/datum/skill/magic/holy, 4, TRUE)
+	H.adjust_skillrank(/datum/skill/combat/unarmed, 3, TRUE)
+	H.adjust_skillrank(/datum/skill/combat/wrestling, 3, TRUE)
+	H.adjust_skillrank(/datum/skill/combat/polearms, 3, TRUE) // Privilege of being the SECOND biggest target in the game, and arguably the worse of the two targets to lose
+	H.adjust_skillrank(/datum/skill/combat/axesmaces, 2, TRUE)
+	H.adjust_skillrank(/datum/skill/misc/athletics, 3, TRUE)
+	H.adjust_skillrank(/datum/skill/misc/sewing, 3, TRUE)
+	H.adjust_skillrank(/datum/skill/misc/medicine, 3, TRUE)
+	H.adjust_skillrank(/datum/skill/craft/cooking, 1, TRUE)
+	H.adjust_skillrank(/datum/skill/labor/mathematics, 3, TRUE)
+	if(H.age == AGE_OLD)
+		H.adjust_skillrank(/datum/skill/combat/polearms, 1, TRUE)
+		H.adjust_skillrank(/datum/skill/magic/holy, 1, TRUE)
+	H.change_stat(STATKEY_STR, 1) // One slot and a VERY important role, it deserves a half-decent statline
+	H.change_stat(STATKEY_INT, 2)
+	H.change_stat(STATKEY_END, 2)
+	H.change_stat(STATKEY_SPD, 1)
+	if(!H.has_language(/datum/language/celestial)) // For discussing church matters with the other Clergy
+		H.grant_language(/datum/language/celestial)
+		to_chat(H, "<span class='info'>I can speak Celestial with ,c before my speech.</span>")
 	var/datum/devotion/cleric_holder/C = new /datum/devotion/cleric_holder(H, H.patron) // This creates the cleric holder used for devotion spells
 	H.verbs += list(/mob/living/carbon/human/proc/devotionreport, /mob/living/carbon/human/proc/clericpray)
 	C.grant_spells_priest(H)
@@ -86,7 +84,7 @@
 	job_flags = (JOB_ANNOUNCE_ARRIVAL | JOB_EQUIP_RANK)
 	flag = PRIEST
 	department_flag = CHURCHMEN
-	faction = FACTION_STATION
+	faction = FACTION_TOWN
 	total_positions = 0
 	spawn_positions = 0
 
@@ -96,7 +94,7 @@
 	job_flags = (JOB_ANNOUNCE_ARRIVAL | JOB_EQUIP_RANK)
 	flag = PRIEST
 	department_flag = CHURCHMEN
-	faction = FACTION_STATION
+	faction = FACTION_TOWN
 	total_positions = 0
 	spawn_positions = 0
 
@@ -171,12 +169,14 @@
 		if(length(GLOB.tennite_schisms))
 			to_chat(src, span_warning("I cannot excommunicate anyone during the schism!"))
 			return FALSE
-		var/found = FALSE
+
 		for(var/mob/living/carbon/human/H in GLOB.player_list)
 			if(H.real_name == inputty)
-				found = TRUE
+				if(H.advjob == "Faceless One")
+					to_chat(src, span_danger("I wasn't able to do that!"))
+					return FALSE
 				H.cleric?.excommunicate()
-		if(!found)
+				break
 			return FALSE
 
 		GLOB.excommunicated_players += inputty
@@ -202,13 +202,15 @@
 		if(length(GLOB.tennite_schisms))
 			to_chat(src, span_warning("I cannot curse anyone during the schism!"))
 			return FALSE
-		var/found = FALSE
-		for(var/mob/living/carbon/H in GLOB.player_list)
+		for(var/mob/living/carbon/human/H in GLOB.player_list)
 			if(H.real_name == inputty)
-				found = TRUE
+				if(H.advjob == "Faceless One")
+					to_chat(src, span_danger("I wasn't able to do that!"))
+					return FALSE
 				H.add_stress(/datum/stressevent/psycurse)
-		if(!found)
+				break
 			return FALSE
+
 		GLOB.heretical_players += inputty
 		priority_announce("[real_name] has put Xylix's curse of woe on [inputty] for offending the church!", title = "SHAME", sound = 'sound/misc/excomm.ogg')
 
@@ -276,7 +278,7 @@
 	if(!recruit.mind)
 		return FALSE
 	//only orphans who aren't apprentices
-	if(recruit.mind.assigned_role == "Orphan" && !recruit.mind.apprentice)
+	if(istype(recruit.mind.assigned_role, /datum/job/orphan) && !recruit.is_apprentice())
 		return FALSE
 	//need to see their damn face
 	if(!recruit.get_face_name(null))

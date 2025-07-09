@@ -1,4 +1,7 @@
 ///Uses Byond's basic obstacle avoidance movement unless the target is on a z-level different to ours
+/datum/ai_movement/hybrid_pathing/gnome
+	max_path_distance = 100 //gnomes are psydon's smartest genetic freak
+
 /datum/ai_movement/hybrid_pathing
 	requires_processing = TRUE
 	max_pathing_attempts = 12
@@ -106,7 +109,39 @@
 
 				// Move to the next step in the path
 				if(next_step.z != movable_pawn.z)
-					movable_pawn.Move(next_step)
+					// Don't teleport across Z-levels - check if there's a valid transition
+					var/can_transition = FALSE
+
+					// Check for stairs going up
+					if(next_step.z > movable_pawn.z)
+						for(var/obj/structure/stairs/S in current_turf.contents)
+							var/turf/above = get_step_multiz(current_turf, UP)
+							if(above)
+								var/turf/dest = get_step(above, S.dir)
+								if(dest == next_step)
+									can_transition = TRUE
+									break
+
+					// Check for stairs going down or falling
+					else if(next_step.z < movable_pawn.z)
+						var/turf/below = get_step_multiz(current_turf, DOWN)
+						if(below == next_step)
+							can_transition = TRUE
+						else
+							// Check if there are stairs leading down at current position
+							for(var/obj/structure/stairs/S in current_turf.contents)
+								var/turf/dest = get_step(below, turn(S.dir, 180))
+								if(dest == next_step)
+									can_transition = TRUE
+									break
+
+					// Only move if we can legitimately transition, otherwise regenerate path
+					if(can_transition)
+						movable_pawn.Move(next_step)
+					else
+						// Can't reach next step legitimately, need new path
+						generate_path = TRUE
+						controller.clear_blackboard_key(future_path_blackboard_key)
 				else
 					step_to(movable_pawn, next_step, controller.blackboard[BB_CURRENT_MIN_MOVE_DISTANCE], controller.movement_delay)
 
@@ -146,9 +181,12 @@
 				// If we're nearing the end of our path, preemptively generate the next path
 				// Only do this if we have a valid current path and aren't already generating a future path
 				if(!generate_path && remaining_path_length <= repath_anticipation_distance && !future_path && COOLDOWN_FINISHED(controller, repath_cooldown))
+					// Target doesnt exist anymore or we picked it up already
+					if(QDELETED(controller.current_movement_target) || controller.current_movement_target.loc == movable_pawn)
+						continue
 					COOLDOWN_START(controller, repath_cooldown, 1 SECONDS) // Shorter cooldown for anticipatory pathing
 					// Generate the future path and store it in the controller's blackboard
-					var/list/new_future_path = get_path_to(movable_pawn, controller.current_movement_target, /turf/proc/Distance3D,
+					var/list/new_future_path = get_path_to(movable_pawn, controller.current_movement_target, TYPE_PROC_REF(/turf, Heuristic_cardinal_3d),
 						max_path_distance + 1, 250, minimum_distance, id=controller.get_access())
 					controller.set_blackboard_key(future_path_blackboard_key, new_future_path)
 					SEND_SIGNAL(controller.pawn, COMSIG_AI_FUTURE_PATH_GENERATED, new_future_path)
@@ -163,9 +201,11 @@
 				if(controller.pathing_attempts >= max_pathing_attempts)
 					controller.CancelActions()
 					continue
-
+				// Target doesnt exist anymore or we picked it up already
+				if(QDELETED(controller.current_movement_target) || controller.current_movement_target.loc == movable_pawn)
+					continue
 				COOLDOWN_START(controller, repath_cooldown, 1.5 SECONDS) // Reduced from 2 seconds
-				controller.movement_path = get_path_to(movable_pawn, controller.current_movement_target, /turf/proc/Distance3D,
+				controller.movement_path = get_path_to(movable_pawn, controller.current_movement_target, TYPE_PROC_REF(/turf, Heuristic_cardinal_3d),
 					max_path_distance + 1, 250, minimum_distance, id=controller.get_access())
 				controller.clear_blackboard_key(future_path_blackboard_key) // Clear any future path as we have a fresh main path
 				SEND_SIGNAL(controller.pawn, COMSIG_AI_PATH_GENERATED, controller.movement_path)

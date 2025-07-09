@@ -63,8 +63,8 @@
 	var/min_ambience_cooldown = 70 SECONDS
 	var/max_ambience_cooldown = 120 SECONDS
 
-	var/droningniqqa = TRUE
-	var/loopniqqa = TRUE
+	var/droningsound = TRUE
+	var/loopsound = TRUE
 
 	var/droning_sound_current = null
 	var/droning_sound_dawn = null
@@ -330,13 +330,14 @@ GLOBAL_LIST_EMPTY(teleportlocs)
 //			weather_icon = TRUE
 //	if(!weather_icon)
 //		icon_state = null
-	return
+	return ..()
 
 /**
  * Update the icon of the area (overridden to always be null for space
  */
 /area/space/update_icon_state()
 	icon_state = null
+	return ..()
 
 /**
  * Call back when an atom enters an area

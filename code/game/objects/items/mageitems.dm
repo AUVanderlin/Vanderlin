@@ -27,7 +27,8 @@
 		STR.remove_from_storage(I, get_turf(user))
 		user.put_in_hands(I)
 
-/obj/item/storage/magebag/update_icon()
+/obj/item/storage/magebag/update_icon_state()
+	. = ..()
 	var/datum/component/storage/STR = GetComponent(/datum/component/storage)
 	var/list/things = STR.contents()
 	if(things.len)
@@ -110,7 +111,7 @@
 	if(structures_in_way == TRUE)
 		to_chat(user, span_cult("There is a structure, rune or wall in the way."))
 		return
-	var/crafttime = (10 SECONDS - ((user.mind?.get_skill_level(/datum/skill/magic/arcane)) * 5))
+	var/crafttime = (10 SECONDS - ((user.get_skill_level(/datum/skill/magic/arcane)) * 5))
 
 	user.visible_message(span_warning("[user] begins to scribe something [user.p_their()] [src]!"), \
 		span_notice("I start to drag the [src] in the shape of symbols and sigils"))
@@ -151,7 +152,7 @@
 
 /obj/item/weapon/knife/dagger/silver/attackby(obj/item/M, mob/user, params)
 	if(istype(M,/obj/item/ore/cinnabar))
-		var/crafttime = (60 - ((user.mind?.get_skill_level(/datum/skill/magic/arcane))*5))
+		var/crafttime = (60 - ((user.get_skill_level(/datum/skill/magic/arcane))*5))
 		if(do_after(user, crafttime, target = src))
 			playsound(loc, 'sound/magic/scrapeblade.ogg', 100, TRUE)
 			to_chat(user, span_notice("I press acryne magic into the blade and it throbs in a deep purple..."))
@@ -190,7 +191,7 @@
 		if(user.blood_volume)
 			user.apply_damage(pickrune.scribe_damage, BRUTE, pick(BODY_ZONE_L_ARM, BODY_ZONE_R_ARM))
 		is_bled = TRUE
-	var/crafttime = (10 SECONDS - ((user.mind?.get_skill_level(/datum/skill/magic/arcane)) * 5))
+	var/crafttime = (10 SECONDS - ((user.get_skill_level(/datum/skill/magic/arcane)) * 5))
 
 	user.visible_message(span_warning("[user] begins to carve something with [user.p_their()] blade!"), \
 		span_notice("I start to drag the blade in the shape of symbols and sigils."))
@@ -319,7 +320,7 @@
 			to_chat(user,span_notice("[src] heats up to an almost burning temperature, flooding you with overwhelming arcane knowledge!"))
 			ready = FALSE
 			addtimer(CALLBACK(src, PROC_REF(revert), user), cdtime,TIMER_STOPPABLE) // Minus two so we play the sound and decap faster
-			user.mind.adjust_skillrank(/datum/skill/magic/arcane, 1, TRUE)
+			user.adjust_skillrank(/datum/skill/magic/arcane, 1, TRUE)
 	else
 		to_chat(user,span_notice("[src] remains inert. It must be gathering arcana!"))
 
@@ -399,8 +400,7 @@
 /obj/item/clothing/gloves/nomagic/equipped(mob/living/user, slot)
 	if(active_item)
 		return
-	var/slotbit = slotdefine2slotbit(slot)
-	if(slotbit == ITEM_SLOT_GLOVES)
+	if(slot & ITEM_SLOT_GLOVES)
 		active_item = TRUE
 		ADD_TRAIT(src, TRAIT_NODROP, TRAIT_GENERIC)
 	. = ..()
@@ -422,7 +422,7 @@
 	var/found_table = locate(/obj/structure/table) in (loc)
 	if(istype(P, /obj/item/natural/melded/t2))
 		if(isturf(loc)&& (found_table))
-			var/crafttime = (100 - ((user.mind?.get_skill_level(/datum/skill/magic/arcane))*5))
+			var/crafttime = (100 - ((user.get_skill_level(/datum/skill/magic/arcane))*5))
 			if(do_after(user, crafttime, target = src))
 				playsound(loc, 'sound/items/book_close.ogg', 100, TRUE)
 				to_chat(user, span_notice("I mold the [P] into the [src] with my arcyne power."))
@@ -441,7 +441,7 @@
 	var/found_table = locate(/obj/structure/table) in (loc)
 	if(istype(P, /obj/item/natural/melded/t3))
 		if(isturf(loc)&& (found_table))
-			var/crafttime = (100 - ((user.mind?.get_skill_level(/datum/skill/magic/arcane))*5))
+			var/crafttime = (100 - ((user.get_skill_level(/datum/skill/magic/arcane))*5))
 			if(do_after(user, crafttime, target = src))
 				playsound(loc, 'sound/items/book_close.ogg', 100, TRUE)
 				to_chat(user, span_notice("I mold the [P] into the [src] with my arcyne power."))
@@ -460,7 +460,7 @@
 	var/found_table = locate(/obj/structure/table) in (loc)
 	if(istype(P, /obj/item/natural/melded/t4))
 		if(isturf(loc)&& (found_table))
-			var/crafttime = (100 - ((user.mind?.get_skill_level(/datum/skill/magic/arcane))*5))
+			var/crafttime = (100 - ((user.get_skill_level(/datum/skill/magic/arcane))*5))
 			if(do_after(user, crafttime, target = src))
 				playsound(loc, 'sound/items/book_close.ogg', 100, TRUE)
 				to_chat(user, span_notice("I mold the [P] into the [src] with my arcyne power."))
@@ -479,7 +479,7 @@
 	var/found_table = locate(/obj/structure/table) in (loc)
 	if(istype(P, /obj/item/natural/melded/t5))
 		if(isturf(loc)&& (found_table))
-			var/crafttime = (100 - ((user.mind?.get_skill_level(/datum/skill/magic/arcane))*5))
+			var/crafttime = (100 - ((user.get_skill_level(/datum/skill/magic/arcane))*5))
 			if(do_after(user, crafttime, target = src))
 				playsound(loc, 'sound/items/book_close.ogg', 100, TRUE)
 				to_chat(user, span_notice("I mold the [P] into the [src] with my arcyne power."))
@@ -584,6 +584,9 @@
 	desc = "Dense mana that has taken the form of plant life."
 	resistance_flags = FLAMMABLE
 	w_class = WEIGHT_CLASS_SMALL
+	slot_flags = ITEM_SLOT_HEAD|ITEM_SLOT_MASK
+	body_parts_covered = NONE
+	alternate_worn_layer  = 8.9
 	list_reagents = list(/datum/reagent/toxin/manabloom_juice = SNACK_CHUNKY)
 	seed = /obj/item/neuFarm/seed/manabloom
 
@@ -648,7 +651,7 @@
 	icon = 'icons/roguetown/misc/mana.dmi'
 	icon_state = "soul"
 
-	plane = PLANE_LEYLINES
+	plane = LEYLINE_PLANE
 	invisibility = INVISIBILITY_LEYLINES
 	anchored = TRUE
 	resistance_flags = INDESTRUCTIBLE | LAVA_PROOF | FIRE_PROOF | UNACIDABLE | ACID_PROOF
@@ -657,20 +660,33 @@
 
 	var/datum/weakref/drainer
 
-/obj/structure/soul/New(loc, mob/living/dead_person)
-	if(dead_person?.mana_pool)
-		mana_amount = dead_person.mana_pool.amount
-		drainer = WEAKREF(dead_person)
+	var/qdel_timer
+
+/obj/structure/soul/Initialize(mapload)
+	. = ..()
 	animate(src, pixel_y = 4, time = 1 SECONDS, loop = -1, flags = ANIMATION_RELATIVE)
 	animate(pixel_y = -4, time = 1 SECONDS, flags = ANIMATION_RELATIVE)
-	QDEL_IN(src, 10 MINUTES)
-	. = ..()
+
+/obj/structure/soul/Destroy()
+	if(qdel_timer)
+		deltimer(qdel_timer)
+	return ..()
 
 /obj/structure/soul/attack_hand(mob/living/user)
 	. = ..()
-	if(user.mana_pool)
-		if(user.mana_pool.intrinsic_recharge_sources & MANA_SOULS)
-			drain_mana(user)
+	if(user.mana_pool?.intrinsic_recharge_sources & MANA_SOULS)
+		drain_mana(user)
+
+/obj/structure/soul/proc/init_mana(datum/weakref/dead_guy)
+	drainer = dead_guy
+	var/mob/living/drained = drainer?.resolve()
+	if(!drained)
+		return
+	mana_amount = drained.mana_pool?.amount
+	if(!mana_amount || mana_amount <= 0)
+		qdel(src)
+		return
+	qdel_timer = QDEL_IN_STOPPABLE(src, 10 MINUTES)
 
 /obj/structure/soul/proc/drain_mana(mob/living/user)
 	var/datum/beam/transfer_beam = user.Beam(src, icon_state = "drain_life", time = INFINITY)

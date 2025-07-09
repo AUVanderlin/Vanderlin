@@ -57,13 +57,13 @@
 
 /datum/reagents
 	var/list/datum/reagent/reagent_list = new/list()
+	var/list/datum/reagent/addiction_list = new/list()
+	var/atom/my_atom = null
 	var/total_volume = 0
 	var/maximum_volume = 100
-	var/atom/my_atom = null
 	var/chem_temp = 150
 	var/last_tick = 1
 	var/addiction_tick = 1
-	var/list/datum/reagent/addiction_list = new/list()
 	var/flags
 
 /datum/reagents/New(maximum=100, new_flags=0)
@@ -78,16 +78,16 @@
 	flags = new_flags
 
 /datum/reagents/Destroy()
-	. = ..()
-	var/list/cached_reagents = reagent_list
-	for(var/reagent in cached_reagents)
-		var/datum/reagent/R = reagent
-		qdel(R)
-	cached_reagents.Cut()
-	cached_reagents = null
+	for(var/datum/reagent/reagent as anything in reagent_list)
+		qdel(reagent)
+	for(var/datum/reagent/reagent as anything in addiction_list)
+		qdel(reagent)
+	reagent_list = null
+	addiction_list = null
 	if(my_atom && my_atom.reagents == src)
 		my_atom.reagents = null
 	my_atom = null
+	return ..()
 
 // Used in attack logs for reagents in pills and such
 // external list is list of reagent types = amounts
@@ -110,8 +110,6 @@
 	var/list/cached_reagents = reagent_list
 	var/total_transfered = 0
 	var/current_list_element = 1
-
-	//testing("removeany called")
 
 	current_list_element = rand(1, cached_reagents.len)
 
@@ -202,8 +200,6 @@
 		R = target.reagents
 		target_atom = target
 
-	//testing("trans to [target_atom]")
-
 	amount = min(min(amount, src.total_volume), R.maximum_volume-R.total_volume)
 	var/trans_data = null
 	var/transfer_log = list()
@@ -293,8 +289,6 @@
 		return
 	if(amount < 0)
 		return
-
-	//testing("transidto")
 
 	var/datum/reagents/R = target.reagents
 	if(src.get_reagent_amount(reagent)<amount)
@@ -571,7 +565,6 @@
 		var/datum/reagent/R = reagent
 		del_reagent(R.type)
 	if(my_atom)
-		//testing("[src]  clear reagents [my_atom]")
 		my_atom.on_reagent_change(CLEAR_REAGENTS)
 	return 0
 
@@ -951,6 +944,7 @@
 		var/datum/reagent/R = i
 		R.on_temp_change(increased)
 	handle_reactions()
+	SEND_SIGNAL(my_atom, COMSIG_REAGENTS_EXPOSE_TEMPERATURE, null, chem_temp)
 
 ///////////////////////////////////////////////////////////////////////////////////
 
@@ -978,3 +972,5 @@
 		var/datum/reagent/R = GLOB.chemical_reagents_list[X]
 		if(ckey(chem_name) == ckey(lowertext(R.name)))
 			return X
+
+#undef CHEMICAL_QUANTISATION_LEVEL

@@ -3,15 +3,15 @@
 	desc = "Astrata will provide a balanced and varied experience. Consider this the default experience."
 	weight = 6
 	always_votable = TRUE
-	follower_modifier = ASTRATA_FOLLOWER_MODIFIER
+	follower_modifier = LOWER_FOLLOWER_MODIFIER
 	color_theme = "#FFD700"
 
 	influence_factors = list(
-		STATS_LAWS_AND_DECREES_MADE = list("points" = 2.75,"capacity" = 45),
-		STATS_ALIVE_NOBLES = list("points" = 3.75,"capacity" = 75),
-		STATS_NOBLE_DEATHS = list("points" = -5,"capacity" = -75),
+		STATS_LAWS_AND_DECREES_MADE = list("points" = 2.75, "capacity" = 45),
+		STATS_ALIVE_NOBLES = list("points" = 3.5, "capacity" = 75),
+		STATS_NOBLE_DEATHS = list("points" = -5, "capacity" = -70),
 		STATS_ASTRATA_REVIVALS = list("points" = 6, "capacity" = 75),
-		STATS_TAXES_COLLECTED = list("points" = 0.175,"capacity" = 90),
+		STATS_SLURS_SPOKEN = list("points" = 0.8, "capacity" = 80),
 	)
 
 /datum/storyteller/noc
@@ -20,6 +20,7 @@
 	welcome_text = "The veil between realms shimmers in your presence."
 	weight = 4
 	always_votable = TRUE
+	follower_modifier = LOWER_FOLLOWER_MODIFIER
 	color_theme = "#F0F0F0"
 
 	tag_multipliers = list(
@@ -29,11 +30,11 @@
 	cost_variance = 25
 
 	influence_factors = list(
-		STATS_BOOKS_PRINTED = list("points" = 4, "capacity" = 40),
-		STATS_LITERACY_TAUGHT = list("points" = 15, "capacity" = 80),
-		STATS_ILLITERATES = list("points" = -2.5, "capacity" = -50),
+		STATS_BOOKS_PRINTED = list("points" = 5, "capacity" = 40),
+		STATS_LITERACY_TAUGHT = list("points" = 15, "capacity" = 70),
+		STATS_ILLITERATES = list("points" = -2.25, "capacity" = -40),
 		STATS_SKILLS_DREAMED = list("points" = 0.325, "capacity" = 100),
-		STATS_MANA_SPENT = list("points" = 0.016, "capacity" = 100),
+		STATS_MANA_SPENT = list("points" = 0.0175, "capacity" = 100),
 	)
 
 /datum/storyteller/ravox
@@ -50,6 +51,7 @@
 
 	point_gains_multipliers = list(
 		EVENT_TRACK_MUNDANE = 0.75,
+		EVENT_TRACK_PERSONAL = 0.9,
 		EVENT_TRACK_MODERATE = 1,
 		EVENT_TRACK_INTERVENTION = 1,
 		EVENT_TRACK_CHARACTER_INJECTION = 1,
@@ -58,8 +60,8 @@
 	)
 
 	influence_factors = list(
-		STATS_COMBAT_SKILLS = list("points" = 2, "capacity" = 100),
-		STATS_PARRIES = list("points" = 0.05, "capacity" = 100),
+		STATS_COMBAT_SKILLS = list("points" = 1.2, "capacity" = 100),
+		STATS_PARRIES = list("points" = 0.0525, "capacity" = 100),
 		STATS_WARCRIES = list("points" = 0.375, "capacity" = 50),
 		STATS_YIELDS = list("points" = -5, "capacity" = -40),
 		STATS_UNDERWORLD_DUELS = list("points" = 6, "capacity" = 70),
@@ -80,9 +82,9 @@
 
 	influence_factors = list(
 		STATS_WATER_CONSUMED = list("points" = 0.0125, "capacity" = 90),
-		STATS_FISH_CAUGHT = list("points" = 1.85, "capacity" = 90),
-		STATS_ABYSSOR_REMEMBERED = list("points" = 1.25, "capacity" = 45),
-		STATS_LEECHES_EMBEDDED = list("points" = 0.165, "capacity" = 70),
+		STATS_FISH_CAUGHT = list("points" = 1.5, "capacity" = 85),
+		STATS_ABYSSOR_REMEMBERED = list("points" = 0.75, "capacity" = 40),
+		STATS_LEECHES_EMBEDDED = list("points" = 0.175, "capacity" = 70),
 		STATS_PEOPLE_DROWNED = list("points" = 9, "capacity" = 75),
 	)
 
@@ -98,6 +100,7 @@
 
 	point_gains_multipliers = list(
 		EVENT_TRACK_MUNDANE = 1,
+		EVENT_TRACK_PERSONAL = 1,
 		EVENT_TRACK_MODERATE = 0,
 		EVENT_TRACK_INTERVENTION = 0,
 		EVENT_TRACK_CHARACTER_INJECTION = 0,
@@ -109,8 +112,8 @@
 		STATS_LAUGHS_MADE = list("points" = 0.25, "capacity" = 85),
 		STATS_GAMES_RIGGED = list("points" = 3.5, "capacity" = 35),
 		STATS_PEOPLE_MOCKED = list("points" = 5, "capacity" = 60),
-		STATS_CRITS_MADE = list("points" = 0.28, "capacity" = 90),
-		STATS_SONGS_PLAYED = list("points" = 0.7, "capacity" = 70),
+		STATS_CRITS_MADE = list("points" = 0.275, "capacity" = 90),
+		STATS_SONGS_PLAYED = list("points" = 0.75, "capacity" = 70),
 	)
 
 /datum/storyteller/necra
@@ -127,6 +130,7 @@
 
 	point_gains_multipliers = list(
 		EVENT_TRACK_MUNDANE = 1.25,
+		EVENT_TRACK_PERSONAL = 0.7,
 		EVENT_TRACK_MODERATE = 1.25,
 		EVENT_TRACK_INTERVENTION = 1.25,
 		EVENT_TRACK_CHARACTER_INJECTION = 0.5,
@@ -135,11 +139,11 @@
 	)
 
 	influence_factors = list(
-		STATS_DEATHS = list("points" = 1.5, "capacity" = 110),
-		STATS_GRAVES_CONSECRATED = list("points" = 7, "capacity" = 100),
-		STATS_GRAVES_ROBBED = list("points" = -4, "capacity" = -50),
-		STATS_DEADITES_KILLED = list("points" = 6.25, "capacity" = 90),
-		STATS_VAMPIRES_KILLED = list("points" = 12.5, "capacity" = 70),
+		STATS_DEATHS = list("points" = 1.35, "capacity" = 110),
+		STATS_GRAVES_CONSECRATED = list("points" = 6.5, "capacity" = 100),
+		STATS_GRAVES_ROBBED = list("points" = -4, "capacity" = -40),
+		STATS_DEADITES_KILLED = list("points" = 6, "capacity" = 90),
+		STATS_VAMPIRES_KILLED = list("points" = 12, "capacity" = 70),
 	)
 
 /datum/storyteller/pestra
@@ -155,10 +159,10 @@
 	)
 
 	influence_factors = list(
-		STATS_POTIONS_BREWED = list("points" = 4.5, "capacity" = 80),
-		STATS_WOUNDS_SEWED = list("points" = 0.5, "capacity" = 100),
+		STATS_POTIONS_BREWED = list("points" = 4.25, "capacity" = 80),
+		STATS_WOUNDS_SEWED = list("points" = 0.475, "capacity" = 100),
 		STATS_SOULS_REINCARNATED = list("points" = 2.25, "capacity" = 65),
-		STATS_ANIMALS_BRED = list("points" = 6, "capacity" = 65),
+		STATS_ANIMALS_BRED = list("points" = 5, "capacity" = 65),
 		STATS_FOOD_ROTTED = list("points" = 0.175, "capacity" = 80),
 	)
 
@@ -174,6 +178,7 @@
 
 	point_gains_multipliers = list(
 		EVENT_TRACK_MUNDANE = 1,
+		EVENT_TRACK_PERSONAL = 1.2,
 		EVENT_TRACK_MODERATE = 1,
 		EVENT_TRACK_INTERVENTION = 2,
 		EVENT_TRACK_CHARACTER_INJECTION = 1,
@@ -182,11 +187,11 @@
 	)
 
 	influence_factors = list(
-		STATS_MASTERWORKS_FORGED = list("points" = 3.5, "capacity" = 85),
+		STATS_MASTERWORKS_FORGED = list("points" = 2.4, "capacity" = 85),
 		STATS_ROCKS_MINED = list("points" = 0.25, "capacity" = 100),
-		STATS_CRAFT_SKILLS = list("points" = 1, "capacity" = 90),
+		STATS_CRAFT_SKILLS = list("points" = 0.6, "capacity" = 90),
 		STATS_BEARDS_SHAVED = list("points" = -4, "capacity" = -40),
-		STATS_BLACKSTEEL_SMELTED = list("points" = 9, "capacity" = 65),
+		STATS_BLACKSTEEL_SMELTED = list("points" = 5, "capacity" = 65),
 	)
 
 /datum/storyteller/eora
@@ -202,6 +207,7 @@
 
 	point_gains_multipliers = list(
 		EVENT_TRACK_MUNDANE = 1,
+		EVENT_TRACK_PERSONAL = 1.4,
 		EVENT_TRACK_MODERATE = 1,
 		EVENT_TRACK_INTERVENTION = 2,
 		EVENT_TRACK_CHARACTER_INJECTION = 1,
@@ -212,9 +218,9 @@
 	influence_factors = list(
 		STATS_PARENTS = list("points" = 8, "capacity" = 90),
 		STATS_MARRIAGES = list("points" = 25, "capacity" = 75),
-		STATS_HUGS_MADE = list("points" = 2, "capacity" = 60),
-		STATS_CLINGY_PEOPLE = list("points" = 6, "capacity" = 75),
-		STATS_PACIFISTS = list("points" = 12, "capacity" = 70),
+		STATS_HUGS_MADE = list("points" = 1.75, "capacity" = 60),
+		STATS_HANDS_HELD = list("points" = 1.75, "capacity" = 60),
+		STATS_PACIFISTS = list("points" = 10, "capacity" = 70),
 	)
 
 /datum/storyteller/dendor
@@ -231,6 +237,7 @@
 
 	point_gains_multipliers = list(
 		EVENT_TRACK_MUNDANE = 1,
+		EVENT_TRACK_PERSONAL = 0.8,
 		EVENT_TRACK_MODERATE = 1,
 		EVENT_TRACK_INTERVENTION = 2,
 		EVENT_TRACK_CHARACTER_INJECTION = 1,
@@ -239,11 +246,11 @@
 	)
 
 	influence_factors = list(
-		STATS_TREES_CUT = list("points" = -0.35, "capacity" = -60),
-		STATS_PLANTS_HARVESTED = list("points" = 0.8, "capacity" = 140),
+		STATS_TREES_CUT = list("points" = -0.375, "capacity" = -60),
+		STATS_PLANTS_HARVESTED = list("points" = 0.75, "capacity" = 130),
 		STATS_WEREVOLVES = list("points" = 15, "capacity" = 80),
 		STATS_DENDOR_SACRIFICES = list("points" = 15, "capacity" = 80),
-		STATS_FOREST_DEATHS = list("points" = 6.25, "capacity" = 100),
+		STATS_FOREST_DEATHS = list("points" = 6.5, "capacity" = 90),
 	)
 
 // INHUMEN
@@ -254,6 +261,7 @@
 	welcome_text = "You will kneel."
 	weight = 4
 	always_votable = TRUE
+	follower_modifier = LOWER_FOLLOWER_MODIFIER
 	color_theme = "#CC4444"
 
 	tag_multipliers = list(
@@ -265,6 +273,7 @@
 
 	point_gains_multipliers = list(
 		EVENT_TRACK_MUNDANE = 1,
+		EVENT_TRACK_PERSONAL = 1.2,
 		EVENT_TRACK_MODERATE = 1.1,
 		EVENT_TRACK_INTERVENTION = 1.5,
 		EVENT_TRACK_CHARACTER_INJECTION = 1,
@@ -273,10 +282,10 @@
 	)
 
 	influence_factors = list(
-		STATS_ZIZO_PRAISED = list("points" = 0.5, "capacity" = 40),
-		STATS_NOBLE_DEATHS = list("points" = 6, "capacity" = 80),
+		STATS_ZIZO_PRAISED = list("points" = 0.75, "capacity" = 40),
+		STATS_NOBLE_DEATHS = list("points" = 5, "capacity" = 80),
 		STATS_DEADITES_WOKEN_UP = list("points" = 3, "capacity" = 90),
-		STATS_CLERGY_DEATHS = list("points" = 10, "capacity" = 80),
+		STATS_CLERGY_DEATHS = list("points" = 9, "capacity" = 80),
 		STATS_TORTURES = list("points" = 4, "capacity" = 70),
 	)
 
@@ -298,6 +307,7 @@
 
 	point_gains_multipliers = list(
 		EVENT_TRACK_MUNDANE = 1.1,
+		EVENT_TRACK_PERSONAL = 1.2,
 		EVENT_TRACK_MODERATE = 1.3,
 		EVENT_TRACK_INTERVENTION = 2,
 		EVENT_TRACK_CHARACTER_INJECTION = 0.7,
@@ -331,6 +341,7 @@
 
 	point_gains_multipliers = list(
 		EVENT_TRACK_MUNDANE = 0.8,
+		EVENT_TRACK_PERSONAL = 0.7,
 		EVENT_TRACK_MODERATE = 1.2,
 		EVENT_TRACK_INTERVENTION = 1.5,
 		EVENT_TRACK_CHARACTER_INJECTION = 1,
@@ -339,9 +350,9 @@
 	)
 
 	influence_factors = list(
-		STATS_BLOOD_SPILT = list("points" = 0.000275, "capacity" = 90),
-		STATS_ORGANS_EATEN = list("points" = 3.25, "capacity" = 75),
-		STATS_LIMBS_BITTEN = list("points" = 0.6, "capacity" = 75),
+		STATS_BLOOD_SPILT = list("points" = 0.00028, "capacity" = 90),
+		STATS_ORGANS_EATEN = list("points" = 3.5, "capacity" = 75),
+		STATS_LIMBS_BITTEN = list("points" = 0.75, "capacity" = 75),
 		STATS_PEOPLE_GIBBED = list("points" = 3, "capacity" = 50),
 		STATS_ASSASSINATIONS = list("points" = 15, "capacity" = 80),
 	)
@@ -364,6 +375,7 @@
 
 	point_gains_multipliers = list(
 		EVENT_TRACK_MUNDANE = 1,
+		EVENT_TRACK_PERSONAL = 1.1,
 		EVENT_TRACK_MODERATE = 1.2,
 		EVENT_TRACK_INTERVENTION = 1.3,
 		EVENT_TRACK_CHARACTER_INJECTION = 1.5,
@@ -372,11 +384,11 @@
 	)
 
 	influence_factors = list(
-		STATS_ITEMS_PICKPOCKETED = list("points" = 6, "capacity" = 90),
-		STATS_SHRINE_VALUE = list("points" = 0.15, "capacity" = 70),
+		STATS_ITEMS_PICKPOCKETED = list("points" = 5, "capacity" = 85),
+		STATS_SHRINE_VALUE = list("points" = 0.1, "capacity" = 70),
 		STATS_GREEDY_PEOPLE = list("points" = 8, "capacity" = 70),
-		STATS_DODGES = list("points" = 0.0875, "capacity" = 100),
-		STATS_LOCKS_PICKED = list("points" = 4.5, "capacity" = 90),
+		STATS_DODGES = list("points" = 0.089, "capacity" = 100),
+		STATS_LOCKS_PICKED = list("points" = 4, "capacity" = 85),
 	)
 
 	cost_variance = 15  // Keeps a balance between predictability and randomness

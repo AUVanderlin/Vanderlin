@@ -77,11 +77,11 @@ GLOBAL_LIST_INIT(turfs_without_ground, typecacheof(list(
 #define isaasimar(A) (is_species(A, /datum/species/aasimar))
 #define ishollowkin(A) (is_species(A, /datum/species/demihuman))
 #define isharpy(A) (is_species(A, /datum/species/harpy))
+#define ishalfdrow(A) (is_species(A, /datum/species/human/halfdrow))
+#define istriton(A) (is_species(A, /datum/species/triton))
 
 //more carbon mobs
 #define ismonkey(A) (istype(A, /mob/living/carbon/monkey))
-
-#define istruedevil(A) (istype(A, /mob/living/carbon/true_devil))
 
 //Simple animals
 #define isanimal(A) (istype(A, /mob/living/simple_animal))
@@ -111,8 +111,6 @@ GLOBAL_LIST_INIT(turfs_without_ground, typecacheof(list(
 #define isovermind(A) (istype(A, /mob/camera/blob))
 
 #define iscameramob(A) (istype(A, /mob/camera))
-
-#define isaicamera(A) (istype(A, /mob/camera/aiEye))
 
 //Objects
 #define isobj(A) istype(A, /obj) //override the byond proc because it returns true on children of /atom/movable that aren't objs
@@ -151,8 +149,8 @@ GLOBAL_LIST_INIT(pointed_types, typecacheof(list(
 
 GLOBAL_LIST_INIT(RATS_DONT_EAT, typecacheof(list(
 	/obj/item/reagent_containers/food/snacks/smallrat,
-	/obj/item/reagent_containers/food/snacks/produce/onion,
-	/obj/item/reagent_containers/food/snacks/produce/jacksberry/poison
+	/obj/item/reagent_containers/food/snacks/produce/vegetable/onion,
+	/obj/item/reagent_containers/food/snacks/produce/fruit/jacksberry/poison
 	)))
 
 // Jobs
@@ -173,6 +171,7 @@ GLOBAL_LIST_INIT(RATS_DONT_EAT, typecacheof(list(
 // Serfs
 	#define is_gaffer_job(job_type) (istype(job_type, /datum/job/gaffer))
 // Peasantry
+	#define is_jester_job(job_type) (istype(job_type, /datum/job/jester))
 	#define is_adventurer_job(job_type) (istype(job_type, /datum/job/adventurer))
 	#define is_mercenary_job(job_type) (istype(job_type, /datum/job/mercenary))
 	#define is_pilgrim_job(job_type) (istype(job_type, /datum/job/pilgrim))
@@ -185,5 +184,12 @@ GLOBAL_LIST_INIT(RATS_DONT_EAT, typecacheof(list(
 	#define is_rousman_job(job_type) (istype(job_type, /datum/job/rousman))
 	#define is_goblin_job(job_type) (istype(job_type, /datum/job/goblin))
 
+// Age Check
+	#define is_child(A) (A.age == AGE_CHILD)
 // seemingly deprecated:
 //"Preacher" //as a job, there is an equivalent class
+
+GLOBAL_VAR_INIT(magic_appearance_detecting_image, new /image) // appearances are awful to detect safely, but this seems to be the best way ~ninjanomnom
+#define isimage(thing) (istype(thing, /image))
+#define isappearance(thing) (!isimage(thing) && !ispath(thing) && istype(GLOB.magic_appearance_detecting_image, thing))
+#define isappearance_or_image(thing) (isimage(thing) || (!ispath(thing) && istype(GLOB.magic_appearance_detecting_image, thing)))

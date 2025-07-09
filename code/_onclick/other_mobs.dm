@@ -101,11 +101,11 @@
 		if(ishuman(src) && ishuman(user))
 			var/mob/living/carbon/human/target = src
 			var/datum/job/job = SSjob.GetJob(target.job)
-			if(length(user.mind?.apprentices) >= user.mind?.max_apprentices)
+			if(length(user.return_apprentices()) >= user.return_max_apprentices())
 				return
-			if((target.age == AGE_CHILD || job?.type == /datum/job/vagrant) && target.mind && !target.mind.apprentice)
+			if((target.age == AGE_CHILD || job?.type == /datum/job/vagrant) && target.mind && !target.is_apprentice())
 				to_chat(user, span_notice("You offer apprenticeship to [target]."))
-				user.mind?.make_apprentice(target)
+				user.make_apprentice(target)
 				return
 
 	if(user.cmode)
@@ -245,9 +245,9 @@
 					INVOKE_ASYNC(H, TYPE_PROC_REF(/mob/living/carbon/human, zombie_infect_attempt))
 
 	var/obj/item/grabbing/bite/B = new()
-	user.equip_to_slot_or_del(B, SLOT_MOUTH)
+	user.equip_to_slot_or_del(B, ITEM_SLOT_MOUTH)
 	if(user.mouth == B)
-		var/used_limb = src.find_used_grab_limb(user)
+		var/used_limb = src.find_used_grab_limb(user, accurate = TRUE)
 		B.name = "[src]'s [parse_zone(used_limb)]"
 		var/obj/item/bodypart/BP = get_bodypart(check_zone(used_limb))
 		BP.grabbedby += B
@@ -282,10 +282,14 @@
 				if(!A.Adjacent(src))
 					return
 				if(A == src)
-					return
-				if(ismob(A))
-					var/mob/M = A
-					if(lying_angle && M.pulling != src)
+					var/list/mobs_here = list()
+					for(var/mob/M in get_turf(src))
+						if(M.invisibility || M == src)
+							continue
+						mobs_here += M
+					if(mobs_here.len)
+						A = pick(mobs_here)
+					if(A == src) //auto aim couldn't select another target
 						return
 				if(IsOffBalanced())
 					to_chat(src, span_warning("I haven't regained my balance yet."))
@@ -325,70 +329,7 @@
 					OffBalance(10)
 				return
 			if(INTENT_JUMP)
-				if(istype(src.loc, /turf/open/water))
-					to_chat(src, span_warning("I can't jump while floating."))
-					return
-				if(A == src || A == src.loc)
-					return
-				if(src.usable_legs < 2)
-					return
-				if(pulledby && pulledby != src)
-					to_chat(src, span_warning("I'm being grabbed."))
-					resist_grab()
-					return
-				if(IsOffBalanced())
-					to_chat(src, span_warning("I haven't regained my balance yet."))
-					return
-				if(lying_angle)
-					to_chat(src, span_warning("I should stand up first."))
-					return
-				if(!isatom(A))
-					return
-				if(A.z != src.z)
-					if(!HAS_TRAIT(src, TRAIT_ZJUMP))
-						return
-				changeNext_move(mmb_intent.clickcd)
-				face_atom(A)
-				if(m_intent == MOVE_INTENT_RUN)
-					emote("leap", forced = TRUE)
-				else
-					emote("jump", forced = TRUE)
-				var/jadded
-				var/jrange
-				var/jextra = FALSE
-				if(m_intent == MOVE_INTENT_RUN)
-					OffBalance(30)
-					jadded = 45
-					jrange = 3
-					jextra = TRUE
-				else
-					OffBalance(20)
-					jadded = 20
-					jrange = 2
-				if(ishuman(src))
-					var/mob/living/carbon/human/H = src
-					jadded += H.get_complex_pain()/50
-					if(H.get_encumbrance() >= 0.7)
-						jadded += 50
-						jrange = 1
-				if(adjust_stamina(min(jadded,100)))
-					if(jextra)
-						throw_at(A, jrange, 1, src, spin = FALSE)
-						while(src.throwing)
-							sleep(1)
-						throw_at(get_step(src, src.dir), 1, 1, src, spin = FALSE)
-					else
-						throw_at(A, jrange, 1, src, spin = FALSE)
-						while(src.throwing)
-							sleep(1)
-					if(isopenturf(src.loc))
-						var/turf/open/T = src.loc
-						if(T.landsound)
-							playsound(T, T.landsound, 100, FALSE)
-						T.Entered(src)
-				else
-					throw_at(A, 1, 1, src, spin = FALSE)
-				return
+				jump_action(A)
 			if(INTENT_BITE)
 				if(!A.Adjacent(src))
 					return
@@ -414,7 +355,7 @@
 				if(ishuman(A))
 					var/mob/living/carbon/human/U = src
 					var/mob/living/carbon/human/V = A
-					var/thiefskill = src.mind.get_skill_level(/datum/skill/misc/stealing) + (has_world_trait(/datum/world_trait/matthios_fingers) ? 1 : 0)
+					var/thiefskill = src.get_skill_level(/datum/skill/misc/stealing) + (has_world_trait(/datum/world_trait/matthios_fingers) ? 1 : 0)
 					var/stealroll = roll("[thiefskill]d6")
 					var/targetperception = (V.STAPER)
 					var/exp_to_gain = STAINT
@@ -430,28 +371,29 @@
 						if(do_after(U, 2 SECONDS, V, progress = FALSE))
 							switch(U.zone_selected)
 								if("chest")
-									if (V.get_item_by_slot(SLOT_BACK_L))
-										stealpos.Add(V.get_item_by_slot(SLOT_BACK_L))
-									if (V.get_item_by_slot(SLOT_BACK_R))
-										stealpos.Add(V.get_item_by_slot(SLOT_BACK_R))
+									if (V.get_item_by_slot(ITEM_SLOT_BACK_L))
+										stealpos.Add(V.get_item_by_slot(ITEM_SLOT_BACK_L))
+									if (V.get_item_by_slot(ITEM_SLOT_BACK_R))
+										stealpos.Add(V.get_item_by_slot(ITEM_SLOT_BACK_R))
 								if("neck")
-									if (V.get_item_by_slot(SLOT_NECK))
-										stealpos.Add(V.get_item_by_slot(SLOT_NECK))
+									if (V.get_item_by_slot(ITEM_SLOT_NECK))
+										stealpos.Add(V.get_item_by_slot(ITEM_SLOT_NECK))
 								if("groin")
-									if (V.get_item_by_slot(SLOT_BELT_R))
-										stealpos.Add(V.get_item_by_slot(SLOT_BELT_R))
-									if (V.get_item_by_slot(SLOT_BELT_L))
-										stealpos.Add(V.get_item_by_slot(SLOT_BELT_L))
+									if (V.get_item_by_slot(ITEM_SLOT_BELT_R))
+										stealpos.Add(V.get_item_by_slot(ITEM_SLOT_BELT_R))
+									if (V.get_item_by_slot(ITEM_SLOT_BELT_L))
+										stealpos.Add(V.get_item_by_slot(ITEM_SLOT_BELT_L))
 								if("r_hand", "l_hand")
-									if (V.get_item_by_slot(SLOT_RING))
-										stealpos.Add(V.get_item_by_slot(SLOT_RING))
+									if (V.get_item_by_slot(ITEM_SLOT_RING))
+										stealpos.Add(V.get_item_by_slot(ITEM_SLOT_RING))
 							if (length(stealpos) > 0)
 								var/obj/item/picked = pick(stealpos)
 								V.dropItemToGround(picked)
 								put_in_active_hand(picked)
 								to_chat(src, span_green("I stole [picked]!"))
-								exp_to_gain *= src.mind.get_learning_boon(thiefskill)
+								exp_to_gain *= src.get_learning_boon(thiefskill)
 								if(V.client && V.stat != DEAD)
+									SEND_SIGNAL(U, COMSIG_ITEM_STOLEN, V)
 									record_featured_stat(FEATURED_STATS_THIEVES, U)
 									record_featured_stat(FEATURED_STATS_CRIMINALS, U)
 									GLOB.vanderlin_round_stats[STATS_ITEMS_PICKPOCKETED]++
@@ -467,7 +409,7 @@
 					if(stealroll < targetperception)
 						exp_to_gain /= 5
 						to_chat(src, span_danger("I failed to pick the pocket!"))
-					src.mind.adjust_experience(/datum/skill/misc/stealing, exp_to_gain, FALSE)
+					src.adjust_experience(/datum/skill/misc/stealing, exp_to_gain, FALSE)
 					changeNext_move(mmb_intent.clickcd)
 				return
 			if(INTENT_SPELL)
@@ -489,12 +431,10 @@
 
 /atom/proc/attack_right(mob/user)
 	. = FALSE
-	if(!(interaction_flags_atom & INTERACT_ATOM_NO_FINGERPRINT_ATTACK_HAND))
+	if(!(interaction_flags_atom & INTERACT_ATOM_NO_FINGERPRINT_ATTACK_RIGHT))
 		add_fingerprint(user)
-	if(SEND_SIGNAL(src, COMSIG_ATOM_ATTACK_HAND, user) & COMPONENT_NO_ATTACK_HAND)
+	if(SEND_SIGNAL(src, COMSIG_ATOM_ATTACK_RIGHT, user) & COMPONENT_NO_ATTACK_RIGHT)
 		. = TRUE
-	if(interaction_flags_atom & INTERACT_ATOM_ATTACK_HAND)
-		. = _try_interact(user)
 
 //Return a non FALSE value to cancel whatever called this from propagating, if it respects it.
 /atom/proc/_try_interact(mob/user)
@@ -543,19 +483,125 @@
 		if(istype(G) && G.Touch(A,0)) // for magic gloves
 			return
 	if(!used_intent.noaa && ismob(A))
-//		playsound(src, pick(GLOB.unarmed_swingmiss), 100, FALSE)
 		do_attack_animation(A, visual_effect_icon = used_intent.animname, used_intent = used_intent)
 		changeNext_move(used_intent.clickcd)
-//		src.emote("attackgrunt")
 		playsound(get_turf(src), used_intent.miss_sound, 100, FALSE)
 		if(used_intent.miss_text)
 			visible_message(span_warning("[src] [used_intent.miss_text]!"), \
 							span_warning("I [used_intent.miss_text]!"))
 		aftermiss()
 
-//	if(isturf(A) && get_dist(src,A) <= 1) //move this to grab inhand item being used on an empty tile
-//		src.Move_Pulled(A)
-//		return
+
+/mob/living/proc/jump_action(atom/A)
+	if(istype(get_turf(src), /turf/open/water))
+		to_chat(src, span_warning("I can't jump while floating."))
+		return
+
+	if(A == src || A == loc)
+		return
+
+	if(usable_legs < 2)
+		return
+
+	if(pulledby && pulledby != src)
+		to_chat(src, span_warning("I'm being grabbed."))
+		resist_grab()
+		return
+
+	if(IsOffBalanced())
+		to_chat(src, span_warning("I haven't regained my balance yet."))
+		return
+
+	if(lying_angle)
+		to_chat(src, span_warning("I should stand up first."))
+		return
+
+	if(!isatom(A))
+		return
+
+	if(A.z != z)
+		if(!HAS_TRAIT(src, TRAIT_ZJUMP))
+			to_chat(src, span_warning("That's too high for me..."))
+			return
+
+	changeNext_move(mmb_intent.clickcd)
+
+	face_atom(A)
+
+	var/jadded
+	var/jrange
+	var/jextra = FALSE
+
+	if(m_intent == MOVE_INTENT_RUN)
+		emote("leap", forced = TRUE)
+		OffBalance(30)
+		jadded = 45
+		jrange = 3
+		jextra = TRUE
+	else
+		emote("jump", forced = TRUE)
+		OffBalance(20)
+		jadded = 20
+		jrange = 2
+
+	if(ishuman(src))
+		var/mob/living/carbon/human/H = src
+		jadded += H.get_complex_pain()/50
+		if(H.get_encumbrance() >= 0.7)
+			jadded += 50
+			jrange = 1
+
+	jump_action_resolve(A, jadded, jrange, jextra)
+
+#define FLIP_DIRECTION_CLOCKWISE 1
+#define FLIP_DIRECTION_ANTICLOCKWISE 0
+
+/mob/living/proc/jump_action_resolve(atom/A, jadded, jrange, jextra)
+	var/do_a_flip
+	var/flip_direction = FLIP_DIRECTION_CLOCKWISE
+	var/prev_pixel_z = pixel_z
+	var/prev_transform = transform
+	if(get_skill_level(/datum/skill/misc/athletics) > 4)
+		do_a_flip = TRUE
+		if((dir & SOUTH) || (dir & WEST))
+			flip_direction = FLIP_DIRECTION_ANTICLOCKWISE
+
+	if(adjust_stamina(min(jadded,100)))
+		if(do_a_flip)
+			var/flip_angle = flip_direction ? 120 : -120
+			animate(src, pixel_z = pixel_z + 6, transform = turn(transform, flip_angle), time = 1)
+			animate(transform = turn(transform, flip_angle), time=1)
+			animate(pixel_z = prev_pixel_z, transform = turn(transform, flip_angle), time=1)
+			animate(transform = prev_transform, time = 0)
+		else
+			animate(src, pixel_z = pixel_z + 6, time = 1)
+			animate(pixel_z = prev_pixel_z, transform = turn(transform, pick(-12, 0, 12)), time=2)
+			animate(transform = prev_transform, time = 0)
+
+		apply_status_effect(/datum/status_effect/is_jumping)
+		if(jextra)
+			throw_at(A, jrange, 1, src, spin = FALSE)
+			while(src.throwing)
+				sleep(1)
+			throw_at(get_step(src, src.dir), 1, 1, src, spin = FALSE)
+		else
+			throw_at(A, jrange, 1, src, spin = FALSE)
+			while(src.throwing)
+				sleep(1)
+		if(isopenturf(src.loc))
+			var/turf/open/T = src.loc
+			if(T.landsound)
+				playsound(T, T.landsound, 100, FALSE)
+			T.Entered(src)
+		remove_status_effect(/datum/status_effect/is_jumping)
+	else
+		animate(src, pixel_z = pixel_z + 6, time = 1)
+		animate(pixel_z = prev_pixel_z, transform = turn(transform, pick(-12, 0, 12)), time=2)
+		animate(transform = prev_transform, time = 0)
+		throw_at(A, 1, 1, src, spin = FALSE)
+
+#undef FLIP_DIRECTION_CLOCKWISE
+#undef FLIP_DIRECTION_ANTICLOCKWISE
 
 /*
 	Animals & All Unspecified
@@ -615,13 +661,6 @@
 	if(SEND_SIGNAL(src, COMSIG_ATOM_ATTACK_PAW, user) & COMPONENT_NO_ATTACK_HAND)
 		return TRUE
 	return FALSE
-
-/*
-	True Devil
-*/
-
-/mob/living/carbon/true_devil/UnarmedAttack(atom/A, proximity)
-	A.attack_hand(src)
 
 /*
 	Brain

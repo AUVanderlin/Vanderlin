@@ -37,6 +37,14 @@
 	mob_overlay_icon = 'icons/roguetown/clothing/onmob/patron_robes.dmi'
 	sleeved = 'icons/roguetown/clothing/onmob/helpers/sleeves_patron_robes.dmi'
 
+/obj/item/clothing/shirt/robe/abyssor
+	name = "sea robe"
+	desc = "Dark green robes with a hood attached to the back, you feel like you're drowning in sweat just being in these."
+	icon_state = "abyssrobe"
+	icon = 'icons/roguetown/clothing/patron_robes.dmi'
+	mob_overlay_icon = 'icons/roguetown/clothing/onmob/patron_robes.dmi'
+	sleeved = 'icons/roguetown/clothing/onmob/patron_robes.dmi'
+
 /obj/item/clothing/shirt/robe/astrata
 	name = "sun robe"
 	desc = "The cloth of a follower of Astrata."
@@ -83,7 +91,7 @@
 /obj/item/clothing/shirt/robe/priest/pickup(mob/living/user)
 	if((user.job != "Priest") && (user.job != "Priestess"))
 		user.visible_message(span_reallybig("UNWORTHY HANDS TOUCH MY VISAGE, CEASE OR BE PUNISHED"))
-		playsound(user, 'sound/misc/astratascream.ogg', 80,  falloff = 0.2)
+		playsound(user, 'sound/misc/gods/astrata_scream.ogg', 80, extrarange = SHORT_RANGE_SOUND_EXTRARANGE)
 		spawn(30)
 			if(loc == user)
 				user.adjust_divine_fire_stacks(5)
@@ -197,8 +205,7 @@
 			if(H.head)
 				to_chat(H, span_warning("I'm already wearing something on my head."))
 				return
-			else if(H.equip_to_slot_if_possible(hood,SLOT_HEAD,0,0,1))
-				testing("begintog")
+			else if(H.equip_to_slot_if_possible(hood,ITEM_SLOT_HEAD,0,0,1))
 				hoodtoggled = TRUE
 				if(!picked)
 					if(toggle_icon_state)
@@ -212,10 +219,8 @@
 				H.update_inv_neck()
 				H.update_inv_pants()
 				H.update_fov_angles()
-
 	else
 		RemoveHood()
-	testing("endtoggle")
 
 /obj/item/clothing/shirt/robe/newmage/RemoveHood()
 	if(!hood)
@@ -348,3 +353,9 @@
 	picked = TRUE
 	to_chat(user, span_info("[src] magically changes it's colours!"))
 	playsound(src, 'sound/magic/swap.ogg', 50, TRUE)
+
+/obj/item/clothing/shirt/robe/faceless
+	desc = "A slimmed down, fitting robe made of fine silks and fabrics."
+	color = null
+	icon_state = "facelesscloth" //Credit goes to Cre
+	item_state = "facelesscloth"

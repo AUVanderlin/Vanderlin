@@ -89,8 +89,8 @@
 						FP.blood_state = S.blood_state
 						FP.entered_dirs |= dir
 						FP.bloodiness = S.bloody_shoes[S.blood_state] - BLOOD_LOSS_IN_SPREAD
-						FP.add_blood_DNA(S.return_blood_DNA())
-						FP.update_icon()
+						FP.add_blood_DNA(GET_ATOM_BLOOD_DNA(S))
+						FP.update_appearance()
 					update_inv_shoes()
 				//End bloody footprints
 				S.step_action()
@@ -103,7 +103,8 @@
 				if(I.minstr)
 					var/effective = I.minstr
 					if(I.wielded)
-						effective = max(I.minstr / 2, 1)
+						if(!is_child(src))
+							effective = max(I.minstr / 2, 1)
 					if(effective > STASTR)
 						if(prob(effective))
 							dropItemToGround(I, silent = FALSE)

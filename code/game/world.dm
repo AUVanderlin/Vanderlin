@@ -68,6 +68,8 @@ GLOBAL_PROTECT(tracy_init_reason)
 	// THAT'S IT, WE'RE DONE, THE. FUCKING. END.
 	Master = new
 
+#undef USE_TRACY_PARAMETER
+
 /world/New()
 
 	log_world("World loaded at [time_stamp()]!")
@@ -144,7 +146,7 @@ GLOBAL_PROTECT(tracy_init_reason)
 #else
 	cb = VARSET_CALLBACK(SSticker, force_ending, TRUE)
 #endif
-	SSticker.OnRoundstart(CALLBACK(GLOBAL_PROC, GLOBAL_PROC_REF(addtimer), cb, 10 SECONDS))
+	SSticker.OnRoundstart(CALLBACK(GLOBAL_PROC, GLOBAL_PROC_REF(_addtimer), cb, 10 SECONDS))
 
 /world/proc/SetupLogs()
 	var/override_dir = params[OVERRIDE_LOG_DIRECTORY_PARAMETER]
@@ -197,6 +199,9 @@ GLOBAL_PROTECT(tracy_init_reason)
 	GLOB.world_job_debug_log = "[GLOB.log_directory]/job_debug.log"
 	GLOB.world_paper_log = "[GLOB.log_directory]/paper.log"
 	GLOB.tgui_log = "[GLOB.log_directory]/tgui.log"
+#ifdef REFERENCE_DOING_IT_LIVE
+	GLOB.harddel_log = "[GLOB.log_directory]/harddel.log"
+#endif
 	set_db_log_directory()
 
 #ifdef UNIT_TESTS
@@ -333,6 +338,7 @@ GLOBAL_PROTECT(tracy_init_reason)
 	'sound/roundend/intermission.ogg',
 	'sound/roundend/motherfuckers.ogg',
 	'sound/roundend/poppop.ogg',
+	'sound/roundend/cursedswords.ogg',
 	'sound/roundend/dwarfs.ogg')
 	for(var/client/thing in GLOB.clients)
 		if(!thing)
@@ -495,7 +501,6 @@ GLOBAL_PROTECT(tracy_init_reason)
 /world/proc/incrementMaxZ()
 	maxz++
 	SSmobs.MaxZChanged()
-	SSidlenpcpool.MaxZChanged()
 	SSai_controllers.on_max_z_changed()
 
 
@@ -573,3 +578,5 @@ GLOBAL_PROTECT(tracy_init_reason)
 			SEND_TEXT(world.log, "Error flushing byond-tracy log: [flush_result]")
 			CRASH("Error flushing byond-tracy log: [flush_result]")
 		SEND_TEXT(world.log, "Flushed byond-tracy log")
+
+#undef RESTART_COUNTER_PATH

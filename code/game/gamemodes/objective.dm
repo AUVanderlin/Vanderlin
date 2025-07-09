@@ -13,14 +13,26 @@ GLOBAL_LIST(admin_objective_list) //Prefilled admin assignable objective list
 	var/triumph_count = 1
 	var/flavor = "Goal" //so it appear as "goal", "dream", "aspiration", etc
 
-/datum/objective/New(text)
+/datum/objective/New(text, datum/mind/owner)
 	if(text)
 		explanation_text = text
+	if(owner)
+		src.owner = owner
+	on_creation()
+
+/datum/objective/proc/on_creation()
+	if(owner && !(owner in GLOB.personal_objective_minds))
+		GLOB.personal_objective_minds |= owner
+	return
 
 /datum/objective/proc/get_owners() // Combine owner and team into a single list.
 	. = (team && team.members) ? team.members.Copy() : list()
 	if(owner)
 		. += owner
+
+/datum/objective/proc/escalate_objective(event_track = EVENT_TRACK_PERSONAL)
+	var/points_to_add = SSgamemode.point_thresholds[event_track] * 0.5
+	SSgamemode.event_track_points[event_track] += points_to_add
 
 /datum/objective/proc/admin_edit(mob/admin)
 	return
@@ -132,7 +144,7 @@ GLOBAL_LIST(admin_objective_list) //Prefilled admin assignable objective list
 	if(receiver && receiver.current)
 		if(ishuman(receiver.current))
 			var/mob/living/carbon/human/H = receiver.current
-			var/list/slots = list("backpack" = SLOT_IN_BACKPACK)
+			var/list/slots = list("backpack" = ITEM_SLOT_BACKPACK)
 			for(var/eq_path in special_equipment)
 				var/obj/O = new eq_path
 				H.equip_in_one_of_slots(O, slots)
@@ -508,7 +520,7 @@ GLOBAL_LIST_EMPTY(possible_items)
 		/datum/objective/steal,
 		/datum/objective/capture,
 		/datum/objective/custom
-	),/proc/cmp_typepaths_asc)
+	),GLOBAL_PROC_REF(cmp_typepaths_asc))
 
 	for(var/T in allowed_types)
 		var/datum/objective/X = T

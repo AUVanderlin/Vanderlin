@@ -6,9 +6,6 @@
 	/// When joining the round, this text will be shown to the player.
 	var/tutorial = null
 
-	/// Determines who can demote this position
-	var/department_head = list()
-
 	/// Tells the given channels that the given mob is the new department head. See communications.dm for valid channels.
 	var/list/head_announce = null
 
@@ -61,7 +58,7 @@
 
 	var/list/mind_traits // Traits added to the mind of the mob assigned this job
 
-	var/display_order = JOB_DISPLAY_ORDER_CAPTAIN
+	var/display_order = JDO_DEFAULT
 
 	/// All values = (JOB_ANNOUNCE_ARRIVAL | JOB_SHOW_IN_CREDITS | JOB_EQUIP_RANK)
 	var/job_flags = NONE
@@ -195,7 +192,7 @@
 	if(roundstart_experience)
 		var/mob/living/carbon/human/experiencer = spawned
 		for(var/i in roundstart_experience)
-			experiencer.mind.adjust_experience(i, roundstart_experience[i], TRUE)
+			experiencer.adjust_experience(i, roundstart_experience[i], TRUE)
 
 	/* V: PAST THIS POINT */
 
@@ -203,9 +200,9 @@
 		ADD_TRAIT(spawned, TRAIT_FOREIGNER, TRAIT_GENERIC)
 
 	if(can_have_apprentices)
-		spawned.mind.apprentice_training_skills = trainable_skills.Copy()
-		spawned.mind.max_apprentices = max_apprentices
-		spawned.mind.apprentice_name = apprentice_name
+		spawned.set_apprentice_training_skills(trainable_skills.Copy())
+		spawned.set_max_apprentices(max_apprentices)
+		spawned.set_apprentice_name(apprentice_name)
 
 	add_spells(spawned)
 
@@ -257,13 +254,6 @@
 		humanguy.advsetup = TRUE
 		humanguy.invisibility = INVISIBILITY_MAXIMUM
 		humanguy.become_blind("advsetup")
-
-/datum/job/proc/announce_job(mob/living/joining_mob)
-	if(head_announce)
-		announce_head(joining_mob, head_announce)
-
-/datum/job/proc/announce_head(mob/living/carbon/human/H, channels) //tells the given channel that the given mob is the new department head. See communications.dm for valid channels.
-	//RT: UNIMPLEMENTED
 
 //Used for a special check of whether to allow a client to latejoin as this job.
 /datum/job/proc/special_check_latejoin(client/C)
@@ -352,9 +342,11 @@
 			H.dna.species.random_underwear(H.gender)
 			if(H.dna.species)
 				if(H.dna.species.id == "elf")
-					H.mind?.adjust_skillrank(/datum/skill/misc/reading, 1, TRUE)
+					H.adjust_skillrank(/datum/skill/misc/reading, 1, TRUE)
 				if(H.dna.species.id == "dwarf")
-					H.mind?.adjust_skillrank(/datum/skill/labor/mining, 1, TRUE)
+					H.adjust_skillrank(/datum/skill/labor/mining, 1, TRUE)
+				if(isharpy(H))
+					H.adjust_skillrank(/datum/skill/misc/music, 1, TRUE)
 	H.underwear_color = null
 	H.update_body()
 
@@ -370,6 +362,7 @@
 		H.mind?.job_bitflag = job_bitflag
 		if(H.familytree_pref != FAMILY_NONE && !visualsOnly && !H.family_datum)
 			SSfamilytree.AddLocal(H, H.familytree_pref)
+			H.ShowFamilyUI(TRUE)
 		if(H.ckey)
 			if(check_crownlist(H.ckey))
 				H.mind.special_items["Champion Circlet"] = /obj/item/clothing/head/crown/sparrowcrown

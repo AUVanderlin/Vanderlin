@@ -7,7 +7,7 @@
 	department_flag = YOUNGFOLK
 	job_flags = (JOB_EQUIP_RANK | JOB_NEW_PLAYER_JOINABLE)
 	display_order = JDO_ORPHAN
-	faction = FACTION_STATION
+	faction = FACTION_TOWN
 	total_positions = 12
 	spawn_positions = 12
 	min_pq = 2
@@ -46,12 +46,13 @@
 	if(prob(15))
 		r_hand = pick(/obj/item/instrument/lute, /obj/item/instrument/accord, /obj/item/instrument/guitar, /obj/item/instrument/flute, /obj/item/instrument/hurdygurdy, /obj/item/instrument/viola)
 		if(H.mind)
-			H.mind.adjust_skillrank(/datum/skill/misc/music, pick(2,3,4), TRUE)
+			H.adjust_skillrank(/datum/skill/misc/music, pick(2,3,4), TRUE)
 	if(H.mind)
-		H.mind.adjust_skillrank(/datum/skill/misc/sneaking, 2, TRUE)
-		H.mind.adjust_skillrank(/datum/skill/misc/stealing, 4, TRUE)
-		H.mind.adjust_skillrank(/datum/skill/misc/climbing, 4, TRUE)
+		H.adjust_skillrank(/datum/skill/misc/sneaking, 2, TRUE)
+		H.adjust_skillrank(/datum/skill/misc/stealing, 4, TRUE)
+		H.adjust_skillrank(/datum/skill/misc/climbing, 4, TRUE)
 		H.STALUC = rand(1, 20)
 	H.change_stat(STATKEY_INT, round(rand(-4,4)))
 	H.change_stat(STATKEY_CON, -1)
 	H.change_stat(STATKEY_END, -1)
+	ADD_TRAIT(H, TRAIT_ORPHAN, TRAIT_GENERIC) //Affected by Matron's Eargrab.

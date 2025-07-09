@@ -58,20 +58,30 @@
 	var/mob/living/living_pawn = controller.pawn
 	return locate(locate_path) in living_pawn.held_items
 
+/datum/ai_behavior/find_and_set/in_hands/given_list
+
+/datum/ai_behavior/find_and_set/in_hands/given_list/search_tactic(datum/ai_controller/controller, locate_paths)
+	var/list/found = typecache_filter_list(controller.pawn, locate_paths)
+	if(length(found))
+		return pick(found)
+
 /**
  * Variant of find and set that takes a list of things to find.
  */
 /datum/ai_behavior/find_and_set/in_list
 
 /datum/ai_behavior/find_and_set/in_list/search_tactic(datum/ai_controller/controller, locate_paths, search_range)
-	var/list/found = list()
-	for(var/locate_path in locate_paths)
-		var/single_locate = ..(controller, locate_path, search_range)
-		if(single_locate)
-			found += single_locate
-	if(found.len)
+	var/list/found = typecache_filter_list(oview(search_range, controller.pawn), locate_paths)
+	if(length(found))
 		return pick(found)
 
+/datum/ai_behavior/find_and_set/in_list/saiga
+
+/datum/ai_behavior/find_and_set/in_list/saiga/search_tactic(datum/ai_controller/controller, locate_paths, search_range)
+	var/list/found = typecache_filter_list(oview(search_range, controller.pawn), locate_paths)
+	if(length(found))
+		controller.set_blackboard_key(BB_BASIC_MOB_FLEEING, FALSE)
+		return pick(found)
 
 /datum/ai_behavior/find_and_set/dead_bodies
 

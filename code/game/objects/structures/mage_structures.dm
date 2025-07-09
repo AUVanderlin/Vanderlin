@@ -74,7 +74,7 @@
 	icon_state = "arcyne"
 	blade_dulling = DULLING_BASH
 	resistance_flags = FIRE_PROOF
-	keylock = FALSE
+	lock = /datum/lock
 	can_add_lock = FALSE
 	max_integrity = 2000
 
@@ -173,6 +173,7 @@
 			playsound(user,pick('sound/items/drink_gen (1).ogg','sound/items/drink_gen (2).ogg','sound/items/drink_gen (3).ogg'), 100, TRUE)
 		return
 	..()
+
 /obj/structure/well/fountain/mana/attackby(obj/item/I, mob/user, params)
 	if(istype(I, /obj/item/reagent_containers/glass))
 		var/obj/item/reagent_containers/glass/W = I
@@ -201,10 +202,11 @@
 		if(!do_after(user, 10 SECONDS, src))
 			return
 		grabbed.mana_pool.set_intrinsic_recharge(MANA_ALL_LEYLINES)
+		SEND_SIGNAL(grabbed, COMSIG_BAPTISM_RECEIVED, user)
 		playsound(user, pick('sound/foley/waterwash (1).ogg','sound/foley/waterwash (2).ogg'), 80, FALSE)
 		return
 
-	else ..()
+	return ..()
 
 /obj/machinery/light/fueled/forge/arcane
 	icon = 'icons/roguetown/misc/forge.dmi'
@@ -224,7 +226,7 @@
 				fueluse = max(fueluse - 10, 0)
 			if(fueluse == 0)//It's litterally powered by arcane lava. It's not gonna run out of fuel.
 				fueluse = 4000
-		update_icon()
+		update_appearance(UPDATE_ICON_STATE)
 
 /obj/structure/leyline
 	name = "inactive leyline"
@@ -268,7 +270,6 @@
 					icon_state = "inactiveleyline"
 					name = "inactive leyline"
 					desc = "A curious arrangement of stones."
-					update_icon()
 					last_process = world.time
 
 	else
@@ -278,7 +279,6 @@
 			name = "active leyline"
 			desc = "An active tear into the leyline. It gives off plenty of energy"
 			active = TRUE
-			update_icon()
 		else
 			if(guardian)
 				if(do_after(user, 60))
@@ -300,7 +300,6 @@
 					icon_state = "inactiveleyline"
 					name = "inactive leyline"
 					desc = "A curious arrangement of stones."
-					update_icon()
 					last_process = world.time
 
 /obj/structure/voidstoneobelisk

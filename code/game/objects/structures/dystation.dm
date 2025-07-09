@@ -38,7 +38,7 @@
 	new /obj/effect/decal/cleanable/dyes(get_turf(src))
 	var/obj/item/bin/I = new(loc)
 	I.kover = TRUE
-	I.update_icon()
+	I.update_appearance()
 	return ..()
 
 
@@ -142,7 +142,7 @@
 	var/mob/living/user = usr
 	if(!istype(user))
 		return
-	if(!user.canUseTopic(src, TRUE))
+	if(!user.can_perform_action(src, FORBID_TELEKINESIS_REACH))
 		return
 
 	switch(href_list["action"])
@@ -157,7 +157,7 @@
 				return
 			if(!active_color)
 				return
-			if(user.mind?.get_skill_level(/datum/skill/misc/sewing) <= 2) // We're not letting people with 0 knowledge in sewing do dying, so they don't step on the toes of the seamstress
+			if(user.get_skill_level(/datum/skill/misc/sewing) <= 2) // We're not letting people with 0 knowledge in sewing do dying, so they don't step on the toes of the seamstress
 				to_chat(user, span_warning("I do not know enough about this craft..."))
 				return
 
@@ -171,7 +171,7 @@
 				if(href_list["type"] == "detail" && isclothing(inserted))
 					var/obj/item/clothing/cloth = inserted
 					cloth.detail_color = active_color
-					cloth.update_icon()
+					cloth.update_appearance()
 				else
 					inserted.add_atom_colour(active_color, FIXED_COLOUR_PRIORITY)
 
@@ -192,7 +192,6 @@
 			inserted = null
 
 			icon_state = initial(icon_state)
-			update_icon()
 
 	updateUsrDialog()
 

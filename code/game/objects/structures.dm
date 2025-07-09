@@ -21,6 +21,11 @@
 	if(smoothing_flags & (SMOOTH_BITMASK|SMOOTH_BITMASK_CARDINALS))
 		QUEUE_SMOOTH(src)
 		QUEUE_SMOOTH_NEIGHBORS(src)
+	if(uses_lord_coloring)
+		if(GLOB.lordprimary && GLOB.lordsecondary)
+			lordcolor()
+		else
+			RegisterSignal(SSdcs, COMSIG_LORD_COLORS_SET, TYPE_PROC_REF(/obj/structure, lordcolor))
 	if(redstone_id)
 		GLOB.redstone_objs += src
 		. = INITIALIZE_HINT_LATELOAD
@@ -54,11 +59,12 @@
 	. = ..()
 	if(.)
 		return
-//	if(structureclimber && structureclimber != user)
-//		user.changeNext_move(CLICK_CD_MELEE)
-//		user.do_attack_animation(src)
-//		structureclimber.Paralyze(40)
-//		structureclimber.visible_message("<span class='warning'>[structureclimber] has been knocked off [src].", "You're knocked off [src]!", "You see [structureclimber] get knocked off [src].</span>")
+
+/obj/structure/pre_lock_interact(mob/user)
+	if(broken)
+		to_chat(user, span_notice("[src] is broken, I cannot do this."))
+		return FALSE
+	return ..()
 
 /obj/structure/Crossed(atom/movable/AM)
 	. = ..()

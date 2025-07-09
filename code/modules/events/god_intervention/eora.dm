@@ -24,15 +24,16 @@
 		if(human_mob.IsWedded() || human_mob.age == AGE_CHILD)
 			continue
 
-		// Exclude parents
-		if(human_mob.family_datum)
-			var/family_role = human_mob.family_datum.family[human_mob]
-			if(family_role in list(FAMILY_FATHER, FAMILY_MOTHER))
+		// Exclude parents using new family system
+		if(human_mob.family_member_datum)
+			var/datum/family_member/member = human_mob.family_member_datum
+			if(member.children.len > 0)
 				continue
 
+		// Add to appropriate gender list
 		if(human_mob.gender == MALE)
 			eligible_males += human_mob
-		else if(human_mob.gender == FEMALE)
+		else
 			eligible_females += human_mob
 
 	if(!length(eligible_males) || !length(eligible_females))
@@ -71,8 +72,8 @@
 
 		to_chat(male, span_rose("Eora's voice whispers in your heart - you feel an irresistible urge to finally get married..."))
 		to_chat(male, span_rose("You can choose anyone you fancy to fulfill this desire, but the name of [span_notice("[female.real_name]")], the [female.job] seems to get your heart racing for some reason..."))
-		SEND_SOUND(male, 'sound/vo/female/gen/giggle (1).ogg')
+		male.playsound_local(male, 'sound/vo/female/gen/giggle (1).ogg', 100)
 
 		to_chat(female, span_rose("Eora's voice whispers in your heart - you feel an irresistible urge to finally get married..."))
 		to_chat(female, span_rose("You can choose anyone you fancy to fulfill this desire, but the name of [span_notice("[male.real_name]")], the [male.job] seems to get your heart racing for some reason..."))
-		SEND_SOUND(female, 'sound/vo/female/gen/giggle (1).ogg')
+		female.playsound_local(female, 'sound/vo/female/gen/giggle (1).ogg', 100)

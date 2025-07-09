@@ -97,6 +97,40 @@
 	prevent_crits = ALL_CRITICAL_HITS
 	item_weight = 9 * IRON_MULTIPLIER
 
+//............... Zizo Frog Helmet ............... //
+
+/obj/item/clothing/head/helmet/heavy/zizo
+	name = "darksteel frog helmet"
+	desc = "A darksteel frog helmet. This one has an adjustable visor. Called forth from the edge of what should be known. In Her name."
+	adjustable = CAN_CADJUST
+	icon_state = "zizofrogmouth"
+	icon = 'icons/roguetown/clothing/special/evilarmor.dmi'
+	mob_overlay_icon = 'icons/roguetown/clothing/special/onmob/evilarmor.dmi'
+	armor = ARMOR_PLATE
+	prevent_crits = ALL_CRITICAL_HITS
+	item_weight = 5 * STEEL_MULTIPLIER
+	block2add = FOV_BEHIND
+	sellprice = 0 // Incredibly evil Zizoid armor, this should be burnt, nobody wants this
+
+//............... Matthios Helmet ............... //
+
+/obj/item/clothing/head/helmet/heavy/matthios
+	name = "gilded visage"
+	mob_overlay_icon = 'icons/roguetown/clothing/onmob/64x64/head.dmi'
+	desc = "A sinister visage. So that your crimes are never brought to you."
+	icon_state = "matthioshelm"
+	icon = 'icons/roguetown/clothing/special/evilarmor.dmi'
+	mob_overlay_icon = 'icons/roguetown/clothing/special/onmob/evilarmor64x64.dmi'
+	armor = ARMOR_PLATE
+	prevent_crits = ALL_CRITICAL_HITS
+	item_weight = 5 * STEEL_MULTIPLIER
+	block2add = FOV_BEHIND
+	sellprice = 0 // See above comment
+	bloody_icon = 'icons/effects/blood64x64.dmi'
+	bloody_icon_state = "helmetblood_big"
+	worn_x_dimension = 64
+	worn_y_dimension = 64
+
 //............... Spangenhelm ............... //
 /obj/item/clothing/head/helmet/heavy/viking
 	name = "spangenhelm"
@@ -208,15 +242,15 @@
 
 	prevent_crits = ALL_CRITICAL_HITS
 
-/obj/item/clothing/head/helmet/heavy/decorated/update_icon()
-	cut_overlays()
-	if(get_detail_tag())
-		var/mutable_appearance/pic = mutable_appearance(icon(icon, "[icon_state][detail_tag]"))
-		pic.appearance_flags = RESET_COLOR
-		if(get_detail_color())
-			pic.color = get_detail_color()
-		add_overlay(pic)
-
+/obj/item/clothing/head/helmet/heavy/decorated/update_overlays()
+	. = ..()
+	if(!get_detail_tag())
+		return
+	var/mutable_appearance/pic = mutable_appearance(icon, "[icon_state][detail_tag]")
+	pic.appearance_flags = RESET_COLOR
+	if(get_detail_color())
+		pic.color = get_detail_color()
+	. += pic
 
 //............... Decorated Knight Helmet ............... //
 /obj/item/clothing/head/helmet/heavy/decorated/knight
@@ -234,7 +268,7 @@
 		picked = TRUE
 		icon_state = playerchoice
 		item_state = playerchoice
-		update_icon()
+		update_appearance(UPDATE_ICON)
 		if(loc == user && ishuman(user))
 			var/mob/living/carbon/H = user
 			H.update_inv_head()
@@ -259,7 +293,7 @@
 		picked = TRUE
 		icon_state = playerchoice
 		item_state = playerchoice
-		update_icon()
+		update_appearance(UPDATE_ICON)
 		if(loc == user && ishuman(user))
 			var/mob/living/carbon/H = user
 			H.update_inv_head()
@@ -281,7 +315,7 @@
 		picked = TRUE
 		icon_state = playerchoice
 		item_state = playerchoice
-		update_icon()
+		update_appearance(UPDATE_ICON)
 		if(loc == user && ishuman(user))
 			var/mob/living/carbon/H = user
 			H.update_inv_head()
@@ -303,7 +337,7 @@
 		picked = TRUE
 		icon_state = playerchoice
 		item_state = playerchoice
-		update_icon()
+		update_appearance(UPDATE_ICON)
 		if(loc == user && ishuman(user))
 			var/mob/living/carbon/H = user
 			H.update_inv_head()
@@ -330,7 +364,7 @@
 		picked = TRUE
 		icon_state = playerchoice
 		item_state = playerchoice
-		update_icon()
+		update_appearance(UPDATE_OVERLAYS)
 		if(loc == user && ishuman(user))
 			var/mob/living/carbon/H = user
 			H.update_inv_head()

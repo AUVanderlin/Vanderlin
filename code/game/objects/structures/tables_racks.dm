@@ -35,7 +35,12 @@
 	attacked_sound = list('sound/combat/hits/onwood/woodimpact (1).ogg','sound/combat/hits/onwood/woodimpact (2).ogg')
 	blade_dulling = DULLING_BASHCHOP
 
+/obj/structure/table/Initialize()
+	. = ..()
+	AddElement(/datum/element/footstep_override, priority = STEP_SOUND_TABLE_PRIORITY)
+
 /obj/structure/table/update_icon()
+	. = ..()
 	if(smoothing_flags & SMOOTH_BITMASK)
 		QUEUE_SMOOTH(src)
 		QUEUE_SMOOTH_NEIGHBORS(src)
@@ -299,6 +304,40 @@
 
 /obj/structure/table/wood/large/corner_blue
 	icon_state = "largetable_alt2"
+
+/obj/structure/table/map
+	icon = 'icons/roguetown/misc/tables.dmi'
+	icon_state = "map_blank"
+	desc = "A table which probably should have a map covering it."
+
+/obj/structure/table/map/enigma
+	icon = 'icons/roguetown/misc/tables.dmi'
+	icon_state = "map_enigma"
+	desc = "A table displaying a map of Enigma."
+
+/obj/structure/table/map/vanderlin
+	icon_state = "map_vanderlin"
+	desc = "A table displaying a map of Vanderlin and Daftmarsh."
+
+/obj/structure/table/map/rosewood
+	icon_state = "map_rosewood"
+	desc = "A table displaying a map of Rosewood and White Palace Pass."
+
+/obj/structure/table/map/deshret
+	icon_state = "map_deshret"
+	desc = "A table displaying a map of Deshret and surrounding deserts."
+
+/obj/structure/table/map/amber
+	icon_state = "map_amber"
+	desc = "A table displaying a map of Amber Hollow. Regardless of serene appearance, the threat of Zizo's Claw underneath never lessens."
+
+/obj/structure/table/map/kingsfield
+	icon_state = "map_kingsfield"
+	desc = "A table displaying a map of the capital of Kingsfield."
+
+/obj/structure/table/map/baotha
+	icon_state = "map_baotha"
+	desc = "A table displaying the lands surrounding the fallen kingdom of Azuria, doomed to ash."
 
 /obj/structure/table/wood/fine
 	icon = 'icons/roguetown/misc/tables.dmi'

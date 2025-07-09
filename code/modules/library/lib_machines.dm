@@ -153,7 +153,7 @@
 	cooldown = world.time + PRINTER_COOLDOWN
 
 /obj/machinery/printingpress/proc/upload_manuscript(mob/user, obj/item/manuscript/M)
-	SSlibrarian.playerbook2file(M.compiled_pages, M.name, M.author, M.ckey, M.select_icon)
+	SSlibrarian.playerbook2file(M.compiled_pages, M.name, M.author, M.ckey, M.select_icon, M.category)
 	SSlibrarian.update_books()
 
 /obj/machinery/printingpress/proc/upload_painting(mob/user, obj/item/canvas/M)
@@ -207,3 +207,6 @@
 	if("print" in href_list)
 		var/id = url_encode(href_list["id"])
 		start_printing(usr, "archive", id)
+
+#undef PRINTER_COOLDOWN
+#undef PRINTING_TIME

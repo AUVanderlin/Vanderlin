@@ -17,7 +17,27 @@
 	name = "tome of the arcyne"
 	desc = "A crackling, glowing book, filled with runes and symbols that hurt the mind to stare at."
 	pages_to_mastery = 7
-	remarks = list("Recall that place of white and black, so cold after its season of heat...", "Time slips away as I devour each pictograph and sigil...", "Noc is a shrewd God, and his followers’ writings are no different...", "The smell of wet rain fills the room with every turned page...", "Helical text spans the page like a winding puzzle...", "Tracing a finger over one rune renders  my hand paralyzed, if only for a moment...", "The Sun-And-Moon theory implicates Astrata and Noc as the primary drivers of magick...", "The Sea-And-Moon theory connects Abyssor and Noc as the chief patrons of arcyne...", "This page clearly details the benefits of swampweed on one's capacity to conceptualize the arcyne...", "Conceptualize. Theorize. Feel. Flow. Manifest...", "Passion. Strength. Power. Victory. The tenets through which we break the chains of reality...", "Didn’t I just read this page...?", "A lone illustration of Noc’s visage fills this page, his stony gaze boring into my soul...", "My eyes begin to lid as I finish this chapter. These symbols cast a heavy fog over my mind...", "This chapter focuses on the scholars of Naledi, and their abstruse traditions on daemon-hunting...", "The book states Grenzelhoftian jesters are renowned for dabbling in the arcyne to please their lords. Is there something I could learn from fools...?", "Silver. Blade. Mana. Blood. These are the ingredients I’ll need to imbibe the very ground with arcyne abilities...", "Elysium incants speak to me in an extinct tongue immortalized on parchment...", "My mind wanders and waves. Z's temptations draw close, but I weather through as I finally finish this chapter...", "I close my eye's for but a moment, and the competing visages of Noc and Z stare into my very soul. I see them blink, and my eyelids open...", "I am the Root. The Root is me. I must reach it, and the Tree...", "I feel the arcyne circuits running through my body, empowered with each word I read...", "Am I reading? Are these words, symbols or inane scribbles? I cannot be sure, yet with each one my eyes glaze over, I can feel the arcyne pulse within me...", "A mystery is revealed before my very eyes. I do not read it, yet I am aware. Gems are the Root's natural arcyne energy, manifest. Perhaps I can use them to better my conceptualization...")
+	remarks = list("Recall that place of white and black, so cold after its season of heat...",
+	"Time slips away as I devour each pictograph and sigil...",
+	"Noc is a shrewd God, and his followers’ writings are no different...",
+	"The smell of wet rain fills the room with every turned page...",
+	"Helical text spans the page like a winding puzzle...",
+	"Tracing a finger over one rune renders  my hand paralyzed, if only for a moment...",
+	"This page clearly details the benefits of swampweed on one's capacity to conceptualize the arcyne...",
+	"Conceptualize. Theorize. Feel. Flow. Manifest...",
+	"Passion. Strength. Power. Victory. The tenets through which we break the chains of reality...",
+	"Magick is to be kept close, a guarded secret. Noc changed the rules again. I need to catch up...",
+	"Didn’t I just read this page...?",
+	"A lone illustration of Noc’s visage fills this page, his stony gaze boring into my soul...",
+	"My eyes begin to lid as I finish this chapter. These symbols cast a heavy fog over my mind...",
+	"Silver. Blade. Mana. Blood. These are the ingredients I’ll need to imbibe the very ground with arcyne abilities...",
+	"Elysium incants speak to me in an extinct tongue immortalized on parchment...",
+	"My mind wanders and waves. Z's temptations draw close, but I weather through as I finally finish this chapter...",
+	"I close my eye's for but a moment, and the competing visages of Noc and Z stare into my very soul. I see them blink, and my eyelids open...",
+	"I am the Root. The Root is me. I must reach it, and the Tree...",
+	"I feel the arcyne circuits running through my body, empowered with each word I read...",
+	"Am I reading? Are these words, symbols or inane scribbles? I cannot be sure, yet with each one my eyes glaze over, I can feel the arcyne pulse within me...",
+	"A mystery is revealed before my very eyes. I do not read it, yet I am aware. Gems are the Root's natural arcyne energy, manifest. Perhaps I can use them to better my conceptualization...")
 	oneuse = FALSE
 	var/owner = null
 	var/list/allowed_readers = list()
@@ -111,7 +131,7 @@
 		if(world.time > (the_time + 30 SECONDS))
 			return
 		base_icon_state = "spellbook[design]"
-		update_icon()
+		update_appearance(UPDATE_ICON_STATE)
 		picked = TRUE
 		return
 	if(owner == null)
@@ -125,10 +145,11 @@
 		open = FALSE
 		playsound(loc, 'sound/items/book_close.ogg', 100, FALSE, -1)
 	curpage = 1
-	update_icon()
+	update_appearance(UPDATE_ICON_STATE)
 	user.update_inv_hands()
 
-/obj/item/book/granter/spellbook/update_icon()
+/obj/item/book/granter/spellbook/update_icon_state()
+	. = ..()
 	icon_state = "[base_icon_state]_[open]"
 
 /obj/item/book/granter/spellbook/on_reading_start(mob/user)
@@ -142,7 +163,7 @@
 		return
 	user.mind?.has_studied = TRUE
 	var/mob/living/reader = user
-	var/qualityoflearn = (reader.STAINT*2 + (user.mind?.get_skill_level(/datum/skill/misc/reading)* 5) + (user.mind?.get_skill_level(/datum/skill/magic/arcane)*5))
+	var/qualityoflearn = (reader.STAINT*2 + (user.get_skill_level(/datum/skill/misc/reading)* 5) + (user.get_skill_level(/datum/skill/magic/arcane)*5))
 	if(reader.has_status_effect(/datum/status_effect/buff/weed))
 		to_chat(user, span_smallgreen("Swampweed truly does open one's third eye to the secrets of the arcyne..."))
 		qualityoflearn += 10
@@ -164,7 +185,10 @@
 	if (born_of_rock)
 		// the rock tomes are a *lot* easier to make, so we make them worse by them reducing your chances by 20%
 		qualityoflearn *= 1.2
-	testing("Quality of learning is [qualityoflearn]")
+
+	if(iskobold(user) && !born_of_rock)
+		qualityoflearn *= 0.1
+
 	user.visible_message(span_warning("[user] is filled with arcyne energy! You witness [user.p_their()] body convulse and spark brightly."), \
 	span_notice("Noc blesses me. I have been granted knowledge and wisdom beyond my years, this tome's mysteries unveiled one at a time."))
 	qualityoflearn = qualityoflearn / 100
@@ -212,36 +236,43 @@
 	desc = "A poorly made book,  it barely glows with arcane and has only small notes on arcane symbols."
 	bookquality = 1
 	sellprice = 15
+
 /obj/item/book/granter/spellbook/mid	//decent magic stones and basic crafting materials
 	name = "beginners tome of the arcyne"
 	desc = "An obviously handcrafted book, it glows occasionally with arcane and has a meager amount notes on arcane symbols."
 	bookquality = 2
 	sellprice = 30
+
 /obj/item/book/granter/spellbook/apprentice	//apprentices get made with obsidian
 	name = "apprentice tome of the arcyne"
 	desc = "A carefully made book,  faintly glowing with arcane and half filled with notes and theory on arcane symbols."
 	bookquality = 3
 	sellprice = 75
+
 /obj/item/book/granter/spellbook/adept	//refugee mages &normal loot
 	name = "adept tome of the arcyne"
 	desc = "A well made book,  it shines moderately with arcane light. It has been filled with notes of varying degrees on the arcane "
 	bookquality = 4
 	sellprice = 150
+
 /obj/item/book/granter/spellbook/expert	//made from 2nd tier loot item
 	name = "expert tome of the arcyne"
 	desc = "A well cared for book, shining brightly with arcane. It has many runes and arcane symbols scribed within, with detailed notes."
 	bookquality = 6
 	sellprice = 200
+
 /obj/item/book/granter/spellbook/master	// Court mage & made from 3rd tier loot item
 	name = "masterful tome of the arcyne"
 	desc = "A crackling, glowing book, filled with advanced arcane runes and symbols that hurt the mind to stare at. A true master of the arcane has left their mark behind."
 	bookquality = 8
 	sellprice = 250
+
 /obj/item/book/granter/spellbook/legendary	//max tier lootmade item
 	name = "legendary tome of the arcyne"
 	desc = "An incredible book that gives off glowing arcane motes,  it is filled with runes and arcane theories that is hard for even masters of arcane to understand. The arcane script glows and practically whispers from the page.."
 	bookquality = 12
 	sellprice = 400
+
 /// Book slapcrafting
 
 /obj/item/spellbook_unfinished
@@ -268,7 +299,7 @@
 	var/found_table = locate(/obj/structure/table) in (loc)
 	if(istype(P, /obj/item/paper/scroll))
 		if(isturf(loc)&& (found_table))
-			var/crafttime = (100 - ((user.mind?.get_skill_level(/datum/skill/magic/arcane))*5))
+			var/crafttime = (100 - ((user.get_skill_level(/datum/skill/magic/arcane))*5))
 			if(do_after(user, crafttime, target = src))
 				playsound(loc, 'sound/items/book_close.ogg', 100, TRUE)
 				to_chat(user, span_notice("I add the first few pages to the leather cover..."))
@@ -284,7 +315,7 @@
 	var/found_table = locate(/obj/structure/table) in (loc)
 	if(istype(P, /obj/item/paper/scroll))
 		if(isturf(loc)&& (found_table))
-			var/crafttime = (60 - ((user.mind?.get_skill_level(/datum/skill/magic/arcane))*5))
+			var/crafttime = (60 - ((user.get_skill_level(/datum/skill/magic/arcane))*5))
 			if(do_after(user, crafttime, target = src))
 				if(pages_left > 0)
 					playsound(loc, 'sound/items/book_page.ogg', 100, TRUE)
@@ -312,7 +343,7 @@
 		return
 	if(istype(P, /obj/item/gem/violet))
 		if(isturf(loc)&& (found_table))
-			var/crafttime = (100 - ((user.mind?.get_skill_level(/datum/skill/magic/arcane))*5))
+			var/crafttime = (100 - ((user.get_skill_level(/datum/skill/magic/arcane))*5))
 			if(do_after(user, crafttime, target = src))
 				if(isarcyne(user))
 					playsound(loc, 'sound/magic/crystal.ogg', 100, TRUE)
@@ -329,7 +360,7 @@
 			to_chat(user, "<span class='warning'>You need to put the [src] on a table to work on it.</span>")
 	if(istype(P, /obj/item/gem))
 		if(isturf(loc)&& (found_table))
-			var/crafttime = (100 - ((user.mind?.get_skill_level(/datum/skill/magic/arcane))*5))
+			var/crafttime = (100 - ((user.get_skill_level(/datum/skill/magic/arcane))*5))
 			if(do_after(user, crafttime, target = src))
 				if(isarcyne(user))
 					playsound(loc, 'sound/magic/crystal.ogg', 100, TRUE)
@@ -348,7 +379,7 @@
 		var/obj/item/natural/stone/the_rock = P
 		if (the_rock.magic_power)
 			if(isturf(loc) && (found_table))
-				var/crafttime = ((130 - the_rock.magic_power) - ((user.mind?.get_skill_level(/datum/skill/magic/arcane))*5))
+				var/crafttime = ((130 - the_rock.magic_power) - ((user.get_skill_level(/datum/skill/magic/arcane))*5))
 				if(do_after(user, crafttime, target = src))
 					if (isarcyne(user))
 						playsound(loc, 'sound/magic/crystal.ogg', 100, TRUE)
@@ -413,7 +444,7 @@
 			return ..()
 	else if (istype(P, /obj/item/natural/melded/t1))
 		if(isturf(loc) && (found_table))
-			var/crafttime = (100 - ((user.mind?.get_skill_level(/datum/skill/magic/arcane))*5))
+			var/crafttime = (100 - ((user.get_skill_level(/datum/skill/magic/arcane))*5))
 			if(do_after(user, crafttime, target = src))
 				if (isarcyne(user))
 					playsound(loc, 'sound/magic/crystal.ogg', 100, TRUE)
@@ -432,7 +463,7 @@
 		return ..()
 	else if (istype(P, /obj/item/natural/melded/t2))
 		if(isturf(loc) && (found_table))
-			var/crafttime = (100 - ((user.mind?.get_skill_level(/datum/skill/magic/arcane))*5))
+			var/crafttime = (100 - ((user.get_skill_level(/datum/skill/magic/arcane))*5))
 			if(do_after(user, crafttime, target = src))
 				if (isarcyne(user))
 					playsound(loc, 'sound/magic/crystal.ogg', 100, TRUE)
@@ -450,7 +481,7 @@
 					qdel(P)
 	else if (istype(P, /obj/item/natural/melded/t3))
 		if(isturf(loc) && (found_table))
-			var/crafttime = (100 - ((user.mind?.get_skill_level(/datum/skill/magic/arcane))*5))
+			var/crafttime = (100 - ((user.get_skill_level(/datum/skill/magic/arcane))*5))
 			if(do_after(user, crafttime, target = src))
 				if (isarcyne(user))
 					playsound(loc, 'sound/magic/crystal.ogg', 100, TRUE)
@@ -468,7 +499,7 @@
 					qdel(P)
 	else if (istype(P, /obj/item/natural/melded/t4))
 		if(isturf(loc) && (found_table))
-			var/crafttime = (100 - ((user.mind?.get_skill_level(/datum/skill/magic/arcane))*5))
+			var/crafttime = (100 - ((user.get_skill_level(/datum/skill/magic/arcane))*5))
 			if(do_after(user, crafttime, target = src))
 				if (isarcyne(user))
 					playsound(loc, 'sound/magic/crystal.ogg', 100, TRUE)
@@ -520,7 +551,7 @@
 		if(!stored_gem)
 			if(isarcyne(user))
 				var/obj/item/gem/gem = P
-				var/crafttime = (60 - ((user.mind?.get_skill_level(/datum/skill/magic/arcane))*5))
+				var/crafttime = (60 - ((user.get_skill_level(/datum/skill/magic/arcane))*5))
 				if(do_after(user, crafttime, target = src))
 					playsound(loc, 'sound/magic/glass.ogg', 100, TRUE)
 					to_chat(user, span_notice("Running my arcyne energy through this crystal, I imbue the tome with my natural essence, attuning it to my state of mind..."))

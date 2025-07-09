@@ -5,7 +5,7 @@
 	cost = 2
 	releasedrain = 30
 	overlay = 'icons/effects/effects.dmi'
-	overlay_state = "shieldsparkles"
+	overlay_state = "snapfreeze"
 	chargedrain = 1
 	chargetime = 15
 	recharge_time = 30 SECONDS
@@ -30,7 +30,7 @@
 	light_outer_range = 2
 	light_color = "#4cadee"
 	duration = 6
-	layer = MASSIVE_OBJ_LAYER
+	plane = MASSIVE_OBJ_PLANE
 
 /obj/effect/temp_visual/snap_freeze
 	icon = 'icons/effects/effects.dmi'
@@ -39,7 +39,7 @@
 	desc = "Get out of the way!"
 	randomdir = FALSE
 	duration = 1 SECONDS
-	layer = MASSIVE_OBJ_LAYER
+	plane = MASSIVE_OBJ_PLANE
 
 /obj/effect/proc_holder/spell/invoked/snap_freeze/cast(list/targets, mob/user)
 	. = ..()

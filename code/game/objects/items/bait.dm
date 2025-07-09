@@ -27,7 +27,7 @@
 	. = ..()
 	user.visible_message("<span class='notice'>[user] begins deploying the bait...</span>", \
 						"<span class='notice'>I begin deploying the bait...</span>")
-	if(do_after(user, deploy_speed * (1/(user.mind?.get_skill_level(/datum/skill/craft/traps) + 1)), src)) //rogtodo hunting skill
+	if(do_after(user, deploy_speed * (1/(user.get_skill_level(/datum/skill/craft/traps) + 1)), src)) //rogtodo hunting skill
 		user.dropItemToGround(src, TRUE)
 		START_PROCESSING(SSobj, src)
 		name = "bait"
@@ -38,7 +38,7 @@
 	if(deployed)
 		user.visible_message("<span class='notice'>[user] begins gathering up the bait...</span>", \
 							"<span class='notice'>I begin gathering up the bait...</span>")
-		if(do_after(user, deploy_speed * (1/(user.mind?.get_skill_level(/datum/skill/craft/traps) + 1)), src)) //rogtodo hunting skill
+		if(do_after(user, deploy_speed * (1/(user.get_skill_level(/datum/skill/craft/traps) + 1)), src)) //rogtodo hunting skill
 			STOP_PROCESSING(SSobj, src)
 			name = initial(name)
 			deployed = 0
@@ -119,7 +119,7 @@
 
 /obj/item/bait/forestdelight
 	name = "meat wrapped in strange herbs"
-	icon_state = "baitbriar"
 	desc = "a piece of rotten and rancid meat wrapped in several herbs. The aroma induces both vomit and a nice herbal odor"
+	icon_state = "baitbriar"
 	attracted_types = list (/mob/living/simple_animal/hostile/retaliate/mole/briars = 50,
 						/mob/living/simple_animal/pet/cat/cabbit = 5) // cause get rabbited

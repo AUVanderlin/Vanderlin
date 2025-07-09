@@ -40,8 +40,6 @@ GLOBAL_LIST_INIT_TYPED(blood_types, /datum/blood_type, init_subtypes_w_path_keys
 /datum/blood_type/proc/set_up_blood(obj/effect/decal/cleanable/blood/blood, new_splat = FALSE)
 	return
 
-
-
 /// A base type for all blood used by humans (NOT humanoids), for organization's sake
 /datum/blood_type/human
 	contains_lux = TRUE
@@ -100,6 +98,14 @@ GLOBAL_LIST_INIT_TYPED(blood_types, /datum/blood_type, init_subtypes_w_path_keys
 	reagent_type = /datum/reagent/blood
 	contains_lux = FALSE
 
+/datum/blood_type/human/demihuman
+	name = "Hollow-Kin"
+	compatible_types = list(
+		/datum/blood_type/human/o_minus,
+	)
+	reagent_type = /datum/reagent/blood
+	contains_lux = FALSE
+
 /datum/blood_type/human/horc
 	name = "Half-Orc"
 	compatible_types = list(
@@ -118,6 +124,14 @@ GLOBAL_LIST_INIT_TYPED(blood_types, /datum/blood_type, init_subtypes_w_path_keys
 
 /datum/blood_type/human/cursed_elf
 	name = "Cursed Elf Blood"
+	compatible_types = list(
+		/datum/blood_type/human/o_minus,
+	)
+	reagent_type = /datum/reagent/blood
+	contains_lux = TRUE
+
+/datum/blood_type/human/triton
+	name = "Triton"
 	compatible_types = list(
 		/datum/blood_type/human/o_minus,
 	)

@@ -32,18 +32,25 @@
 /obj/item/textbook/Initialize()
 	. = ..()
 	if(skilltoteach)
-		update_name()
+		update_appearance(UPDATE_DESC | UPDATE_NAME)
 
-/obj/item/textbook/proc/update_name()
+/obj/item/textbook/update_name()
+	. = ..()
 	var/title = "something"
 	switch(skilltoteach)
 		if(/datum/skill/misc/reading)
 			title = "literature"
-			desc = "A textbook that teaches the alphabet, sentences of varying complexity, and common symbols, allowing readers to train their reading skills. The higher the complexity, the more skilled the reader must be to study it."
 		if(/datum/skill/labor/mathematics)
 			title = "mathematics"
-			desc = "A textbook focused on teaching mathematic notation and the applications for arithmetic, calculus, and other areas of math. The higher the complexity, the more skilled the reader must be to study it."
 	name = "[skill_name]'s guide to [title]"
+
+/obj/item/textbook/update_desc()
+	. = ..()
+	switch(skilltoteach)
+		if(/datum/skill/misc/reading)
+			desc = "A textbook that teaches the alphabet, sentences of varying complexity, and common symbols, allowing readers to train their reading skills. The higher the complexity, the more skilled the reader must be to study it."
+		if(/datum/skill/labor/mathematics)
+			desc = "A textbook focused on teaching mathematic notation and the applications for arithmetic, calculus, and other areas of math. The higher the complexity, the more skilled the reader must be to study it."
 
 /obj/item/textbook/attacked_by(obj/item/I, mob/living/user)
 	if(istype(I, /obj/item/natural/feather))
@@ -52,7 +59,7 @@
 		var/skill = input(user, "What kind of textbook will you write", "NOC") as null|anything in teachable_skills
 		if(!skill)
 			return
-		var/userskill = user.mind?.get_skill_level(teachable_skills[skill])
+		var/userskill = user.get_skill_level(teachable_skills[skill])
 		if(userskill <= 1)
 			to_chat(user, span_warning("You aren't skilled enough to write a textbook about [lowertext(skill)]!"))
 			return
@@ -78,7 +85,7 @@
 			skill_name = lowertext(level_name)
 			maxskill = possible_skill_levels[level_name]
 			minskill = maxskill - 1
-			update_name()
+			update_appearance(UPDATE_DESC | UPDATE_NAME)
 			to_chat(user, span_notice("You finish writing [src]."))
 			icon_state = "basic_book_1"
 			playsound(src, 'sound/items/write.ogg', 50, FALSE, ignore_walls = FALSE)
@@ -96,7 +103,7 @@
 		return
 	if(user.mind && ishuman(user))
 		var/mob/living/carbon/human/H = user
-		var/userskill = H.mind.get_skill_level(skilltoteach)
+		var/userskill = H.get_skill_level(skilltoteach)
 		var/intbonus = H.STAINT - 10
 		var/true_experience = exppercycle + intbonus
 		if(true_experience <= 0)
@@ -107,7 +114,7 @@
 		if(userskill < maxskill)
 			to_chat(user, span_info("You begin to study the [src.name]."))
 			if(do_after(H, 5 SECONDS))
-				user.mind.adjust_experience(skilltoteach, true_experience)
+				user.adjust_experience(skilltoteach, true_experience)
 				attemptlearn(user)
 		else
 			to_chat(user, span_warning("This textbook is too simple for me to learn any more from!"))

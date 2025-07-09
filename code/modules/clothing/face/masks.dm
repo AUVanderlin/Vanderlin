@@ -7,6 +7,21 @@
 /obj/item/clothing/face/lordmask/l
 	icon_state = "lmask_l"
 
+/obj/item/clothing/face/lordmask/faceless
+	name = "half-face"
+	desc = "A face for the faceless."
+	color = CLOTHING_SOOT_BLACK
+
+/obj/item/clothing/face/lordmask/faceless/Initialize()
+	. = ..()
+	ADD_TRAIT(src, TRAIT_NODROP, CURSED_ITEM_TRAIT)
+
+/obj/item/clothing/face/lordmask/faceless/dropped(mob/living/carbon/human/user)
+	. = ..()
+	if(QDELETED(src))
+		return
+	qdel(src)
+
 /obj/item/clothing/face/facemask
 	name = "iron mask"
 	icon_state = "imask"
@@ -99,6 +114,7 @@
 				if(ishuman(user))
 					var/mob/living/carbon/H = user
 					H.update_inv_wear_mask()
+		user.regenerate_clothes()
 
 /obj/item/clothing/face/shepherd/rag
 	icon_state = "ragmask"
