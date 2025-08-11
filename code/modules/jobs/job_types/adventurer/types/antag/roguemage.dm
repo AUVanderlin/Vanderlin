@@ -1,7 +1,6 @@
 /datum/advclass/roguemage //mage class - like the adventurer mage, but more evil.
 	name = "Rogue Mage"
 	tutorial = "Those fools at the academy laughed at you and cast you from the ivory tower of higher learning and magickal practice. No matter - you will ascend to great power one day, but first you need wealth - vast amounts of it. Show those fools in the town what REAL magic looks like."
-	allowed_sexes = list(MALE, FEMALE)
 	outfit = /datum/outfit/job/bandit/roguemage
 	category_tags = list(CTAG_BANDIT)
 	cmode_music = 'sound/music/cmode/antag/CombatRogueMage.ogg'
@@ -47,10 +46,10 @@
 		H.change_stat(STATKEY_SPD, -1)
 		H.change_stat(STATKEY_INT, 1)
 		H.change_stat(STATKEY_PER, 1)
-		H.adjust_spellpoints(1)
+		H.adjust_spell_points(1)
 	H.change_stat(STATKEY_STR, -1)
 	H.change_stat(STATKEY_INT, 3)
 	H.change_stat(STATKEY_CON, 1)
 	H.change_stat(STATKEY_END, -1)
-	H.adjust_spellpoints(1)
+	H.adjust_spell_points(1)
 	H.add_spell(/datum/action/cooldown/spell/undirected/touch/prestidigitation)

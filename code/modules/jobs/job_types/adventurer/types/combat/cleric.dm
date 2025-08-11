@@ -2,13 +2,13 @@
 /datum/advclass/combat/cleric
 	name = "Cleric"
 	tutorial = "Clerics are wandering warriors of the Gods, drawn from the ranks of temple acolytes who demonstrated martial talent. Protected by armor and zeal, they are a force to be reckoned with."
-	allowed_sexes = list(MALE, FEMALE)
 	allowed_races = RACES_PLAYER_NONHERETICAL
 	vampcompat = FALSE
 	outfit = /datum/outfit/job/adventurer/cleric
 	category_tags = list(CTAG_ADVENTURER)
 	min_pq = 0
 	maximum_possible_slots = 4
+	allowed_patrons = ALL_CLERIC_PATRONS
 
 /datum/outfit/job/adventurer/cleric
 	allowed_patrons = ALL_CLERIC_PATRONS
@@ -16,7 +16,6 @@
 /datum/outfit/job/adventurer/cleric/pre_equip(mob/living/carbon/human/H)
 	..()
 	H.virginity = TRUE
-
 	head = /obj/item/clothing/head/helmet/ironpot
 	armor = /obj/item/clothing/armor/cuirass/iron // Adventurers are not supposed to have fricking steel, at all
 	shirt = /obj/item/clothing/armor/gambeson/light
@@ -79,31 +78,6 @@
 			wrists = /obj/item/clothing/neck/psycross/silver/xylix
 			cloak = /obj/item/clothing/cloak/tabard/crusader
 			H.cmode_music = 'sound/music/cmode/adventurer/CombatMonk.ogg'
-		if(/datum/patron/inhumen/graggar) // Heretical Patrons
-			cloak = /obj/item/clothing/cloak/raincloak/mortus
-			H.change_stat(STATKEY_LCK, -1)
-			H.cmode_music = 'sound/music/cmode/antag/combat_werewolf.ogg'
-			GLOB.heretical_players += H.real_name
-		if(/datum/patron/inhumen/graggar_zizo)
-			cloak = /obj/item/clothing/cloak/raincloak/mortus
-			H.cmode_music = 'sound/music/cmode/antag/combat_werewolf.ogg'
-		if(/datum/patron/inhumen/zizo)
-			cloak = /obj/item/clothing/cloak/raincloak/mortus
-			H.change_stat(STATKEY_LCK, -1)
-			H.cmode_music = 'sound/music/cmode/antag/combat_cult.ogg'
-			GLOB.heretical_players += H.real_name
-		if(/datum/patron/inhumen/matthios)
-			cloak = /obj/item/clothing/cloak/raincloak/mortus
-			H.change_stat(STATKEY_LCK, -1)
-			H.cmode_music = 'sound/music/cmode/antag/CombatBandit1.ogg'
-			GLOB.heretical_players += H.real_name
-		if(/datum/patron/inhumen/baotha)
-			head = /obj/item/clothing/head/crown/circlet
-			mask = /obj/item/clothing/face/spectacles/sglasses
-			cloak = /obj/item/clothing/cloak/raincloak/purple
-			H.change_stat(STATKEY_LCK, -1)
-			H.cmode_music = 'sound/music/cmode/antag/CombatBaotha.ogg'
-			GLOB.heretical_players += H.real_name
 		else // Failsafe
 			cloak = /obj/item/clothing/cloak/tabard/crusader // Give us a generic crusade tabard
 			wrists = /obj/item/clothing/neck/psycross/silver // Give us a silver psycross for protection against lickers

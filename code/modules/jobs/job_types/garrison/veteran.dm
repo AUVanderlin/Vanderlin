@@ -58,6 +58,7 @@
 	beltl = /obj/item/weapon/sword/sabre
 	beltr = /obj/item/storage/keyring/veteran
 	backr = /obj/item/storage/backpack/satchel/black
+	scabbards = list(/obj/item/weapon/scabbard/sword)
 	cloak = /obj/item/clothing/cloak/half/vet
 	belt = /obj/item/storage/belt/leather/black
 	H.cmode_music = 'sound/music/cmode/adventurer/CombatWarrior.ogg'
@@ -214,14 +215,14 @@
 	ADD_TRAIT(H, TRAIT_STEELHEARTED, TRAIT_GENERIC)
 
 	H.adjust_blindness(-3)
-	var/weapons = list("Sword + Recurve Bow","Axe + Crossbow","Spear + Shield")
+	var/weapons = list("Sword + Short Bow","Axe + Crossbow","Spear + Shield")
 	var/weapon_choice = input("Choose your weapon.", "TAKE UP ARMS") as anything in weapons
 	H.set_blindness(0)
 	switch(weapon_choice)
-		if("Sword + Recurve Bow")
+		if("Sword + Short Bow")
 			r_hand = /obj/item/weapon/sword/long
 			beltl = /obj/item/ammo_holder/quiver/arrows
-			backl = /obj/item/gun/ballistic/revolver/grenadelauncher/bow/recurve
+			backl = /obj/item/gun/ballistic/revolver/grenadelauncher/bow/short
 
 		if("Axe + Crossbow")
 			r_hand = /obj/item/weapon/axe/steel

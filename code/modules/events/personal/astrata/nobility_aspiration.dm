@@ -7,10 +7,6 @@
 	max_occurrences = 1
 	min_players = 25
 
-	tags = list(
-		TAG_BOON,
-	)
-
 /datum/round_event_control/astrata_nobility/canSpawnEvent(players_amt, gamemode, fake_check)
 	. = ..()
 	if(!.)
@@ -23,7 +19,7 @@
 			continue
 		if(H.is_noble() || (H.mind?.assigned_role.title in GLOB.church_positions))
 			continue
-		if(!(H.dna?.species.name in RACES_PLAYER_NONHERETICAL))
+		if(!(H.dna?.species.id in RACES_PLAYER_NONHERETICAL))
 			continue
 		return TRUE
 
@@ -39,7 +35,7 @@
 			continue
 		if(human_mob.is_noble() || (human_mob.mind?.assigned_role.title in GLOB.church_positions))
 			continue
-		if(!(human_mob.dna?.species.name in RACES_PLAYER_NONHERETICAL))
+		if(!(human_mob.dna?.species.id in RACES_PLAYER_NONHERETICAL))
 			continue
 		valid_targets += human_mob
 

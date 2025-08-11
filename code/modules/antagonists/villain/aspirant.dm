@@ -60,7 +60,7 @@
 			to_chat(owner, span_notice("I can retrieve my item from a statue, tree or clock by right clicking it."))
 
 		if(CHOICE_BOMB)
-			owner.special_items["Bomb"] = /obj/item/bomb
+			owner.special_items["Bomb"] = /obj/item/explosive/bottle
 			to_chat(owner, span_notice("I can retrieve my item from a statue, tree or clock by right clicking it."))
 
 
@@ -163,7 +163,7 @@
 	triumph_count = 5
 
 /datum/objective/aspirant/coup/one/check_completion()
-	if(owner.current == SSticker.rulermob)
+	if(owner?.current == SSticker.rulermob)
 		return TRUE
 	else
 		return FALSE
@@ -193,7 +193,7 @@
 	triumph_count = 3
 
 /datum/objective/aspirant/loyal/one/check_completion()
-	if(owner.current == SSticker.rulermob)
+	if(owner?.current == SSticker.rulermob)
 		return TRUE
 	else
 		return FALSE

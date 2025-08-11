@@ -50,13 +50,13 @@
 		leaving.Bump(src)
 		return COMPONENT_ATOM_BLOCK_EXIT
 
-/obj/structure/chair/bench/couch
-	icon_state = "redcouch"
-
 /obj/structure/chair/bench/church/smallbench
 	icon_state = "benchsmall"
 
-/obj/structure/chair/bench/couch/r
+/obj/structure/chair/bench/coucha
+	icon_state = "redcouch"
+
+/obj/structure/chair/bench/coucha/r
 	icon_state = "redcouch2"
 
 /obj/structure/chair/bench/ultimacouch
@@ -82,10 +82,10 @@
 	icon_state = "thronechair"
 
 // dirtier sofa
-/obj/structure/chair/bench/couch/redleft
+/obj/structure/chair/bench/coucha/redleft
 	icon_state = "redcouch_alt"
 
-/obj/structure/chair/bench/couch/redright
+/obj/structure/chair/bench/coucha/redright
 	icon_state = "redcouch2_alt"
 
 /obj/structure/chair/wood/alt
@@ -101,6 +101,16 @@
 	. = ..()
 	var/static/list/loc_connections = list(COMSIG_ATOM_EXIT = PROC_REF(on_exit))
 	AddElement(/datum/element/connect_loc, loc_connections)
+
+/obj/structure/chair/wood/alt/uncomfortable
+	icon_state = "chair_bronze"
+	desc = "This has to be the most uncomfortable chair in Psydonia. It looks like it will *violate* your backside." //This is a DE reference don't be fucking weird about it.
+	item_chair = /obj/item/chair/bronze
+	attacked_sound = "sound/combat/hits/onmetal/metalimpact (1).ogg"
+
+/obj/item/chair/bronze
+	icon_state = "chair_bronze"
+	origin_type = /obj/structure/chair/wood/alt/uncomfortable
 
 /obj/structure/chair/wood/alt/chair3
 	icon_state = "chair3"
@@ -385,3 +395,27 @@
 /obj/structure/bed/post_unbuckle_mob(mob/living/M)
 	..()
 	M.reset_offsets("bed_buckle")
+
+/obj/structure/chair/wood/alt/chair3/crafted
+	item_chair = /obj/item/chair/chair3/crafted
+	sellprice = 6
+
+/obj/item/chair/chair3/crafted
+	origin_type = /obj/structure/chair/wood/alt/chair3/crafted
+	sellprice = 6
+
+/obj/structure/chair/wood/alt/fancy/crafted
+	item_chair = /obj/item/chair/fancy/crafted
+	sellprice = 12
+
+/obj/item/chair/fancy/crafted
+	origin_type = /obj/structure/chair/wood/alt/fancy/crafted
+	sellprice = 12
+
+/obj/structure/chair/stool/crafted
+	item_chair = /obj/item/chair/stool/bar/crafted
+	sellprice = 6
+
+/obj/item/chair/stool/bar/crafted
+	origin_type = /obj/structure/chair/stool/crafted
+	sellprice = 6

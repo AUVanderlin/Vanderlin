@@ -3,7 +3,7 @@
 	desc = "Conjure a magical brick in your hand for 3 minutes. \
 	This spell has been honed over centuries to bypass anti-magic defenses."
 	button_icon_state = "magicians_brick"
-	sound = list('sound/magic/whiteflame.ogg')
+	sound = 'sound/magic/whiteflame.ogg'
 
 	point_cost = 1
 
@@ -12,7 +12,7 @@
 
 	invocation = "Valtarem!"
 	invocation_type = INVOCATION_SHOUT
-
+	spell_flags = SPELL_RITUOS
 	item_type = /obj/item/weapon/magicbrick
 	item_duration = 3 MINUTES
 	item_outline = "#6495ED"

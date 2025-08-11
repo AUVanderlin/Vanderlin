@@ -41,7 +41,7 @@
 	icon = 'icons/obj/toy.dmi'
 	icon_state = "snappop"
 	w_class = WEIGHT_CLASS_TINY
-	var/ash_type = /obj/item/ash
+	var/ash_type = /obj/item/fertilizer/ash
 
 /obj/item/toy/snappop/proc/pop_burst(n=3, c=1)
 	var/datum/effect_system/spark_spread/s = new()
@@ -70,16 +70,16 @@
 /obj/item/toy/snappop/phoenix
 	name = "magic powder pack"
 	desc = ""
-	ash_type = /obj/item/ash/snappop_phoenix
+	ash_type = /obj/item/fertilizer/ash/snappop_phoenix
 
-/obj/item/ash/snappop_phoenix
+/obj/item/fertilizer/ash/snappop_phoenix
 	var/respawn_time = 300
 
-/obj/item/ash/snappop_phoenix/Initialize()
+/obj/item/fertilizer/ash/snappop_phoenix/Initialize()
 	. = ..()
 	addtimer(CALLBACK(src, PROC_REF(respawn)), respawn_time)
 
-/obj/item/ash/snappop_phoenix/proc/respawn()
+/obj/item/fertilizer/ash/snappop_phoenix/proc/respawn()
 	new /obj/item/toy/snappop/phoenix(get_turf(src))
 	qdel(src)
 
@@ -180,11 +180,11 @@
 			switch(outcome)
 				if("False Shuffle")
 					record_featured_stat(FEATURED_STATS_CRIMINALS, user)
-					GLOB.vanderlin_round_stats[STATS_GAMES_RIGGED]++
+					record_round_statistic(STATS_GAMES_RIGGED)
 					to_chat(user, span_notice("I shuffle the cards, then reverse the shuffle. Sneaky."))
 				if("Force Top Card")
 					record_featured_stat(FEATURED_STATS_CRIMINALS, user)
-					GLOB.vanderlin_round_stats[STATS_GAMES_RIGGED]++
+					record_round_statistic(STATS_GAMES_RIGGED)
 					user.set_machine(src)
 					interact(user)
 				if("Play fair")

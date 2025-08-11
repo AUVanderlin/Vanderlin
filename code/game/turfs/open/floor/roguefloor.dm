@@ -145,8 +145,8 @@
 	smoothing_list = SMOOTH_GROUP_FLOOR_DIRT_ROAD
 	neighborlay = "grassedge"
 	max_integrity = 1200
-	spread_chance = 3
-	burn_power = 60
+	spread_chance = 2.5
+	burn_power = 15
 
 /turf/open/floor/grass/Initialize()
 	. = ..()
@@ -234,11 +234,10 @@
 	smoothing_groups = SMOOTH_GROUP_OPEN_FLOOR + SMOOTH_GROUP_FLOOR_DIRT
 	smoothing_list = SMOOTH_GROUP_FLOOR_DIRT_ROAD + SMOOTH_GROUP_FLOOR_GRASS + SMOOTH_GROUP_FLOOR_STONE
 	neighborlay = "dirtedge"
-	spread_chance = 1.6
+	spread_chance = 1.1
 
 	var/muddy = FALSE
 	var/bloodiness = 20
-	var/obj/structure/closet/dirthole/holie
 	var/dirt_amt = 3
 
 /turf/open/floor/dirt/attack_hand_secondary(mob/user, params)
@@ -256,12 +255,6 @@
 		else
 			qdel(I)
 	return SECONDARY_ATTACK_CANCEL_ATTACK_CHAIN
-
-/turf/open/floor/dirt/Destroy()
-	if(holie)
-		QDEL_NULL(holie)
-	return ..()
-
 
 /turf/open/floor/dirt/Crossed(atom/movable/O)
 	..()
@@ -419,6 +412,16 @@
 /turf/open/floor/volcanic/Initialize()
 	dir = pick(GLOB.cardinals)
 	. = ..()
+
+/turf/open/floor/hay
+	name = "hay"
+	desc = "A light covering of hay strewn across the ground."
+	icon_state = "hay"
+	footstep = FOOTSTEP_GRASS
+	barefootstep = FOOTSTEP_SOFT_BAREFOOT
+	heavyfootstep = FOOTSTEP_GENERIC_HEAVY
+	landsound = 'sound/foley/jumpland/grassland.ogg'
+	slowdown = 0
 
 /*	..................   Stone Block Floors   ................... */
 /turf/open/floor/blocks
@@ -762,6 +765,21 @@
 /turf/open/floor/tile/masonic/spiral
 	icon_state = "masonicspiral"
 
+/turf/open/floor/tile/brick
+	icon_state = "bricktile"
+
+/turf/open/floor/tile/brownbrick
+	icon_state = "brown"
+
+/turf/open/floor/tile/diamond
+	icon_state = "dia_tile"
+
+/turf/open/floor/tile/diamond/blue
+	icon_state = "dia_tile1"
+
+/turf/open/floor/tile/diamond/purple
+	icon_state = "dia_tile2"
+
 /turf/open/floor/tile/bath
 	icon_state = "bathtile"
 
@@ -917,3 +935,14 @@
 	max_integrity = 800
 	break_sound = 'sound/combat/hits/onstone/stonedeath.ogg'
 	attacked_sound = list('sound/combat/hits/onstone/wallhit.ogg', 'sound/combat/hits/onstone/wallhit2.ogg', 'sound/combat/hits/onstone/wallhit3.ogg')
+
+
+/turf/open/transparent/glass
+	name = "Glass floor"
+	icon = 'icons/turf/floors.dmi'
+	icon_state = "woodglass"
+
+	footstep = FOOTSTEP_PLATING
+	barefootstep = FOOTSTEP_HARD_BAREFOOT
+	clawfootstep = FOOTSTEP_HARD_CLAW
+	heavyfootstep = FOOTSTEP_GENERIC_HEAVY

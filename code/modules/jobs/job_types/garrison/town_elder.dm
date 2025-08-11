@@ -15,7 +15,6 @@
 	min_pq = 10 // Requires knowledge and good rp for the classes.
 	bypass_lastclass = TRUE
 	spells = list(/datum/action/cooldown/spell/undirected/list_target/convert_role/militia)
-	allowed_sexes = list(MALE, FEMALE)
 	allowed_ages = list(AGE_MIDDLEAGED, AGE_OLD, AGE_IMMORTAL)
 	allowed_races = RACES_PLAYER_NONDISCRIMINATED
 
@@ -382,6 +381,7 @@
 	cloak = /obj/item/clothing/cloak/half
 	backl = /obj/item/storage/backpack/satchel
 	beltr = /obj/item/weapon/sword/arming
+	scabbards = list(/obj/item/weapon/scabbard/sword)
 	beltl = /obj/item/flashlight/flare/torch/lantern
 	backpack_contents = list(/obj/item/storage/belt/pouch/coins/mid = 1, /obj/item/storage/keyring/elder = 1, /obj/item/paper/scroll = 5, /obj/item/natural/feather = 1)
 

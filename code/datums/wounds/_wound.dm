@@ -84,6 +84,9 @@ GLOBAL_LIST_INIT(primordial_wounds, init_primordial_wounds())
 	/// Actual infection timer
 	var/werewolf_infection_timer
 
+	/// Ingores "bloody wound" checks for wound applications
+	var/ignore_bloody
+
 /datum/wound/Destroy(force)
 	. = ..()
 	if(bodypart_owner)
@@ -140,7 +143,7 @@ GLOBAL_LIST_INIT(primordial_wounds, init_primordial_wounds())
 /datum/wound/proc/can_apply_to_bodypart(obj/item/bodypart/affected)
 	if(bodypart_owner || owner || QDELETED(affected) || QDELETED(affected.owner))
 		return FALSE
-	if(!isnull(bleed_rate) && !affected.can_bloody_wound())
+	if(!ignore_bloody && !isnull(bleed_rate) && !affected.can_bloody_wound())
 		return FALSE
 	for(var/datum/wound/other_wound as anything in affected.wounds)
 		if(!can_stack_with(other_wound))
@@ -303,7 +306,7 @@ GLOBAL_LIST_INIT(primordial_wounds, init_primordial_wounds())
 	passive_healing = max(passive_healing, 1)
 	if(mob_overlay != old_overlay)
 		owner?.update_damage_overlays()
-	GLOB.vanderlin_round_stats[STATS_WOUNDS_SEWED]++
+	record_round_statistic(STATS_WOUNDS_SEWED)
 	return TRUE
 
 /// Checks if this wound has a special infection (zombie or werewolf)

@@ -67,7 +67,7 @@
 		reagents.trans_to(M, reagents.total_volume, transfered_by = user, method = "swallow")
 		SEND_SIGNAL(M, COMSIG_DRUG_SNIFFED, user)
 		record_featured_stat(FEATURED_STATS_CRIMINALS, user)
-		GLOB.vanderlin_round_stats[STATS_DRUGS_SNORTED]++
+		record_round_statistic(STATS_DRUGS_SNORTED)
 	qdel(src)
 	return TRUE
 
@@ -273,7 +273,7 @@
 
 /obj/item/reagent_containers/powder/blastpowder
 	name = "blastpowder"
-	desc = "explosive powder known to be produced by the dwarves. It's used in many explosives."
+	desc = "Explosive powder known to be produced by the dwarves. It's used in many explosives."
 	icon = 'icons/roguetown/items/produce.dmi'
 	icon_state = "blastpowder"
 	volume = 15

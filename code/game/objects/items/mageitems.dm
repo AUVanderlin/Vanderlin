@@ -67,8 +67,9 @@
 /obj/item/chalk
 	name = "stick of chalk"
 	desc = "A stark-white stick of chalk, possibly made from quicksilver. "
-	icon = 'icons/roguetown/items/misc.dmi'
+	icon = 'icons/roguetown/misc/rituals.dmi'
 	icon_state = "chalk"
+	dropshrink = 0.7
 	throw_speed = 2
 	throw_range = 5
 	throwforce = 5
@@ -364,9 +365,11 @@
 	user.hud_used?.plane_masters_update()
 	active = FALSE
 
-/obj/item/sendingstonesummoner/Initialize()
+/obj/item/sendingstonesummoner
+	name = "sending stone summoner"
+
+/obj/item/sendingstonesummoner/OnCrafted(dirin, mob/user)
 	. = ..()
-	var/mob/living/user = usr
 	var/obj/item/natural/stone/sending/item1 = new /obj/item/natural/stone/sending
 	var/obj/item/natural/stone/sending/item2 = new /obj/item/natural/stone/sending
 	item1.paired_with = item2
@@ -377,7 +380,7 @@
 	item2.color = "#d8aeff"
 	user.put_in_hands(item1, FALSE)
 	user.put_in_hands(item2, FALSE)
-	return INITIALIZE_HINT_QDEL
+	qdel(src)
 
 /obj/item/natural/stone/sending
 	name = "sending stone"

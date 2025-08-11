@@ -1,5 +1,6 @@
 /datum/objective/inhumen_scorn
 	name = "Scorn Inhumen"
+	triumph_count = 2
 	var/spits_done = 0
 	var/spits_required = 2
 
@@ -16,7 +17,7 @@
 
 /datum/objective/inhumen_scorn/proc/on_spit(datum/source, mob/living/carbon/human/target)
 	SIGNAL_HANDLER
-	if(completed || !istype(target) || target.stat == DEAD || (target.dna?.species.name in RACES_PLAYER_NONHERETICAL))
+	if(completed || !istype(target) || target.stat == DEAD || (target.dna?.species.id in RACES_PLAYER_NONHERETICAL))
 		return
 
 	spits_done++
@@ -28,7 +29,7 @@
 		to_chat(owner.current, span_greentext("You have scorned enough inhumen and completed Astrata's objective!"))
 		owner.current.adjust_triumphs(triumph_count)
 		completed = TRUE
-		adjust_storyteller_influence("Astrata", 10)
+		adjust_storyteller_influence(ASTRATA, 10)
 		escalate_objective()
 		UnregisterSignal(owner.current, COMSIG_SPAT_ON)
 

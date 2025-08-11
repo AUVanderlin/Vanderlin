@@ -10,7 +10,7 @@
 	break_sound = 'sound/foley/cloth_rip.ogg'
 	drop_sound = 'sound/foley/dropsound/cloth_drop.ogg'
 	sewrepair = TRUE
-	smeltresult = /obj/item/ash
+	smeltresult = /obj/item/fertilizer/ash
 	sellprice = VALUE_LEATHER_ARMOR
 
 	armor_class = AC_LIGHT
@@ -247,3 +247,8 @@
 	armor = ARMOR_LEATHER_GOOD
 	body_parts_covered = COVERAGE_ALL_BUT_LEGS
 	prevent_crits = list(BCLASS_CUT, BCLASS_TWIST, BCLASS_STAB)
+
+/obj/item/clothing/armor/leather/jacket/leathercoat/renegade
+	name = "renegade's coat"
+	desc = "An insulated leather coat with capelets. It protects you well from the elements, a useful thing for those who like to wait in ambush."
+	icon_state = "renegadecoat"

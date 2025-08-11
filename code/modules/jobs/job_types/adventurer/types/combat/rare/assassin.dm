@@ -58,13 +58,13 @@
 			beltl = /obj/item/storage/belt/pouch/coins/poor
 			backpack_contents = list(/obj/item/flint)
 			if(H.dna?.species)
-				if(H.dna.species.id == "human")
+				if(ishuman(H))
 					backr = /obj/item/instrument/lute
-				if(H.dna.species.id == "dwarf")
+				else if(isdwarf(H))
 					backr = /obj/item/instrument/accord
-				if(H.dna.species.id == "elf")
+				else if(iself(H))
 					backr = /obj/item/instrument/harp
-				if(H.dna.species.id == "tiefling")
+				else if(istiefling(H))
 					backr = /obj/item/instrument/guitar
 		if("Beggar") //The sole "town" disguise available.
 			H.job = "Beggar"
@@ -187,7 +187,7 @@
 				armor = /obj/item/clothing/shirt/dress/gen/random
 				shirt = /obj/item/clothing/shirt/undershirt
 				pants = null
-			backpack_contents = list(/obj/item/neuFarm/seed/wheat=1,/obj/item/neuFarm/seed/apple=1,/obj/item/ash=1,/obj/item/weapon/knife/villager=1)
+			backpack_contents = list(/obj/item/neuFarm/seed/wheat=1,/obj/item/neuFarm/seed/apple=1,/obj/item/fertilizer/ash=1,/obj/item/weapon/knife/villager=1)
 		if("Carpenter")
 			H.adjust_skillrank(/datum/skill/combat/axesmaces, 2, TRUE) //Use the axe...
 			H.adjust_skillrank(/datum/skill/combat/swords, -2, TRUE)
@@ -284,7 +284,7 @@
 
 	H.change_stat(STATKEY_PER, 2)
 	H.change_stat(STATKEY_SPD, 2)
-	if(H.dna.species.id == "human")
+	if(H.dna.species.id == SPEC_ID_HUMEN)
 		if(H.gender == "male")
 			H.dna.species.soundpack_m = new /datum/voicepack/male/assassin()
 		else

@@ -2,19 +2,21 @@
 	name = "Mana Baptism"
 	track = EVENT_TRACK_PERSONAL
 	typepath = /datum/round_event/noc_baptism
-	weight = 5
+	weight = 7
 	earliest_start = 10 MINUTES
 	max_occurrences = 1
 	min_players = 35
 
 	tags = list(
-		TAG_MAGIC,
-		TAG_BOON,
+		TAG_MAGICAL,
 	)
 
 /datum/round_event_control/noc_baptism/canSpawnEvent(players_amt, gamemode, fake_check)
 	. = ..()
 	if(!.)
+		return FALSE
+
+	if(!length(GLOB.mana_fountains))
 		return FALSE
 
 	for(var/mob/living/carbon/human/H in GLOB.player_list)
@@ -29,6 +31,9 @@
 	return FALSE
 
 /datum/round_event/noc_baptism/start()
+	if(!length(GLOB.mana_fountains))
+		return
+
 	var/list/valid_targets = list()
 
 	for(var/mob/living/carbon/human/human_mob in GLOB.player_list)

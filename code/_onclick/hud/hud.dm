@@ -126,14 +126,6 @@ GLOBAL_LIST_INIT(available_ui_styles, sortList(list(
 		var/atom/movable/plane_master_controller/controller_instance = new mytype(null, src)
 		plane_master_controllers[controller_instance.name] = controller_instance
 
-/datum/hud/new_player/New(mob/owner)
-	..()
-	scannies = new /atom/movable/screen/scannies
-	scannies.hud = src
-	static_inventory += scannies
-	if(owner.client?.prefs?.crt == TRUE)
-		scannies.alpha = 70
-
 /datum/hud/Destroy()
 	if(mymob.hud_used == src)
 		mymob.hud_used = null
@@ -280,7 +272,8 @@ GLOBAL_LIST_INIT(available_ui_styles, sortList(list(
 	for(var/thing in plane_masters)
 		var/atom/movable/screen/plane_master/PM = plane_masters[thing]
 		PM.backdrop(mymob)
-		mymob.client.screen += PM
+		if(mymob.client)
+			mymob.client.screen += PM
 
 /datum/hud/human/show_hud(version = 0,mob/viewmob)
 	. = ..()

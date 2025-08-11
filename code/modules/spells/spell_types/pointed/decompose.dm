@@ -5,7 +5,7 @@
 	button_icon_state = "orison"
 	sound = 'sound/magic/whiteflame.ogg'
 	self_cast_possible = FALSE
-
+	spell_flags = SPELL_RITUOS
 	cast_range = 1
 	point_cost = 3
 	associated_skill = /datum/skill/magic/blood
@@ -32,13 +32,15 @@
 	if(isitem(cast_on))
 		if(istype(cast_on, /obj/item/reagent_containers/food/snacks))
 			var/obj/item/reagent_containers/food/snacks/food = cast_on
-			food.rotprocess = 0
+			if(!food.become_rotten())
+				to_chat(owner, span_warning("[food] rots away into nothing."))
+				qdel(food)
 		return
 	// DATUMISE ROT PLEASE
 	if(isanimal(cast_on))
 		var/mob/living/simple_animal/SA = cast_on
 		var/datum/component/rot/rot = SA.GetComponent(/datum/component/rot/simple)
-		if(rot?.amount < 9.9 MINUTES)
+		if(rot && rot.amount < 9.9 MINUTES)
 			rot.amount = 9.9 MINUTES
 		return
 	if(ishuman(cast_on))

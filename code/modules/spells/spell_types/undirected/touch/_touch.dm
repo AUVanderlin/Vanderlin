@@ -104,6 +104,7 @@
 		unregister_hand_signals()
 		hand_owner?.temporarilyRemoveItemFromInventory(attached_hand)
 		QDEL_NULL(attached_hand)
+	attached_hand = null
 
 	if(reset_cooldown_after)
 		if(hand_owner)
@@ -165,6 +166,7 @@
 		INVOKE_ASYNC(src, PROC_REF(do_secondary_hand_hit), source, victim, caster, modifiers)
 	else
 		INVOKE_ASYNC(src, PROC_REF(do_hand_hit), source, victim, caster, modifiers)
+	return COMPONENT_CANCEL_ATTACK_CHAIN
 
 /// Checks if the passed victim can be cast on by the caster.
 /datum/action/cooldown/spell/undirected/touch/proc/can_hit_with_hand(atom/victim, mob/caster)
@@ -328,4 +330,7 @@
 
 	// We have no spell associated for some reason, just delete us as normal.
 	holder.temporarilyRemoveItemFromInventory(src, force = TRUE)
+	qdel(src)
+
+/obj/item/melee/touch_attack/attack_self(mob/user, params)
 	qdel(src)

@@ -159,8 +159,8 @@ GLOBAL_LIST_EMPTY(heretical_players)
 		H.add_spell(spell, source = src)
 
 	level = CLERIC_T1
-	max_devotion = 180
-	max_progression = 180
+	max_devotion = 250
+	max_progression = 250
 	update_devotion(50, 50)
 
 //Templar Spell Spawner
@@ -182,6 +182,8 @@ GLOBAL_LIST_EMPTY(heretical_players)
 			A.t0,
 		)
 		for(var/datum/action/cooldown/spell/spell as anything in spells)
+			if(!spell)
+				continue
 			H.add_spell(spell, source = src)
 
 	level = CLERIC_T0
@@ -201,7 +203,7 @@ GLOBAL_LIST_EMPTY(heretical_players)
 // Debug verb
 /mob/living/carbon/human/proc/devotionchange()
 	set name = "(DEBUG)Change Devotion"
-	set category = "Special Verbs"
+	set category = "Special"
 
 	var/datum/devotion/cleric_holder/C = src.cleric
 	var/changeamt = input(src, "My devotion is [C.devotion]. How much to change?", "How much to change?") as null|num

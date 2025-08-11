@@ -2,10 +2,10 @@
 	name = "Marriage Broker"
 	track = EVENT_TRACK_PERSONAL
 	typepath = /datum/round_event/eora_marriage
-	weight = 5
+	weight = 7
 	earliest_start = 15 MINUTES
 	max_occurrences = 1
-	min_players = 40
+	min_players = 35
 
 	tags = list(
 		TAG_BOON,
@@ -46,6 +46,7 @@
 
 	to_chat(chosen_one, span_userdanger("YOU ARE EORA'S CHOSEN!"))
 	to_chat(chosen_one, span_notice("Eora wishes to see love blossom! Arrange a marriage between any two people to earn Eora's favor!"))
+	to_chat(chosen_one, span_notice("You were given a power to conduct secret marriage ceremonies outside of the chapel. Let nothing stand in the way of true love!"))
 	chosen_one.playsound_local(chosen_one, 'sound/vo/female/gen/giggle (1).ogg', 100)
 
 	chosen_one.mind.announce_personal_objectives()

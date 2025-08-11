@@ -1,8 +1,13 @@
 /mob/living/carbon/Life()
 	set invisibility = 0
 
-	if(grab_fatigue > 0 && !pulling)
-		grab_fatigue = max(0, grab_fatigue - 0.5)
+	if(grab_fatigue > 0)
+		if(!pulling)
+			// Exponential decay mostly
+			grab_fatigue -= max(grab_fatigue * 0.15, 0.5)
+		else
+			grab_fatigue -= 0.5
+		grab_fatigue = max(0, grab_fatigue)
 
 	if(notransform)
 		return
@@ -173,8 +178,10 @@
 			adjustOxyLoss(5)
 	if(isopenturf(loc))
 		var/turf/open/T = loc
-		if(reagents&& T.pollution)
+		if(reagents && T.pollution)
 			T.pollution.breathe_act(src)
+			if(HAS_TRAIT(src, TRAIT_NOSTINK))
+				return
 			if(next_smell <= world.time)
 				next_smell = world.time + 30 SECONDS
 				T.pollution.smell_act(src)
@@ -197,10 +204,10 @@
 	if(!is_laying && W.water_level < 2)
 		return
 	if(is_laying && !(HAS_TRAIT(src, TRAIT_WATER_BREATHING) || HAS_TRAIT(src, TRAIT_NOBREATH)))
-		var/drown_damage = has_world_trait(/datum/world_trait/abyssor_rage) ? 10 : 5
+		var/drown_damage = has_world_trait(/datum/world_trait/abyssor_rage) ? (is_ascendant(ABYSSOR) ? 15 : 10) : 5
 		adjustOxyLoss(drown_damage)
 		if(stat == DEAD && client)
-			GLOB.vanderlin_round_stats[STATS_PEOPLE_DROWNED]++
+			record_round_statistic(STATS_PEOPLE_DROWNED)
 			return
 		emote("drown")
 		react_volume = 5
@@ -220,8 +227,7 @@
 /mob/living/carbon/proc/get_complex_pain()
 	var/total_pain = 0
 
-	for(var/I in bodyparts)
-		var/obj/item/bodypart/BP = I
+	for(var/obj/item/bodypart/BP as anything in bodyparts)
 		if(BP.status == BODYPART_ROBOTIC)
 			continue
 
@@ -395,8 +401,7 @@
 	return "[intensity]"
 
 /mob/living/carbon/proc/handle_lingering_pain()
-	for(var/I in bodyparts)
-		var/obj/item/bodypart/BP = I
+	for(var/obj/item/bodypart/BP as anything in bodyparts)
 		if(BP.status == BODYPART_ROBOTIC)
 			continue
 
@@ -563,12 +568,10 @@
 
 /mob/living/carbon/proc/handle_organs()
 	if(stat != DEAD)
-		for(var/V in internal_organs)
-			var/obj/item/organ/O = V
+		for(var/obj/item/organ/O as anything in internal_organs)
 			O.on_life()
 	else
-		for(var/V in internal_organs)
-			var/obj/item/organ/O = V
+		for(var/obj/item/organ/O as anything in internal_organs)
 			O.on_death() //Needed so organs decay while inside the body.
 
 /mob/living/carbon/handle_embedded_objects()

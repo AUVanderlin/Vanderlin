@@ -17,6 +17,7 @@
 	charge_slowdown = 0.3
 	cooldown_time = 60 SECONDS
 	spell_cost = 50
+	spell_flags = SPELL_RITUOS
 
 /datum/action/cooldown/spell/undirected/longstrider/cast(atom/cast_on)
 	. = ..()
@@ -25,7 +26,7 @@
 		span_notice("I mutter the incantation and a dim pulse of light radiates out from me."),
 	)
 
-	var/duration_increase = min(0, attuned_strength * 2 MINUTES)
+	var/duration_increase = max(0, attuned_strength * 2 MINUTES)
 	for(var/mob/living/L in viewers(1, owner))
 		L.apply_status_effect(/datum/status_effect/buff/longstrider, duration_increase)
 

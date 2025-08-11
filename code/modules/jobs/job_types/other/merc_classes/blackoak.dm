@@ -1,7 +1,6 @@
 /datum/advclass/mercenary/blackoak
 	name = "Black Oak's Guardian"
 	tutorial = "A shady guardian of the Black Oaks, a mercenary band in all but offical name. Commonly taking caravan contracts through the thickest of forests."
-	allowed_sexes = list(MALE, FEMALE)
 	allowed_races = RACES_PLAYER_ELF
 	outfit = /datum/outfit/job/mercenary/blackoak
 	category_tags = list(CTAG_MERCENARY)
@@ -17,6 +16,7 @@
 	armor = /obj/item/clothing/armor/cuirass/elven
 	backl = /obj/item/storage/backpack/satchel
 	beltl = /obj/item/weapon/knife/dagger/steel/special
+	scabbards = list(/obj/item/weapon/scabbard/knife)
 	shirt = /obj/item/clothing/shirt/undershirt/black
 	pants = /obj/item/clothing/pants/trou/leather
 	neck = /obj/item/clothing/neck/chaincoif

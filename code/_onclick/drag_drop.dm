@@ -66,14 +66,31 @@
 	var/last_charge_process
 	var/datum/patreon_data/patreon
 	var/toggled_leylines = TRUE
+	/// The DPI scale of the client. 1 is equivalent to 100% window scaling, 2 will be 200% window scaling
+	var/window_scaling
 
 /atom/movable/screen
 	blockscharging = TRUE
 
+///setter used to set our new hud
+/atom/movable/screen/proc/set_new_hud(datum/hud/hud_owner)
+	if(hud)
+		UnregisterSignal(hud, COMSIG_PARENT_QDELETING)
+	if(isnull(hud_owner))
+		hud = null
+		return
+	hud = hud_owner
+	RegisterSignal(hud, COMSIG_PARENT_QDELETING, PROC_REF(on_hud_delete))
+
+/atom/movable/screen/proc/on_hud_delete(datum/source)
+	SIGNAL_HANDLER
+
+	set_new_hud(hud_owner = null)
+
 /client/MouseDown(datum/object, location, control, params)
 	if(!control || QDELETED(object))
 		return
-	if(mob.incapacitated(ignore_grab = TRUE))
+	if(mob.incapacitated(IGNORE_GRAB))
 		return
 	SEND_SIGNAL(src, COMSIG_CLIENT_MOUSEDOWN, object, location, control, params)
 	if(istype(object, /obj/abstract/visual_ui_element/hoverable/movable))
@@ -105,7 +122,7 @@
 
 	if(!mob.fixedeye) //If fixedeye isn't already enabled, we need to set this var
 		mob.tempfixeye = TRUE //Change icon to 'target' red eye
-		mob.atom_flags |= NO_DIR_CHANGE
+		mob.atom_flags |= NO_DIR_CHANGE_ON_MOVE
 
 	for(var/atom/movable/screen/eye_intent/eyet in mob.hud_used.static_inventory)
 		eyet.update_appearance(UPDATE_ICON)
@@ -153,7 +170,7 @@
 		mob.cast_move = 0
 		mob.used_intent = mob.a_intent
 		if(mob.uses_intents)
-			if(mob.used_intent.get_chargetime() && !AD.blockscharging && !mob.in_throw_mode)
+			if(!ispath(mob.used_intent) && mob.used_intent.get_chargetime() && !AD.blockscharging && !mob.in_throw_mode)
 				updateprogbar()
 			else
 				mouse_pointer_icon = 'icons/effects/mousemice/human_attack.dmi'
@@ -187,7 +204,7 @@
 
 	if(!mob.fixedeye)
 		mob.tempfixeye = FALSE
-		mob.atom_flags &= ~NO_DIR_CHANGE
+		mob.atom_flags &= ~NO_DIR_CHANGE_ON_MOVE
 
 	if(mob.hud_used)
 		for(var/atom/movable/screen/eye_intent/eyet in mob.hud_used.static_inventory)
@@ -250,10 +267,6 @@
 		doneset = FALSE
 		chargedprog = 0
 		START_PROCESSING(SSmousecharge, src)
-
-/client/Destroy()
-	STOP_PROCESSING(SSmousecharge, src)
-	return ..()
 
 /client/process()
 	if(!mob || !isliving(mob))
@@ -348,7 +361,7 @@
 	. = 1
 
 /client/MouseDrag(src_object,atom/over_object,src_location,over_location,src_control,over_control,params)
-	if(mob.incapacitated(ignore_grab = TRUE))
+	if(mob.incapacitated(IGNORE_GRAB))
 		return
 
 	var/list/modifiers = params2list(params)

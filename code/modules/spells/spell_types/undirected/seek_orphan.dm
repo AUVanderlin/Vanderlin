@@ -2,9 +2,13 @@
 	name = "Brat Detector"
 	desc = "Find the distance between me and one of my brats."
 
+	spell_type = NONE
+	charge_required = FALSE
+	sound = null
+	has_visual_effects = FALSE
+
 	charge_required = FALSE
 	cooldown_time = 20 SECONDS
-
 	var/datum/weakref/targeted_orphan
 
 /datum/action/cooldown/spell/undirected/seek_orphan/Destroy()

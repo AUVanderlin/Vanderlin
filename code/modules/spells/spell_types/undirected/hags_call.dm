@@ -3,9 +3,13 @@
 	desc = "Callout for my children, or my old friends."
 	button_icon_state = "message"
 
+	spell_type = NONE
+	charge_required = FALSE
+	sound = null
+	has_visual_effects = FALSE
+
 	charge_required = FALSE
 	cooldown_time = 3 MINUTES
-
 	var/brat_name
 
 /datum/action/cooldown/spell/undirected/hag_call/before_cast(atom/cast_on)

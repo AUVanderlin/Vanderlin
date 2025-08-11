@@ -16,9 +16,10 @@
 		to_chat(src, span_warning("I can't move this hand."))
 		return
 
-	if(check_arm_grabbed(used_hand))
-		to_chat(src, "<span class='warning'>Someone is grabbing my arm!</span>")
-		resist_grab()
+	var/obj/item/grabbing/arm_grab = check_arm_grabbed(active_hand_index)
+	if(arm_grab)
+		// to_chat(src, span_warning("Someone is grabbing my arm!"))
+		grab_counter_attack(arm_grab.grabbee)
 		return
 
 	// Special glove functions:
@@ -31,11 +32,16 @@
 	if(SEND_SIGNAL(src, COMSIG_HUMAN_EARLY_UNARMED_ATTACK, A, proximity) & COMPONENT_CANCEL_ATTACK_CHAIN)
 		return
 	SEND_SIGNAL(src, COMSIG_HUMAN_MELEE_UNARMED_ATTACK, A, proximity)
+	var/rmb_stam_penalty = 1
+	if(istype(rmb_intent, /datum/rmb_intent/strong) || istype(rmb_intent, /datum/rmb_intent/swift))
+		rmb_stam_penalty = 1.5	//Uses a modifer instead of a flat addition, less than weapons no matter what rn. 50% extra stam cost basically.
 	if(isliving(A))
 		var/mob/living/L = A
 		if(!used_intent.noaa)
 			playsound(get_turf(src), pick(GLOB.unarmed_swingmiss), 100, FALSE)
 //			src.emote("attackgrunt")
+		var/intent_drain = used_intent.get_releasedrain()
+		adjust_stamina(ceil(intent_drain * rmb_stam_penalty))
 		if(L.checkmiss(src))
 			return
 		if(!L.checkdefense(used_intent, src))
@@ -171,7 +177,7 @@
 		to_chat(user, span_warning("Nothing to bite."))
 		return
 
-	user.do_attack_animation(src, ATTACK_EFFECT_BITE)
+	user.do_attack_animation(src, ATTACK_EFFECT_BITE, atom_bounce = TRUE)
 	next_attack_msg.Cut()
 
 	var/nodmg = FALSE
@@ -268,7 +274,7 @@
 					var/mob/living/M = A
 					if(src.used_intent)
 
-						src.do_attack_animation(M, visual_effect_icon = src.used_intent.animname)
+						do_attack_animation(M, visual_effect_icon = ATTACK_EFFECT_KICK, atom_bounce = TRUE)
 						playsound(src, pick(PUNCHWOOSH), 100, FALSE, -1)
 
 						sleep(src.used_intent.swingdelay)
@@ -276,7 +282,7 @@
 							return
 						if(!M.Adjacent(src))
 							return
-						if(src.incapacitated(ignore_grab = TRUE))
+						if(src.incapacitated(IGNORE_GRAB))
 							return
 						if(M.checkmiss(src))
 							return
@@ -302,7 +308,7 @@
 					return
 				if(A == src)
 					return
-				if(src.incapacitated(ignore_grab = TRUE))
+				if(src.incapacitated(IGNORE_GRAB))
 					return
 				if(is_mouth_covered())
 					to_chat(src, span_warning("My mouth is blocked."))
@@ -322,7 +328,7 @@
 				if(ishuman(A))
 					var/mob/living/carbon/human/U = src
 					var/mob/living/carbon/human/V = A
-					var/thiefskill = src.get_skill_level(/datum/skill/misc/stealing) + (has_world_trait(/datum/world_trait/matthios_fingers) ? 1 : 0)
+					var/thiefskill = src.get_skill_level(/datum/skill/misc/stealing) + (has_world_trait(/datum/world_trait/matthios_fingers) ? (is_ascendant(MATTHIOS) ? 2 : 1) : 0)
 					var/stealroll = roll("[thiefskill]d6")
 					var/targetperception = (V.STAPER)
 					var/exp_to_gain = STAINT
@@ -363,7 +369,7 @@
 									SEND_SIGNAL(U, COMSIG_ITEM_STOLEN, V)
 									record_featured_stat(FEATURED_STATS_THIEVES, U)
 									record_featured_stat(FEATURED_STATS_CRIMINALS, U)
-									GLOB.vanderlin_round_stats[STATS_ITEMS_PICKPOCKETED]++
+									record_round_statistic(STATS_ITEMS_PICKPOCKETED)
 								if(has_flaw(/datum/charflaw/addiction/kleptomaniac))
 									sate_addiction()
 							else
@@ -410,8 +416,15 @@
 	if((interaction_flags_atom & INTERACT_ATOM_REQUIRES_DEXTERITY) && !user.IsAdvancedToolUser())
 		to_chat(user, span_warning("I don't have the dexterity to do this!"))
 		return FALSE
-	if(!(interaction_flags_atom & INTERACT_ATOM_IGNORE_INCAPACITATED) && user.incapacitated(ignore_restraints = (interaction_flags_atom & INTERACT_ATOM_IGNORE_RESTRAINED), ignore_grab = !(interaction_flags_atom & INTERACT_ATOM_CHECK_GRAB)))
-		return FALSE
+	if(!(interaction_flags_atom & INTERACT_ATOM_IGNORE_INCAPACITATED))
+		var/ignore_flags = NONE
+		if(interaction_flags_atom & INTERACT_ATOM_IGNORE_RESTRAINED)
+			ignore_flags |= IGNORE_RESTRAINTS
+		if(!(interaction_flags_atom & INTERACT_ATOM_CHECK_GRAB))
+			ignore_flags |= IGNORE_GRAB
+
+		if(user.incapacitated(ignore_flags))
+			return FALSE
 	return TRUE
 
 /atom/ui_status(mob/user)
@@ -484,7 +497,7 @@
 			to_chat(src, span_warning("That's too high for me..."))
 			return
 
-	changeNext_move(mmb_intent.clickcd)
+	changeNext_move(mmb_intent?.clickcd ? mmb_intent.clickcd : CLICK_CD_MELEE)
 
 	face_atom(A)
 
@@ -506,12 +519,13 @@
 
 	if(ishuman(src))
 		var/mob/living/carbon/human/H = src
-		jadded += H.get_complex_pain()/50
+		jadded += H.get_complex_pain() / 50
 		if(H.get_encumbrance() >= 0.7)
 			jadded += 50
 			jrange = 1
 
 	jump_action_resolve(A, jadded, jrange, jextra)
+	return TRUE
 
 #define FLIP_DIRECTION_CLOCKWISE 1
 #define FLIP_DIRECTION_ANTICLOCKWISE 0

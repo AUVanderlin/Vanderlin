@@ -13,7 +13,6 @@
 	min_pq = -50
 	bypass_lastclass = TRUE
 
-	allowed_sexes = list(MALE, FEMALE)
 	allowed_races = RACES_PLAYER_ALL
 
 	outfit = /datum/outfit/job/grabber
@@ -51,6 +50,7 @@
 	belt = /obj/item/storage/belt/leather/rope
 	beltr = /obj/item/weapon/mace/cudgel
 	beltl = /obj/item/weapon/sword/sabre/cutlass
+	scabbards = list(/obj/item/weapon/scabbard/sword)
 	backpack_contents = list(/obj/item/storage/keyring/stevedore)
 	if(H.gender == MALE)
 		shoes = /obj/item/clothing/shoes/boots/leather

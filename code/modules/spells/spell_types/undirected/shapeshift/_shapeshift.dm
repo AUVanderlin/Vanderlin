@@ -5,9 +5,9 @@
 	/// Whehter we revert to our human form on death.
 	var/revert_on_death = TRUE
 	/// Whether we die when our shapeshifted form is killed
-	var/die_with_shapeshifted_form = TRUE
+	var/die_with_shapeshifted_form = FALSE
 	/// Whether we convert our health from one form to another
-	var/convert_damage = TRUE
+	var/convert_damage = FALSE
 	/// If convert damage is true, the damage type we deal when converting damage back and forth
 	var/convert_damage_type = BRUTE
 
@@ -84,6 +84,13 @@
 		to_chat(caster, span_warning("You're already shapeshifted!"))
 		CRASH("[type] called do_shapeshift while shapeshifted.")
 
+	for(var/listed_coven as anything in caster.covens)
+		var/datum/coven/coven = caster.covens[listed_coven]
+		var/datum/coven_power/power = coven?.current_power
+		if(!power)
+			continue
+		power.try_deactivate(direct = TRUE, alert = FALSE)
+
 	var/mob/living/new_shape = new shapeshift_type(caster.loc)
 	var/obj/shapeshift_holder/new_shape_holder = new(new_shape, src, caster)
 
@@ -113,9 +120,9 @@
 	var/restoring = FALSE
 	var/datum/action/cooldown/spell/undirected/shapeshift/source
 
-/obj/shapeshift_holder/Initialize(mapload, datum/action/cooldown/spell/undirected/shapeshift/_source, mob/living/caster)
+/obj/shapeshift_holder/Initialize(mapload, datum/action/cooldown/spell/undirected/shapeshift/source, mob/living/caster)
 	. = ..()
-	source = _source
+	src.source = source
 	shape = loc
 	if(!istype(shape))
 		stack_trace("shapeshift holder created outside mob/living")
@@ -126,11 +133,15 @@
 	stored.forceMove(src)
 	stored.notransform = TRUE
 	if(source.convert_damage)
-		var/damage_percent = (stored.maxHealth - stored.health) / stored.maxHealth;
-		var/damapply = damage_percent * shape.maxHealth;
+		var/damage_percent = (stored.maxHealth - stored.health) / stored.maxHealth
+		var/damapply = damage_percent * shape.maxHealth
 
-		shape.apply_damage(damapply, source.convert_damage_type, forced = TRUE);
-		shape.blood_volume = stored.blood_volume;
+		shape.apply_damage(damapply, source.convert_damage_type, forced = TRUE)
+		shape.blood_volume = stored.blood_volume
+
+	if(!shape.get_spell(source.type, TRUE))
+		var/datum/action/cooldown/spell/undirected/shapeshift/copy = new source.type(src)
+		copy.Grant(shape)
 
 	RegisterSignal(shape, list(COMSIG_PARENT_QDELETING, COMSIG_LIVING_DEATH), PROC_REF(shape_death))
 	RegisterSignal(stored, list(COMSIG_PARENT_QDELETING, COMSIG_LIVING_DEATH), PROC_REF(caster_death))
@@ -186,6 +197,10 @@
 	stored.notransform = FALSE
 	if(shape.mind)
 		shape.mind.transfer_to(stored)
+
+	if(HAS_SPATIAL_GRID_CONTENTS(stored))
+		SSspatial_grid.enter_cell(stored, shape.loc)
+
 	if(death)
 		stored.death()
 	else if(source.convert_damage)
@@ -198,10 +213,15 @@
 	if(source.convert_damage)
 		stored.blood_volume = shape.blood_volume;
 
+	var/mob/old_stored = stored
+	var/turf/old_loc = shape.loc
 	// This guard is important because restore() can also be called on COMSIG_PARENT_QDELETING for shape, as well as on death.
 	// This can happen in, for example, [/proc/wabbajack] where the mob hit is qdel'd.
 	if(!QDELETED(shape))
 		QDEL_NULL(shape)
+
+	if(HAS_SPATIAL_GRID_CONTENTS(old_stored))
+		SSspatial_grid.enter_cell(old_stored, old_loc)
 
 	qdel(src)
 	return stored

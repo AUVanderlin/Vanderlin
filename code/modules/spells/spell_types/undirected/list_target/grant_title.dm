@@ -3,8 +3,8 @@
 	desc = "Grant someone a title of honor... Or shame."
 	button_icon_state = "recruit_titlegrant"
 
+	spell_type = NONE
 	cooldown_time = 4 MINUTES
-
 	target_radius = 3
 
 	var/title

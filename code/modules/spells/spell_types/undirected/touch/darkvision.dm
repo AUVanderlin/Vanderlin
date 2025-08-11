@@ -6,9 +6,9 @@
 
 	point_cost = 2
 	attunements = list(
-		/datum/attunement/illusion = 0.4,
+		/datum/attunement/light = 0.6,
 	)
-
+	spell_flags = SPELL_RITUOS
 	cooldown_time = 6 MINUTES
 
 	hand_path = /obj/item/melee/touch_attack/darkvision

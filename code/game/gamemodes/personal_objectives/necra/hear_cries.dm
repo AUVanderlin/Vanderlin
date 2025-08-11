@@ -1,5 +1,6 @@
 /datum/objective/listen_whispers
 	name = "Listen to Whispers"
+	triumph_count = 2
 	var/time_required = 5 MINUTES
 	var/time_spent = 0
 	var/last_check = 0
@@ -41,11 +42,11 @@
 
 	time_spent += check_interval
 
-	if(prob(20) && GLOB.last_messages.len)
-		var/message = pick(GLOB.last_messages - heard_messages)
+	if(prob(20) && length(GLOB.last_words))
+		var/message = pick(GLOB.last_words - heard_messages)
 		to_chat(user, span_red("[message]"))
 		heard_messages += message
-		if(prob(25))
+		if(prob(33))
 			user.playsound_local(user, 'sound/effects/ghost.ogg', 40)
 
 	if(time_spent >= time_required && !completed)
@@ -55,7 +56,7 @@
 	to_chat(owner.current, span_greentext("You have listened to the whispers of the dead long enough to satisfy Necra!"))
 	owner.current.adjust_triumphs(triumph_count)
 	completed = TRUE
-	adjust_storyteller_influence("Necra", 15)
+	adjust_storyteller_influence(NECRA, 15)
 	escalate_objective()
 	STOP_PROCESSING(SSprocessing, src)
 

@@ -6,6 +6,8 @@
 	charge_sound = 'sound/magic/charging_lightning.ogg'
 	sparks_amt = 5
 
+	cast_range = 8
+	point_cost = 3
 	attunements = list(
 		/datum/attunement/electric = 0.7,
 	)
@@ -15,7 +17,7 @@
 	charge_slowdown = 0.7
 	cooldown_time = 30 SECONDS
 	spell_cost = 40
-
+	spell_flags = SPELL_RITUOS
 	projectile_type = /obj/projectile/magic/lightning
 
 /obj/projectile/magic/lightning

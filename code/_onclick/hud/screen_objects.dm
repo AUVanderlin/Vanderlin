@@ -52,7 +52,10 @@
 /atom/movable/screen/text
 	icon = null
 	icon_state = null
+	layer = FLOAT_LAYER
+	plane = HUD_PLANE
 	mouse_opacity = MOUSE_OPACITY_TRANSPARENT
+	appearance_flags = APPEARANCE_UI_IGNORE_ALPHA
 	screen_loc = "CENTER-7,CENTER-7"
 	maptext_height = 480
 	maptext_width = 480
@@ -117,18 +120,25 @@
 	icon_state = "craft"
 	screen_loc = rogueui_craft
 	var/last_craft
+	var/obj/item/recipe_book/always_known/book
 
 /atom/movable/screen/craft/Click(location, control, params)
+	var/list/modifiers = params2list(params)
+	if(modifiers["middle"])
+		if(QDELETED(book))
+			book = new(null)
+		usr << browse(book.generate_html(usr),"window=recipe;size=800x810")
+		return
 	if(world.time < lastclick + 3 SECONDS)
 		return
 	lastclick = world.time
-	if(ishuman(usr))
-		var/mob/living/carbon/human/H = usr
-		H.playsound_local(H, 'sound/misc/click.ogg', 100)
-		if(H.craftingthing)
-			last_craft = world.time
-			var/datum/component/personal_crafting/C = H.craftingthing
-			C.roguecraft(location, control, params, H)
+	if(!HAS_TRAIT(usr, TRAIT_BLUEPRINT_VISION))
+		var/mob/vision = usr
+		vision.enter_blueprint()
+
+/atom/movable/screen/craft/Destroy()
+	QDEL_NULL(book)
+	. = ..()
 
 /atom/movable/screen/area_creator
 	name = "create new area"
@@ -136,7 +146,7 @@
 	screen_loc = ui_building
 
 /atom/movable/screen/area_creator/Click()
-	if(usr.incapacitated(ignore_grab = TRUE) || (isobserver(usr) && !IsAdminGhost(usr)))
+	if(usr.incapacitated(IGNORE_GRAB) || (isobserver(usr) && !IsAdminGhost(usr)))
 		return TRUE
 	var/area/A = get_area(usr)
 	if(!A.outdoors)
@@ -172,7 +182,7 @@
 	if(world.time <= usr.next_move)
 		return TRUE
 
-	if(usr.incapacitated(ignore_grab = TRUE))
+	if(usr.incapacitated(IGNORE_GRAB))
 		return TRUE
 
 	if(hud?.mymob && slot_id)
@@ -269,10 +279,10 @@
 		if(held_index)
 			if(!C.has_hand_for_held_index(held_index))
 				. += blocked_overlay
-			else if(!C.has_hand_for_held_index(held_index, TRUE))
-				. += fingerless_overlay
 			else if(C.check_arm_grabbed(held_index))
 				. += grabbed_overlay
+			else if(!C.has_hand_for_held_index(held_index, TRUE))
+				. += fingerless_overlay
 
 	if(held_index == hud.mymob.active_hand_index)
 		. += "hand_active"
@@ -867,7 +877,7 @@
 	if(LAZYACCESS(modifiers, RIGHT_CLICK))
 		if(master)
 			var/obj/item/flipper = usr.get_active_held_item()
-			if(!flipper || (!usr.Adjacent(flipper) && !usr.DirectAccess(flipper)) || !isliving(usr) || usr.incapacitated(ignore_grab = TRUE))
+			if(!flipper || (!usr.Adjacent(flipper) && !usr.DirectAccess(flipper)) || !isliving(usr) || usr.incapacitated(IGNORE_GRAB))
 				return
 			var/old_width = flipper.grid_width
 			var/old_height = flipper.grid_height
@@ -878,7 +888,7 @@
 
 	if(world.time <= usr.next_move)
 		return TRUE
-	if(usr.incapacitated(ignore_grab = TRUE))
+	if(usr.incapacitated(IGNORE_GRAB))
 		return TRUE
 	if(master)
 		var/obj/item/I = usr.get_active_held_item()
@@ -1303,7 +1313,7 @@
 	if (ishuman(usr))
 		var/mob/living/carbon/human/H = usr
 		H.check_for_injuries(H)
-		to_chat(H, "I am [H.get_encumbrance() * 100]% Encumbered")
+		to_chat(H, "I am [H.get_encumbrance() * 100]% encumbered.")
 
 /atom/movable/screen/mood
 	name = "mood"
@@ -1322,7 +1332,7 @@
 		var/mob/living/carbon/human/H = usr
 		if(LAZYACCESS(modifiers, LEFT_CLICK))
 			H.check_for_injuries(H)
-			to_chat(H, "I am [H.get_encumbrance() * 100]% Encumbered")
+			to_chat(H, "I am [H.get_encumbrance() * 100]% encumbered.")
 		if(LAZYACCESS(modifiers, RIGHT_CLICK))
 			if(!H.mind)
 				return

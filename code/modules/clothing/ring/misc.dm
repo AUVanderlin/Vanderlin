@@ -5,7 +5,7 @@
 	sellprice = 33
 
 /obj/item/clothing/ring/silver/makers_guild
-	name = "Makers ring"
+	name = "makers' ring"
 	desc = "The wearer is a proud member of the Makers' guild."
 	icon_state = "guild_mason"
 	sellprice = 0
@@ -318,7 +318,7 @@
 	if(ismob(loc))
 		return
 	visible_message(span_warning("[src] begins to twitch and shake violently, before crumbling into ash"))
-	new /obj/item/ash(loc)
+	new /obj/item/fertilizer/ash(loc)
 	qdel(src)
 
 /obj/item/clothing/ring/gold/burden/equipped(mob/user, slot)

@@ -23,12 +23,7 @@ GLOBAL_LIST_EMPTY(lord_titles)
 		/datum/action/cooldown/spell/undirected/list_target/grant_nobility,
 	)
 
-	allowed_races = list(
-		"Humen",
-		"Elf",
-		"Half-Elf",
-		"Dwarf"
-	)
+	allowed_races = RACES_PLAYER_ROYALTY
 	outfit = /datum/outfit/job/lord
 	bypass_lastclass = TRUE
 	give_bank_account = 500
@@ -65,7 +60,8 @@ GLOBAL_LIST_EMPTY(lord_titles)
 	head = /obj/item/clothing/head/crown/serpcrown
 	backr = /obj/item/storage/backpack/satchel
 	belt = /obj/item/storage/belt/leather/plaquegold
-	backpack_contents = list(/obj/item/weapon/knife/dagger/steel/special = 1)
+	beltl = /obj/item/weapon/knife/dagger/steel/special
+	scabbards = list(/obj/item/weapon/scabbard/knife)
 	ring = /obj/item/clothing/ring/active/nomag
 	l_hand = /obj/item/weapon/lordscepter
 
@@ -97,7 +93,7 @@ GLOBAL_LIST_EMPTY(lord_titles)
 		shoes = /obj/item/clothing/shoes/boots
 		cloak = /obj/item/clothing/cloak/lordcloak
 		if(H.dna?.species)
-			if(H.dna.species.id == "human")
+			if(H.dna.species.id == SPEC_ID_HUMEN)
 				H.dna.species.soundpack_m = new /datum/voicepack/male/evil()
 	else
 		pants = /obj/item/clothing/pants/tights/random
@@ -117,6 +113,7 @@ GLOBAL_LIST_EMPTY(lord_titles)
 	ADD_TRAIT(H, TRAIT_NOBLE, TRAIT_GENERIC)
 	ADD_TRAIT(H, TRAIT_NOSEGRAB, TRAIT_GENERIC)
 	ADD_TRAIT(H, TRAIT_HEAVYARMOR, TRAIT_GENERIC)
+	ADD_TRAIT(H, TRAIT_MEDIUMARMOR, TRAIT_GENERIC)
 	ADD_TRAIT(H, TRAIT_KNOWKEEPPLANS, TRAIT_GENERIC)
 
 /datum/job/exlord //just used to change the lords title

@@ -5,7 +5,7 @@
 	weight = 10
 	earliest_start = 10 MINUTES
 	max_occurrences = 1
-	min_players = 35
+	min_players = 30
 
 /datum/round_event_control/inhumen_scorn/canSpawnEvent(players_amt, gamemode, fake_check)
 	. = ..()
@@ -17,7 +17,7 @@
 			continue
 		if(!H.patron || !istype(H.patron, /datum/patron/divine/astrata))
 			continue
-		if(!(H.dna?.species.name in RACES_PLAYER_NONHERETICAL))
+		if(!(H.dna?.species.id in RACES_PLAYER_NONHERETICAL))
 			continue
 		return TRUE
 
@@ -31,7 +31,7 @@
 			continue
 		if(!human_mob.patron || !istype(human_mob.patron, /datum/patron/divine/astrata))
 			continue
-		if(!(human_mob.dna?.species.name in RACES_PLAYER_NONHERETICAL))
+		if(!(human_mob.dna?.species.id in RACES_PLAYER_NONHERETICAL))
 			continue
 		valid_targets += human_mob
 

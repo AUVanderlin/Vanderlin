@@ -219,8 +219,7 @@
 
 	var/flags = NONE
 	var/mov_name = A.name
-	for(var/i in contents)
-		var/atom/thing = i
+	for(var/atom/thing as anything in contents)
 		flags |= thing.intercept_zImpact(A, levels)
 		if(flags & FALL_STOP_INTERCEPTING)
 			break
@@ -503,8 +502,7 @@
 	else
 		affecting_level = 1
 
-	for(var/V in contents)
-		var/atom/A = V
+	for(var/atom/A as anything in contents)
 		if(!QDELETED(A) && A.level >= affecting_level)
 			if(ismovableatom(A))
 				var/atom/movable/AM = A
@@ -515,8 +513,7 @@
 
 /turf/narsie_act(force, ignore_mobs, probability = 20)
 	. = (prob(probability) || force)
-	for(var/I in src)
-		var/atom/A = I
+	for(var/atom/A as anything in src)
 		if(ignore_mobs && ismob(A))
 			continue
 		if(ismob(A) || .)
@@ -558,8 +555,7 @@
 /turf/proc/photograph(limit=20)
 	var/image/I = new()
 	I.add_overlay(src)
-	for(var/V in contents)
-		var/atom/A = V
+	for(var/atom/A as anything in contents)
 		if(A.invisibility)
 			continue
 		I.add_overlay(A)
@@ -604,11 +600,16 @@
 /turf/proc/Melt()
 	return ScrapeAway(flags = CHANGETURF_INHERIT_AIR)
 
-// When our turf is washed, we may wash everything on top of the turf
-// By default we will only wash mopable things (like blood or vomit)
-// but you may optionally pass in all_contents = TRUE to wash everything
-/turf/wash(clean_types, all_contents = FALSE)
+/**
+ * Called when this turf is being washed.
+ */
+/turf/wash(clean_types)
 	. = ..()
-	for(var/atom/movable/to_clean as anything in src)
-		if(all_contents)
-			to_clean.wash(clean_types)
+
+	for(var/am in src)
+		if(am == src)
+			continue
+		var/atom/movable/movable_content = am
+		if(!is_cleanable(movable_content))
+			continue
+		movable_content.wash(clean_types)

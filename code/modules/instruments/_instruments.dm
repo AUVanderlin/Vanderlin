@@ -74,7 +74,6 @@
 	. = ..()
 
 /obj/item/instrument/process()
-	. = ..()
 	var/source
 	if(!ishuman(loc))
 		var/atom/thing = loc
@@ -108,7 +107,7 @@
 
 	for(var/obj/structure/soil/soil in view(7, source))
 		var/distance = max(1, get_dist(source, soil))
-		soil.process_growth(round(2 / distance, 0.1))
+		soil.process_npk_growth(round(2 / distance, 0.1))
 
 	for(var/mob/living/carbon/L in hearers(7, source))
 		if(!L.client)
@@ -256,7 +255,7 @@
 	soundloop.set_parent(user)
 	soundloop.start()
 	user.apply_status_effect(/datum/status_effect/buff/playing_music, stressevent, note_color)
-	GLOB.vanderlin_round_stats[STATS_SONGS_PLAYED]++
+	record_round_statistic(STATS_SONGS_PLAYED)
 	if(dynamic_icon)
 		lift_to_mouth()
 		update_icon()

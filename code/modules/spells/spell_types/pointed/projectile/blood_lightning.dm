@@ -4,6 +4,8 @@
 	button_icon_state = "bloodlightning"
 	sound = 'sound/magic/vlightning.ogg'
 
+	cast_range = 8
+	point_cost = 6
 	associated_skill = /datum/skill/magic/blood
 	attunements = list(
 		/datum/attunement/electric = 0.3,
@@ -15,7 +17,7 @@
 	charge_slowdown = 0.7
 	cooldown_time = 30 SECONDS
 	spell_cost = 40
-
+	spell_flags = SPELL_RITUOS
 	projectile_type = /obj/projectile/magic/bloodlightning
 
 /obj/projectile/magic/bloodlightning

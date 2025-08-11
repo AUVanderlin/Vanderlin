@@ -15,23 +15,10 @@
 	selection_color = "#192bc2"
 	cmode_music = 'sound/music/cmode/towner/CombatTowner2.ogg'
 
-	allowed_races = list(
-		RACE_HUMEN,
-		RACE_ELF,
-		RACE_HALF_ELF,
-		RACE_DWARF,
-		RACE_TIEFLING,
-		RACE_DROW,
-		RACE_HALF_DROW,
-		RACE_AASIMAR,
-		RACE_RAKSHARI,
-		RACE_HOLLOWKIN,
-		RACE_TRITON,
-		RACE_HARPY,
-	)
+	allowed_races = RACES_PLAYER_ALL
 
 	outfit = /datum/outfit/job/merchant
-	give_bank_account = 100
+	give_bank_account = 200
 
 /datum/outfit/job/merchant/pre_equip(mob/living/carbon/human/H)
 	..()
@@ -45,6 +32,7 @@
 	armor = /obj/item/clothing/shirt/robe/merchant
 	head = /obj/item/clothing/head/chaperon/greyscale/silk/random
 	ring = /obj/item/clothing/ring/gold/guild_mercator
+	scabbards = list(/obj/item/weapon/scabbard/sword)
 
 	if(H.gender == MALE)
 		shirt = /obj/item/clothing/shirt/undershirt/sailor
